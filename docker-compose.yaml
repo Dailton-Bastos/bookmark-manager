@@ -1,0 +1,105 @@
+services:
+  setup:
+    container_name: setup
+    build:
+      context: .
+      dockerfile: Dockerfile.cli
+    user: root
+    volumes:
+      - .:/usr/src/app
+      - node_modules:/usr/src/app/node_modules
+    environment:
+      CI: "true"
+    command: sh -lc "pnpm install"
+    restart: "no"
+  workspace:
+    container_name: workspace
+    build:
+      context: .
+      dockerfile: Dockerfile.cli
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    volumes:
+      - .:/usr/src/app
+      - node_modules:/usr/src/app/node_modules
+    command: sh -c "tail -f /dev/null"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "sh",
+          "-lc",
+          "test -d /usr/src/app/node_modules && test -f /usr/src/app/pnpm-lock.yaml",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    restart: "no"
+  api:
+    container_name: api
+    build:
+      context: .
+      target: dev
+      dockerfile: apps/api/Dockerfile
+    env_file:
+      - ./apps/api/.env
+    depends_on:
+      workspace:
+        condition: service_healthy
+    volumes:
+      - .:/usr/src/app
+      - node_modules:/usr/src/app/node_modules
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const http=require('node:http');const req=http.get('http://127.0.0.1:3001/api/health',(res)=>{process.exit(res.statusCode>=200&&res.statusCode<500?0:1)});req.on('error',()=>process.exit(1));req.setTimeout(4000,()=>{req.destroy();process.exit(1)});",
+        ]
+      interval: 20s
+      timeout: 5s
+      retries: 6
+      start_period: 45s
+    restart: unless-stopped
+  web:
+    container_name: web
+    build:
+      context: .
+      target: dev
+      dockerfile: apps/web/Dockerfile
+    env_file:
+      - ./apps/web/.env
+    depends_on:
+      workspace:
+        condition: service_healthy
+    volumes:
+      - .:/usr/src/app
+      - node_modules:/usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const http=require('node:http');const req=http.get('http://127.0.0.1:3000/api/health',(res)=>{process.exit(res.statusCode>=200&&res.statusCode<500?0:1)});req.on('error',()=>process.exit(1));req.setTimeout(4000,()=>{req.destroy();process.exit(1)});",
+        ]
+      interval: 20s
+      timeout: 5s
+      retries: 8
+      start_period: 70s
+    restart: unless-stopped
+
+volumes:
+  node_modules:
+
+networks:
+  default:
+    name: app-network
+    driver: bridge

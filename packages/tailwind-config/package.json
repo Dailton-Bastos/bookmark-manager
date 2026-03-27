@@ -1,0 +1,27 @@
+{
+	"name": "@repo/tailwind-config",
+	"version": "1.0.0",
+	"type": "module",
+	"private": true,
+	"description": "Tailwind CSS configuration for the monorepo",
+	"keywords": [],
+	"license": "ISC",
+	"packageManager": "pnpm@10.30.3",
+	"exports": {
+		".": "./globals.css",
+		"./postcss": "./postcss.config.js"
+	},
+	"scripts": {
+		"lint": "biome lint .",
+		"check": "biome check .",
+		"lint:fix": "biome lint . --fix",
+		"format:fix": "biome format . --write",
+		"check:fix": "biome check . --fix"
+	},
+	"devDependencies": {
+		"@repo/biome-config": "workspace:*",
+		"@tailwindcss/postcss": "catalog:",
+		"postcss": "catalog:",
+		"tailwindcss": "catalog:"
+	}
+}

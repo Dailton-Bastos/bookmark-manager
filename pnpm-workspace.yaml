@@ -1,0 +1,27 @@
+packages:
+  - apps/*
+  - packages/*
+
+catalog:
+  '@biomejs/biome': ^2.4.4
+  '@vitejs/plugin-react-swc': ^3.8.0
+  '@swc/core': ^1.15.21
+  '@swc/jest': ^0.2.39
+  '@tailwindcss/postcss': ^4
+  '@types/jest': ^30.0.0
+  '@types/node': ^20
+  jsdom: ^26.1.0
+  jest: ^30.3.0
+  postcss: ^8
+  tailwindcss: ^4
+  ts-jest: ^29.2.5
+  typescript: ^5
+  unplugin-swc: ^1.5.8
+  vite: ^6.3.5
+  vitest: ^3.2.0
+
+onlyBuiltDependencies:
+  - '@nestjs/core'
+  - '@swc/core'
+  - sharp
+  - unrs-resolver

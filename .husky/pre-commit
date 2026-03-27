@@ -1,0 +1,6 @@
+#!/bin/bash
+echo '[pre-commit] This may take a while...'
+
+pnpm lint-staged
+
+echo '[pre-commit] Done'

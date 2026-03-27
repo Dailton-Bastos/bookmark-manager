@@ -1,0 +1,78 @@
+# Compiled output & Dependencies
+**/dist/
+**/out/
+**/build/
+**/.next/
+**/.pnp
+**/.pnp.*
+**/.yarn/*
+**/node_modules/
+**/.pnpm-store/
+!**/.yarn/patches
+!**/.yarn/plugins
+!**/.yarn/releases
+!**/.yarn/versions
+
+# Tests
+**/coverage/
+
+# Logs
+**/logs/
+**/*.log
+**/npm-debug.log*
+**/pnpm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+
+# Environment variable files
+**/.env
+**/*.env
+**/.env*
+!**/.env.example
+
+# Temporary stuff
+**/.temp
+**/.tmp
+**/tmp
+
+# Runtime data
+**/pids
+**/*.pid
+**/*.seed
+**/*.pid.lock
+
+# IDEs and editors
+**/.idea
+**/.project
+**/.classpath
+**/.c9/
+**/*.launch
+**/.settings/
+**/*.sublime-workspace
+
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# OS
+**/.DS_Store
+**/*.pem
+
+# Vercel
+**/.vercel
+
+# Typescript
+**/*.tsbuildinfo
+**/next-env.d.ts
+
+# Turbo
+**/.turbo/
+
+# NX
+**/.nx/
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+**/report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

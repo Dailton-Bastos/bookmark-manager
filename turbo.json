@@ -1,0 +1,58 @@
+{
+	"$schema": "./node_modules/turbo/schema.json",
+	"ui": "stream",
+	"tasks": {
+		"build": {
+			"dependsOn": ["^build"],
+			"inputs": ["$TURBO_DEFAULT$", ".env*"],
+			"outputs": [".next/**", "!.next/cache/**", "dist/**"]
+		},
+		"dev": {
+			"dependsOn": ["^build"],
+			"cache": false,
+			"persistent": true
+		},
+		"lint": {
+			"dependsOn": ["^build"]
+		},
+		"format": {
+			"dependsOn": ["^build"]
+		},
+		"check": {
+			"dependsOn": ["^build"]
+		},
+		"lint:fix": {
+			"dependsOn": ["^build"]
+		},
+		"format:fix": {
+			"dependsOn": ["^build"]
+		},
+		"check:fix": {
+			"dependsOn": ["^build"]
+		},
+		"check-types": {
+			"dependsOn": ["^check-types"]
+		},
+		"test": {
+			"dependsOn": ["^build"]
+		},
+		"test:watch": {
+			"cache": false,
+			"persistent": true
+		},
+		"test:cov": {
+			"dependsOn": ["^build"],
+			"outputs": ["coverage/**"]
+		},
+		"test:e2e": {
+			"dependsOn": ["^build"]
+		},
+		"test:vitest": {
+			"dependsOn": ["^build"]
+		},
+		"test:vitest:watch": {
+			"cache": false,
+			"persistent": true
+		}
+	}
+}

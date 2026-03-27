@@ -1,0 +1,58 @@
+{
+	"name": "monorepo",
+	"version": "1.0.0",
+	"description": "Monorepo for web development",
+	"keywords": [],
+	"author": "Dailton Bastos",
+	"license": "ISC",
+	"packageManager": "pnpm@10.30.3",
+	"scripts": {
+		"dev": "turbo run dev",
+		"build": "turbo run build",
+		"lint": "turbo run lint",
+		"format": "turbo run format",
+		"check": "turbo run check",
+		"check-types": "turbo run check-types",
+		"lint:fix": "turbo run lint:fix",
+		"format:fix": "turbo run format:fix",
+		"check:fix": "turbo run check:fix",
+		"docker:up": "docker compose up -d",
+		"docker:down": "docker compose down -v",
+		"docker:exec": "docker exec -it workspace /bin/zsh",
+		"prepare": "husky"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"@commitlint/cli": "^20.5.0",
+		"@commitlint/config-conventional": "^20.5.0",
+		"commitizen": "^4.3.1",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.4.0",
+		"turbo": "^2.8.20"
+	},
+	"lint-staged": {
+		"apps/**/*.{js,jsx,ts,tsx}": [
+			"turbo run lint --filter='./apps/*' --",
+			"biome lint --write --no-errors-on-unmatched",
+			"biome format --write --no-errors-on-unmatched",
+			"biome check --write --no-errors-on-unmatched"
+		],
+		"packages/**/*.{js,jsx,ts,tsx}": [
+			"turbo run lint --filter='./packages/*' --",
+			"biome lint --write --no-errors-on-unmatched",
+			"biome format --write --no-errors-on-unmatched",
+			"biome check --write --no-errors-on-unmatched"
+		],
+		"*.{json,md,yaml,yml}": [
+			"biome check --write --no-errors-on-unmatched"
+		]
+	},
+	"config": {
+		"commitizen": {
+			"path": "cz-conventional-changelog"
+		}
+	},
+	"engines": {
+		"node": ">=18.0.0"
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"name": "@repo/webpack-config",
+	"version": "1.0.0",
+	"description": "Webpack configuration for the monorepo",
+	"keywords": [
+		"webpack",
+		"config"
+	],
+	"license": "MIT",
+	"packageManager": "pnpm@10.30.3",
+	"files": [
+		"webpack.config.js"
+	],
+	"exports": {
+		"./webpack.config": "./webpack.config.js",
+		"./webpack.config.js": "./webpack.config.js"
+	},
+	"peerDependencies": {
+		"@swc/core": "^1.15.21",
+		"swc-loader": "^0.2.7"
+	}
+}

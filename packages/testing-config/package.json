@@ -1,0 +1,44 @@
+{
+	"name": "@repo/testing-config",
+	"version": "1.0.0",
+	"description": "Testing configuration for the monorepo",
+	"keywords": [
+		"testing",
+		"config",
+		"jest",
+		"vitest"
+	],
+	"license": "MIT",
+	"packageManager": "pnpm@10.30.3",
+	"exports": {
+		".": "./dist/index.js",
+		"./index": "./dist/index.js",
+		"./index.js": "./dist/index.js",
+		"./jest": "./dist/jest/index.js",
+		"./jest/*": "./dist/jest/*",
+		"./vitest": "./dist/vitest/index.js",
+		"./vitest/*": "./dist/vitest/*"
+	},
+	"scripts": {
+		"build": "tsc",
+		"lint": "biome lint .",
+		"check": "biome check .",
+		"check-types": "tsc -p tsconfig.json --noEmit",
+		"lint:fix": "biome lint . --fix",
+		"format:fix": "biome format . --write",
+		"check:fix": "biome check . --fix"
+	},
+	"devDependencies": {
+		"@repo/biome-config": "workspace:*",
+		"@repo/typescript-config": "workspace:*",
+		"@swc/core": "catalog:",
+		"@swc/jest": "catalog:",
+		"@types/jest": "catalog:",
+		"@vitejs/plugin-react-swc": "catalog:",
+		"jest": "catalog:",
+		"jsdom": "catalog:",
+		"unplugin-swc": "catalog:",
+		"vite": "catalog:",
+		"vitest": "catalog:"
+	}
+}

@@ -1,0 +1,89 @@
+# VCS & repo metadata
+.git/
+**/.git/
+**/.gitattributes
+**/.gitmodules
+.github/
+
+# Compiled output & Dependencies
+**/dist/
+**/out/
+**/build/
+**/.next/
+**/.pnp
+**/.pnp.*
+**/.yarn/
+**/node_modules/
+
+# Tests
+**/coverage/
+**/.nyc_output/
+cypress/videos/
+cypress/screenshots/
+playwright-report/
+test-results/
+
+# Logs
+**/logs/
+**/*.log
+**/npm-debug.log*
+**/pnpm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/lerna-debug.log*
+
+# Environment variable files
+**/.env
+**/.env.*
+**/*.env
+.envrc
+*.pem
+*.key
+*.crt
+
+# Temporary stuff
+**/.temp/
+**/.tmp/
+
+# Runtime data
+**/pids/
+**/*.pid
+**/*.seed
+**/*.pid.lock
+
+# IDEs and editors
+**/.idea/
+**/.project
+**/.classpath
+**/.c9/
+**/*.launch
+**/.settings/
+**/*.sublime-workspace
+
+# VSCode
+.vscode/
+
+# OS
+**/.DS_Store
+**/Thumbs.db
+
+# Vercel
+**/.vercel/
+
+# Typescript
+**/*.tsbuildinfo
+**/next-env.d.ts
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+**/report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Tool & build caches
+**/.cache/
+**/.turbo/
+**/.vite/
+**/.parcel-cache/
+.nx/
+
+# Docs
+docs/
+.adr-dir/

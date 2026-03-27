@@ -1,0 +1,33 @@
+ARG NODE_TAG=22-alpine
+ARG PNPM_VERSION=10.30.3
+ARG ZSH_IN_DOCKER_VERSION=v1.2.1
+ARG ZSH_IN_DOCKER_SHA256=0cf15b6f9c63a8103eb33bad87dc4b43fed0e0ad5884dff90f943ee1e868796e
+
+FROM node:${NODE_TAG}
+ARG PNPM_VERSION
+ARG ZSH_IN_DOCKER_VERSION
+ARG ZSH_IN_DOCKER_SHA256
+
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+
+RUN apk add --no-cache git curl zsh \
+    && corepack enable \
+    && corepack prepare pnpm@${PNPM_VERSION} --activate
+
+RUN addgroup -S dev \
+    && adduser -S dev -G dev \
+    && mkdir -p /usr/src/app \
+    && chown -R dev:dev /usr/src/app
+
+USER dev
+ENV HOME=/home/dev
+
+RUN curl -fsSL -o /tmp/zsh-in-docker.sh "https://github.com/deluan/zsh-in-docker/releases/download/${ZSH_IN_DOCKER_VERSION}/zsh-in-docker.sh" \
+    && echo "${ZSH_IN_DOCKER_SHA256}  /tmp/zsh-in-docker.sh" | sha256sum -c - \
+    && sh /tmp/zsh-in-docker.sh -- \
+    -p https://github.com/zsh-users/zsh-autosuggestions \
+    -p https://github.com/zsh-users/zsh-syntax-highlighting \
+    -p https://github.com/zsh-users/zsh-completions \
+    && rm -f /tmp/zsh-in-docker.sh
+
+WORKDIR /usr/src/app

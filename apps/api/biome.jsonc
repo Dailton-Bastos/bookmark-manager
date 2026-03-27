@@ -1,0 +1,22 @@
+{
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"extends": ["@repo/biome-config/base"],
+	"root": false,
+	"linter": {
+		"rules": {
+			"style": {
+				/**
+				 * NestJs dependency injection doesn't play well with this rule
+				 * @see: https://stackoverflow.com/questions/74175543/nest-cant-resolve-dependencies-of-the-controller
+				 */
+				"useImportType": "off"
+			}
+		}
+	},
+	"javascript": {
+		"parser": {
+			// This is required for NestJs dependency injection to work properly
+			"unsafeParameterDecoratorsEnabled": true
+		}
+	}
+}
