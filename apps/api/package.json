@@ -1,10 +1,14 @@
 {
 	"name": "api",
 	"version": "0.0.1",
-	"description": "",
-	"author": "",
-	"private": true,
-	"license": "UNLICENSED",
+	"description": "API for the Bookmark Manager application",
+	"author": "Dailton Bastos <dailtonbastos@gmail.com>",
+	"private": false,
+	"license": "ISC",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Dailton-Bastos/bookmark-manager"
+	},
 	"scripts": {
 		"build": "nest build",
 		"format": "biome format .",
@@ -22,9 +26,7 @@
 		"test:watch": "jest --watch",
 		"test:cov": "jest --coverage",
 		"test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-		"test:e2e": "jest --config ./jest-e2e.config.ts",
-		"test:vitest": "vitest run",
-		"test:vitest:watch": "vitest"
+		"test:e2e": "jest --config ./jest-e2e.config.ts"
 	},
 	"dependencies": {
 		"@nestjs/common": "^11.0.1",
@@ -58,7 +60,6 @@
 		"ts-loader": "^9.5.2",
 		"ts-node": "^10.9.2",
 		"tsconfig-paths": "^4.2.0",
-		"typescript": "catalog:",
-		"vitest": "catalog:"
+		"typescript": "catalog:"
 	}
 }

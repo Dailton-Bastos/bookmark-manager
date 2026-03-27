@@ -175,9 +175,6 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
-      vitest:
-        specifier: 'catalog:'
-        version: 3.2.4(@types/node@20.19.37)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.32.0)(terser@5.46.1)(yaml@2.8.3)
 
   apps/web:
     dependencies:
@@ -209,9 +206,6 @@ importers:
       '@tailwindcss/postcss':
         specifier: 'catalog:'
         version: 4.2.2
-      '@types/jest':
-        specifier: 'catalog:'
-        version: 30.0.0
       '@types/node':
         specifier: 'catalog:'
         version: 20.19.37

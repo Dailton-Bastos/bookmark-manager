@@ -1,7 +1,14 @@
 {
 	"name": "web",
-	"version": "0.1.0",
-	"private": true,
+	"version": "0.0.1",
+	"private": false,
+	"description": "Web application for the Bookmark Manager",
+	"author": "Dailton Bastos <dailtonbastos@gmail.com>",
+	"license": "ISC",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Dailton-Bastos/bookmark-manager"
+	},
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",
@@ -28,7 +35,6 @@
 		"@repo/testing-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"@tailwindcss/postcss": "catalog:",
-		"@types/jest": "catalog:",
 		"@types/node": "catalog:",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
