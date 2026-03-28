@@ -1,3 +1,2 @@
-@import "tailwindcss";
-
-@import "@repo/tailwind-config";
+@import "ui/globals.css";
+@source "../../../../packages/ui/**/*.{ts,tsx,css}";
