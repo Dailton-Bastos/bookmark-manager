@@ -9,7 +9,7 @@
 	"packageManager": "pnpm@10.30.3",
 	"exports": {
 		".": "./globals.css",
-		"./postcss": "./postcss.config.js"
+		"./postcss.config": "./postcss.config.mjs"
 	},
 	"scripts": {
 		"lint": "biome lint .",
