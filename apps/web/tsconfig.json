@@ -8,7 +8,8 @@
 		],
 		"strictNullChecks": true,
 		"paths": {
-			"@/*": ["./src/*", "../../packages/ui/src/*"]
+			"@/*": ["./src/*"],
+			"@ui/*": ["../../packages/ui/src/*"]
 		}
 	},
 	"include": [

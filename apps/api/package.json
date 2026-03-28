@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"description": "API for the Bookmark Manager application",
 	"author": "Dailton Bastos <dailtonbastos@gmail.com>",
-	"private": false,
+	"private": true,
 	"license": "ISC",
 	"repository": {
 		"type": "git",

@@ -1,7 +1,7 @@
 {
 	"name": "web",
 	"version": "0.0.1",
-	"private": false,
+	"private": true,
 	"description": "Web application for the Bookmark Manager",
 	"author": "Dailton Bastos <dailtonbastos@gmail.com>",
 	"license": "ISC",
