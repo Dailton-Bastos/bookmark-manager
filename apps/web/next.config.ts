@@ -4,7 +4,10 @@ const nextConfig: NextConfig = {
 	output: 'standalone',
 	webpack: (config, { dev }) => {
 		if (dev) {
+			const existingWatchOptions = config.watchOptions ?? {}
+
 			config.watchOptions = {
+				...existingWatchOptions,
 				poll: 1000,
 				aggregateTimeout: 300
 			}
