@@ -17,7 +17,7 @@
   --secondary-foreground: oklch(0.1804 0.0232 185.1825);
   --muted: oklch(0.9244 0.0131 185.0775);
   --muted-foreground: oklch(0.4602 0.0203 182.7951);
-  --accent: '#COCFCC';
+  --accent: oklch(0.8422 0.0168 182.63);
   --accent-foreground: oklch(0.1804 0.0232 185.1825);
   --destructive: oklch(0.5314 0.2145 29.3752);
   --destructive-foreground: oklch(1.0000 0 0);
@@ -27,7 +27,7 @@
   --chart-1: oklch(0.3597 0.0614 191.5495);
   --chart-2: oklch(0.6570 0.0130 183.8788);
   --chart-3: oklch(0.3223 0.0547 192.9229);
-  --chart-4: '#COCFCC';
+  --chart-4: oklch(0.8422 0.0168 182.63);
   --chart-5: oklch(0.9244 0.0131 185.0775);
   --sidebar: oklch(0.9488 0.0086 188.1083);
   --sidebar-foreground: oklch(0.1804 0.0232 185.1825);
@@ -110,6 +110,10 @@
   --shadow-lg: 0px 4px 15px 0px hsl(0 0% 0% / 0.30), 0px 4px 6px -1px hsl(0 0% 0% / 0.30);
   --shadow-xl: 0px 4px 15px 0px hsl(0 0% 0% / 0.30), 0px 8px 10px -1px hsl(0 0% 0% / 0.30);
   --shadow-2xl: 0px 4px 15px 0px hsl(0 0% 0% / 0.75);
+}
+
+@theme {
+	--font-roboto: "Roboto", sans-serif;
 }
 
 @theme inline {
