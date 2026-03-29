@@ -31,12 +31,12 @@ export const InputPassword = ({
 			{showIcon && (
 				<InputGroupAddon align="inline-end">
 					<InputGroupButton
-						aria-label="Show password"
+						aria-label={showPassword ? "Hide password" : "Show password"}
 						size={"icon-sm"}
 						className="cursor-pointer"
 						onClick={() => setShowPassword(!showPassword)}
 					>
-						{showPassword ? <EyeIcon /> : <EyeOffIcon />}
+						{showPassword ? <EyeOffIcon /> : <EyeIcon />}
 					</InputGroupButton>
 				</InputGroupAddon>
 			)}

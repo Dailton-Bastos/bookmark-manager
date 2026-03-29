@@ -28,7 +28,7 @@ export const LoginForm = () => {
 							id="email"
 							type="email"
 							required
-							className="hover:bg-secondary focus-within:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
+							className="hover:bg-secondary focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
 						/>
 					</Field>
 
@@ -40,7 +40,10 @@ export const LoginForm = () => {
 					</Field>
 
 					<Field>
-						<Button type="submit" className="w-full">
+						<Button
+							type="submit"
+							className="w-full h-11.5 rounded-lg hover:bg-chart-3 cursor-pointer font-semibold"
+						>
 							Log in
 						</Button>
 
@@ -49,7 +52,7 @@ export const LoginForm = () => {
 								Forgot password?{' '}
 								<Link
 									href="/forgot-password"
-									className="font-semibold text-sm text-foreground outline-none focus-visible:p-0.5 focus-visible:rounded  focus-visible:ring-2 focus-visible:ring-ring/60 focus-within:ring-offset-2"
+									className="font-semibold text-sm text-foreground outline-none focus-visible:p-0.5 focus-visible:rounded  focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2"
 								>
 									Reset it
 								</Link>
@@ -59,7 +62,7 @@ export const LoginForm = () => {
 								Don&apos;t have an account?{' '}
 								<Link
 									href="/signup"
-									className="font-semibold text-sm text-foreground outline-none focus-visible:p-0.5 focus-visible:rounded focus-visible:ring-2 focus-visible:ring-ring/60 focus-within:ring-offset-2"
+									className="font-semibold text-sm text-foreground outline-none focus-visible:p-0.5 focus-visible:rounded focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2"
 								>
 									Sign up
 								</Link>
