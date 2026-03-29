@@ -24,9 +24,8 @@ module.exports = {
 			)
 
 			return [
-				// Method 1: Use shell: true format
-				`bash -c "cd ${appDir} && biome lint --write --no-errors-on-unmatched "${relativeFiles.join(' ')}""`,
-				`bash -c "cd ${appDir} && biome format --write --no-errors-on-unmatched "${relativeFiles.join(' ')}""`
+				`bash -c "cd ${appDir} && biome lint --write --no-errors-on-unmatched ${relativeFiles.join(' ')}"`,
+				`bash -c "cd ${appDir} && biome format --write --no-errors-on-unmatched ${relativeFiles.join(' ')}"`
 			]
 		})
 	},
@@ -59,8 +58,8 @@ module.exports = {
 			)
 
 			return [
-				`bash -c "cd ${pkgDir} && biome lint --write --no-errors-on-unmatched "${relativeFiles.join(' ')}""`,
-				`bash -c "cd ${pkgDir} && biome format --write --no-errors-on-unmatched "${relativeFiles.join(' ')}""`
+				`bash -c "cd ${pkgDir} && biome lint --write --no-errors-on-unmatched ${relativeFiles.join(' ')}"`,
+				`bash -c "cd ${pkgDir} && biome format --write --no-errors-on-unmatched ${relativeFiles.join(' ')}"`
 			]
 		})
 	},
