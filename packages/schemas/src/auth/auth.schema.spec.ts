@@ -37,6 +37,8 @@ describe('AuthSchema', () => {
 					(issue) => issue.path[0] === 'password'
 				)
 
+				expect(emailIssue).toBeDefined()
+				expect(passwordIssue).toBeDefined()
 				expect(emailIssue?.code).toBe('invalid_format')
 				expect(passwordIssue?.code).toBe('too_small')
 			}
@@ -84,6 +86,9 @@ describe('AuthSchema', () => {
 					(issue) => issue.path[0] === 'password'
 				)
 
+				expect(nameIssue).toBeDefined()
+				expect(emailIssue).toBeDefined()
+				expect(passwordIssue).toBeDefined()
 				expect(nameIssue?.code).toBe('too_small')
 				expect(emailIssue?.code).toBe('invalid_format')
 				expect(passwordIssue?.code).toBe('too_small')
@@ -109,6 +114,7 @@ describe('AuthSchema', () => {
 					(issue) => issue.path[0] === 'password'
 				)
 
+				expect(passwordIssue).toBeDefined()
 				expect(passwordIssue?.code).toBe('too_big')
 			}
 		})
