@@ -1,11 +1,15 @@
 'use client'
 
+import { zodResolver } from '@hookform/resolvers/zod'
+import { type LoginFormData, loginSchema } from '@repo/schemas'
 import Link from 'next/link'
+import { Controller, useForm } from 'react-hook-form'
 import { InputPassword } from 'ui/components/input-password'
 import { Button } from 'ui/components/shadcn/ui/button'
 import {
 	Field,
 	FieldDescription,
+	FieldError,
 	FieldGroup,
 	FieldLabel
 } from 'ui/components/shadcn/ui/field'
@@ -13,31 +17,75 @@ import { Input } from 'ui/components/shadcn/ui/input'
 import { CardWrapper } from './card-wrapper'
 
 export const LoginForm = () => {
+	const form = useForm<LoginFormData>({
+		resolver: zodResolver(loginSchema),
+		defaultValues: {
+			email: '',
+			password: ''
+		}
+	})
+
+	const onSubmit = (data: LoginFormData) => {
+		return data
+	}
+
 	return (
 		<CardWrapper
 			headerTitle="Log in to your account"
 			headerDescription="Welcome back! Please enter your details"
 		>
-			<form>
+			<form id="form-login" onSubmit={form.handleSubmit(onSubmit)}>
 				<FieldGroup className="gap-4">
-					<Field className="gap-1.5">
-						<FieldLabel htmlFor="email" className="text-foreground">
-							Email
-						</FieldLabel>
-						<Input
-							id="email"
-							type="email"
-							required
-							className="hover:bg-secondary focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
-						/>
-					</Field>
+					<Controller
+						control={form.control}
+						name="email"
+						render={({ field, fieldState }) => (
+							<Field className="gap-1.5" data-invalid={fieldState.invalid}>
+								<FieldLabel htmlFor="email" className="text-foreground">
+									Email
+								</FieldLabel>
+								<Input
+									{...field}
+									id="email"
+									type="email"
+									aria-invalid={fieldState.invalid}
+									autoComplete="off"
+									required
+									className="hover:bg-secondary focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
+								/>
+								{fieldState.invalid && (
+									<FieldError
+										errors={[fieldState.error]}
+										className="font-medium"
+									/>
+								)}
+							</Field>
+						)}
+					/>
 
-					<Field className="gap-1.5">
-						<FieldLabel htmlFor="password" className="text-foreground">
-							Password
-						</FieldLabel>
-						<InputPassword id="password" required />
-					</Field>
+					<Controller
+						control={form.control}
+						name="password"
+						render={({ field, fieldState }) => (
+							<Field className="gap-1.5" data-invalid={fieldState.invalid}>
+								<FieldLabel htmlFor="password" className="text-foreground">
+									Password
+								</FieldLabel>
+								<InputPassword
+									{...field}
+									id="password"
+									aria-invalid={fieldState.invalid}
+									required
+								/>
+								{fieldState.invalid && (
+									<FieldError
+										errors={[fieldState.error]}
+										className="font-medium"
+									/>
+								)}
+							</Field>
+						)}
+					/>
 
 					<Field>
 						<Button

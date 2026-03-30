@@ -2,6 +2,7 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
 	output: 'standalone',
+	transpilePackages: ['@repo/schemas'],
 	webpack: (config, { dev }) => {
 		if (dev) {
 			const existingWatchOptions = config.watchOptions ?? {}
