@@ -1,5 +1,17 @@
 const path = require('node:path')
 
+const quoteForShell = (value) => `'${value.replace(/'/g, `'"'"'`)}'`
+
+const buildBiomeCommands = (dir, files) => {
+	const quotedDir = quoteForShell(dir)
+	const quotedFiles = files.map(quoteForShell).join(' ')
+
+	return [
+		`bash -c "cd ${quotedDir} && biome lint --write --no-errors-on-unmatched ${quotedFiles}"`,
+		`bash -c "cd ${quotedDir} && biome format --write --no-errors-on-unmatched ${quotedFiles}"`
+	]
+}
+
 module.exports = {
 	// Handle apps separately with proper directory context
 	'apps/**/*.{js,jsx,ts,tsx}': (filenames) => {
@@ -23,10 +35,7 @@ module.exports = {
 				relativeFiles
 			)
 
-			return [
-				`bash -c "cd ${appDir} && biome lint --write --no-errors-on-unmatched ${relativeFiles.join(' ')}"`,
-				`bash -c "cd ${appDir} && biome format --write --no-errors-on-unmatched ${relativeFiles.join(' ')}"`
-			]
+			return buildBiomeCommands(appDir, relativeFiles)
 		})
 	},
 
@@ -57,10 +66,7 @@ module.exports = {
 				relativeFiles
 			)
 
-			return [
-				`bash -c "cd ${pkgDir} && biome lint --write --no-errors-on-unmatched ${relativeFiles.join(' ')}"`,
-				`bash -c "cd ${pkgDir} && biome format --write --no-errors-on-unmatched ${relativeFiles.join(' ')}"`
-			]
+			return buildBiomeCommands(pkgDir, relativeFiles)
 		})
 	},
 
