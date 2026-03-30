@@ -10,8 +10,8 @@
 		"url": "https://github.com/Dailton-Bastos/bookmark-manager"
 	},
 	"scripts": {
-		"dev": "next dev",
-		"build": "next build",
+		"dev": "WATCHPACK_POLLING=true next dev --webpack",
+		"build": "next build --webpack",
 		"start": "next start",
 		"lint": "biome lint .",
 		"format": "biome format .",
