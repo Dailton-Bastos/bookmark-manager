@@ -2,19 +2,7 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
 	output: 'standalone',
-	transpilePackages: ['@repo/schemas'],
-	webpack: (config, { dev }) => {
-		if (dev) {
-			const existingWatchOptions = config.watchOptions ?? {}
-
-			config.watchOptions = {
-				...existingWatchOptions,
-				poll: 1000,
-				aggregateTimeout: 300
-			}
-		}
-		return config
-	},
+	transpilePackages: ['ui', '@repo/schemas'],
 	images: {
 		dangerouslyAllowSVG: true,
 		contentDispositionType: 'attachment',
