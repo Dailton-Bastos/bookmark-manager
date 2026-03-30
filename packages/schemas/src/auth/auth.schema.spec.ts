@@ -29,8 +29,18 @@ describe('AuthSchema', () => {
 			if (!result.success) {
 				expect(result.error).toBeInstanceOf(ZodError)
 				expect(result.error.issues.length).toBe(2)
-				expect(result.error.issues[0]?.code).toBe('invalid_format')
-				expect(result.error.issues[1]?.code).toBe('too_small')
+
+				const emailIssue = result.error.issues.find(
+					(issue) => issue.path[0] === 'email'
+				)
+				const passwordIssue = result.error.issues.find(
+					(issue) => issue.path[0] === 'password'
+				)
+
+				expect(emailIssue).toBeDefined()
+				expect(passwordIssue).toBeDefined()
+				expect(emailIssue?.code).toBe('invalid_format')
+				expect(passwordIssue?.code).toBe('too_small')
 			}
 		})
 	})
@@ -65,9 +75,23 @@ describe('AuthSchema', () => {
 			if (!result.success) {
 				expect(result.error).toBeInstanceOf(ZodError)
 				expect(result.error.issues.length).toBe(3)
-				expect(result.error.issues[0]?.code).toBe('too_small')
-				expect(result.error.issues[1]?.code).toBe('invalid_format')
-				expect(result.error.issues[2]?.code).toBe('too_small')
+
+				const nameIssue = result.error.issues.find(
+					(issue) => issue.path[0] === 'name'
+				)
+				const emailIssue = result.error.issues.find(
+					(issue) => issue.path[0] === 'email'
+				)
+				const passwordIssue = result.error.issues.find(
+					(issue) => issue.path[0] === 'password'
+				)
+
+				expect(nameIssue).toBeDefined()
+				expect(emailIssue).toBeDefined()
+				expect(passwordIssue).toBeDefined()
+				expect(nameIssue?.code).toBe('too_small')
+				expect(emailIssue?.code).toBe('invalid_format')
+				expect(passwordIssue?.code).toBe('too_small')
 			}
 		})
 
@@ -85,7 +109,13 @@ describe('AuthSchema', () => {
 			if (!result.success) {
 				expect(result.error).toBeInstanceOf(ZodError)
 				expect(result.error.issues.length).toBe(1)
-				expect(result.error.issues[0]?.code).toBe('too_big')
+
+				const passwordIssue = result.error.issues.find(
+					(issue) => issue.path[0] === 'password'
+				)
+
+				expect(passwordIssue).toBeDefined()
+				expect(passwordIssue?.code).toBe('too_big')
 			}
 		})
 	})
