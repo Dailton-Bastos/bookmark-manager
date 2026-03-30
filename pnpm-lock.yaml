@@ -247,9 +247,6 @@ importers:
 
   packages/schemas:
     dependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
       zod:
         specifier: 'catalog:'
         version: 4.3.6
@@ -260,15 +257,15 @@ importers:
       '@repo/testing-config':
         specifier: workspace:*
         version: link:../testing-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       '@types/jest':
         specifier: 'catalog:'
         version: 30.0.0
       jest:
         specifier: 'catalog:'
         version: 30.3.0(@types/node@20.19.37)(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@20.19.37)(typescript@5.9.3))
-      ts-jest:
-        specifier: 'catalog:'
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.3.0)(@jest/types@30.3.0)(babel-jest@30.3.0(@babel/core@7.29.0))(jest-util@30.3.0)(jest@30.3.0(@types/node@20.19.37)(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@20.19.37)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3

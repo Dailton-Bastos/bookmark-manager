@@ -131,7 +131,7 @@ export const SignupForm = () => {
 								Already have an account?{' '}
 								<Link
 									href="/login"
-									className="font-semibold text-sm text-foreground outline-none focus-visible:p-0.5 focus-visible:rounded  focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2"
+									className="font-semibold text-sm text-foreground outline-none focus-visible:p-0.5 focus-visible:rounded focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2"
 								>
 									Log in
 								</Link>

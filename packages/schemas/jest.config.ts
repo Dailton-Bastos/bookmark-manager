@@ -3,7 +3,6 @@ import type { Config } from 'jest'
 
 const config: Config = {
 	...jestBaseConfig,
-	rootDir: 'src',
 	testEnvironment: 'node',
 	coverageDirectory: '../coverage',
 	collectCoverageFrom: [

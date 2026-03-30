@@ -27,15 +27,14 @@
 		"check:fix": "biome check . --fix"
 	},
 	"dependencies": {
-		"@repo/typescript-config": "workspace:*",
 		"zod": "catalog:"
 	},
 	"devDependencies": {
 		"@repo/biome-config": "workspace:*",
 		"@repo/testing-config": "workspace:*",
+		"@repo/typescript-config": "workspace:*",
 		"@types/jest": "catalog:",
 		"jest": "catalog:",
-		"ts-jest": "catalog:",
 		"typescript": "catalog:"
 	}
 }
