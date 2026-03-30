@@ -40,6 +40,8 @@
 **/*.pid
 **/*.seed
 **/*.pid.lock
+pgdata/
+pgadmin/
 
 # IDEs and editors
 **/.idea
