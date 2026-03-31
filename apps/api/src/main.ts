@@ -9,6 +9,7 @@ async function bootstrap() {
 	const logger = new Logger('Bootstrap')
 
 	const app = await NestFactory.create<NestExpressApplication>(AppModule)
+	app.enableShutdownHooks()
 
 	appConfig(app)
 

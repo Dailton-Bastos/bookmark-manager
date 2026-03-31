@@ -5,8 +5,10 @@ import {
 	MemoryHealthIndicator
 } from '@nestjs/terminus'
 import { Test, TestingModule } from '@nestjs/testing'
+import { DATABASE_HEALTH_INDICATOR } from '../../shared/constants/database'
 import { downMock } from '../__mock__/down.mock'
 import { upMock } from '../__mock__/up.mock'
+import { DatabaseHealthIndicator } from '../database.health'
 import { HealthController } from '../health.controller'
 
 describe('HealthController', () => {
@@ -41,6 +43,14 @@ describe('HealthController', () => {
 							.fn()
 							.mockResolvedValue({} as HealthIndicatorResult<'rss'>)
 					}
+				},
+				{
+					provide: DATABASE_HEALTH_INDICATOR,
+					useValue: {
+						isHealthy: jest
+							.fn()
+							.mockResolvedValue({} as HealthIndicatorResult<'database'>)
+					} as Pick<DatabaseHealthIndicator, 'isHealthy'>
 				}
 			]
 		}).compile()
@@ -55,6 +65,7 @@ describe('HealthController', () => {
 		const result = await healthController.check()
 
 		expect(health.check).toHaveBeenCalledWith([
+			expect.any(Function),
 			expect.any(Function),
 			expect.any(Function),
 			expect.any(Function)
