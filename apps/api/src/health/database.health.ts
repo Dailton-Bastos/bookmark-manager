@@ -19,10 +19,9 @@ export class DatabaseHealthIndicator {
 			await this.database.execute(sql`SELECT 1`)
 
 			return indicator.up()
-		} catch (error) {
+		} catch {
 			return indicator.down({
-				message: 'Database connection failed',
-				error: error instanceof Error ? error.message : 'Unknown error'
+				message: 'Database connection failed'
 			})
 		}
 	}
