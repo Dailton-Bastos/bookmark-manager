@@ -37,6 +37,7 @@
 		"@vitejs/plugin-react-swc": "catalog:",
 		"jest": "catalog:",
 		"jsdom": "catalog:",
+		"typescript": "catalog:",
 		"unplugin-swc": "catalog:",
 		"vite": "catalog:",
 		"vitest": "catalog:"

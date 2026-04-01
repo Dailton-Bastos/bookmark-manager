@@ -4,7 +4,7 @@ import type { Config } from 'jest'
 const config: Config = {
 	...jestApiConfig,
 	rootDir: 'src',
-	collectCoverage: true,
+	collectCoverage: false,
 	coverageDirectory: '../coverage',
 	collectCoverageFrom: [
 		'**/*.(t|j)s',
