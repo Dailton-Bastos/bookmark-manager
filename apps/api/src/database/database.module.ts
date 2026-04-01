@@ -9,7 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { TerminusModule } from '@nestjs/terminus'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
-import { DatabaseHealthIndicator } from '../health/database.health'
+import { DatabaseHealthIndicator } from './database.health'
 import {
 	DATABASE_CONNECTION,
 	DATABASE_HEALTH_INDICATOR,
