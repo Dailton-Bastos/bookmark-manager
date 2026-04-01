@@ -9,12 +9,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { TerminusModule } from '@nestjs/terminus'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
-import { DatabaseHealthIndicator } from './database.health'
 import {
 	DATABASE_CONNECTION,
 	DATABASE_HEALTH_INDICATOR,
 	DATABASE_POOL
 } from '../shared/constants/database'
+import { DatabaseHealthIndicator } from './database.health'
 
 @Injectable()
 class DatabasePoolCleanupService implements OnApplicationShutdown {

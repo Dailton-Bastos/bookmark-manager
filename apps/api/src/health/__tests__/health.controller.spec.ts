@@ -5,8 +5,8 @@ import {
 	MemoryHealthIndicator
 } from '@nestjs/terminus'
 import { Test, TestingModule } from '@nestjs/testing'
-import { DATABASE_HEALTH_INDICATOR } from '../../shared/constants/database'
 import { DatabaseHealthIndicator } from '../../database/database.health'
+import { DATABASE_HEALTH_INDICATOR } from '../../shared/constants/database'
 import { downMock } from '../__mock__/down.mock'
 import { upMock } from '../__mock__/up.mock'
 import { HealthController } from '../health.controller'
