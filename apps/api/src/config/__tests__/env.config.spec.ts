@@ -41,9 +41,7 @@ describe('EnvConfig', () => {
 				HOST: 'localhost'
 			}
 
-			expect(() => validate(config)).toThrow(
-				'"message": "Invalid input: expected string, received undefined"'
-			)
+			expect(() => validate(config)).toThrow(/Invalid environment variables/)
 		})
 	})
 })
