@@ -1,4 +1,4 @@
-import { ConfigService } from '@nestjs/config/dist/config.service'
+import { ConfigService } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
 import type { EnvConfig } from '../../config/env.config'
 import { EnvService } from '../env.service'
