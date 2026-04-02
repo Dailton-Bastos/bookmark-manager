@@ -1,9 +1,9 @@
 import { Logger } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 import type { NestExpressApplication } from '@nestjs/platform-express'
 import { AppModule } from './app.module'
 import { appConfig } from './config/app.config'
+import { EnvService } from './env/env.service'
 
 async function bootstrap() {
 	const logger = new Logger('Bootstrap')
@@ -13,11 +13,11 @@ async function bootstrap() {
 
 	appConfig(app)
 
-	const configService = app.get<ConfigService>(ConfigService)
+	const configService = app.get(EnvService)
 
-	const PORT = configService.get<number>('PORT') || 3001
-	const HOST = configService.get<string>('HOST') || 'localhost'
-	const ENV = configService.get<string>('NODE_ENV') || 'development'
+	const PORT = configService.get('PORT')
+	const HOST = configService.get('HOST')
+	const ENV = configService.get('NODE_ENV')
 
 	await app.listen(PORT, () => {
 		logger.log(
