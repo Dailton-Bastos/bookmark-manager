@@ -5,10 +5,11 @@ import {
 	Module,
 	OnApplicationShutdown
 } from '@nestjs/common'
-import { ConfigModule, ConfigService } from '@nestjs/config'
 import { TerminusModule } from '@nestjs/terminus'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
+import { EnvModule } from '../env/env.module'
+import { EnvService } from '../env/env.service'
 import {
 	DATABASE_CONNECTION,
 	DATABASE_HEALTH_INDICATOR,
@@ -29,16 +30,20 @@ class DatabasePoolCleanupService implements OnApplicationShutdown {
 }
 
 @Module({
-	imports: [ConfigModule, TerminusModule],
+	imports: [EnvModule, TerminusModule],
 	providers: [
 		{
 			provide: DATABASE_POOL,
-			useFactory: (configService: ConfigService) => {
+			useFactory: (envService: EnvService) => {
 				return new Pool({
-					connectionString: configService.getOrThrow('DATABASE_URL')
+					host: envService.get('DATABASE_HOST'),
+					port: envService.get('DATABASE_PORT'),
+					user: envService.get('DATABASE_USER'),
+					password: envService.get('DATABASE_PASSWORD'),
+					database: envService.get('DATABASE_NAME')
 				})
 			},
-			inject: [ConfigService]
+			inject: [EnvService]
 		},
 		{
 			provide: DATABASE_CONNECTION,
