@@ -12,7 +12,7 @@ const envSchema = z.object({
 			message: "NODE_ENV must be one of 'development', 'production', or 'test'"
 		})
 		.default(Environment.Development),
-	PORT: z.coerce.number().default(3000),
+	PORT: z.coerce.number().default(3001),
 	HOST: z.string().default('localhost'),
 	DATABASE_HOST: z.string().nonempty({ message: 'DATABASE_HOST is required' }),
 	DATABASE_PORT: z.coerce.number().default(5432),
@@ -20,8 +20,7 @@ const envSchema = z.object({
 	DATABASE_PASSWORD: z
 		.string()
 		.nonempty({ message: 'DATABASE_PASSWORD is required' }),
-	DATABASE_NAME: z.string().nonempty({ message: 'DATABASE_NAME is required' }),
-	DATABASE_URL: z.string().optional()
+	DATABASE_NAME: z.string().nonempty({ message: 'DATABASE_NAME is required' })
 })
 
 export const validate = (config: Record<string, unknown>) => {
