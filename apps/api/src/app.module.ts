@@ -7,6 +7,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { validate } from './config/env.config'
 import { DatabaseModule } from './database/database.module'
 import { EnvModule } from './env/env.module'
+import { EnvService } from './env/env.service'
 import { HealthModule } from './health/health.module'
 import { DATABASE_CONNECTION } from './shared/constants/database'
 
@@ -21,20 +22,18 @@ import { DATABASE_CONNECTION } from './shared/constants/database'
 		HealthModule,
 		DatabaseModule,
 		AuthModule.forRootAsync({
-			imports: [DatabaseModule],
-			useFactory: (database: NodePgDatabase) => ({
+			imports: [DatabaseModule, EnvModule],
+			useFactory: (database: NodePgDatabase, envService: EnvService) => ({
 				auth: betterAuth({
 					database: drizzleAdapter(database, {
 						provider: 'pg',
 						usePlural: true
 					}),
-					user: { modelName: 'users' },
-					session: { modelName: 'sessions' },
-					account: { modelName: 'accounts' },
-					verificationToken: { modelName: 'verifications' }
+					emailAndPassword: { enabled: true },
+					trustedOrigins: [envService.get('UI_URL')]
 				})
 			}),
-			inject: [DATABASE_CONNECTION]
+			inject: [DATABASE_CONNECTION, EnvService]
 		})
 	],
 	controllers: [],

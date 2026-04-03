@@ -26,6 +26,7 @@
 	"dependencies": {
 		"@hookform/resolvers": "^5.2.2",
 		"@repo/schemas": "workspace:*",
+		"better-auth": "catalog:",
 		"next": "16.2.1",
 		"react": "19.2.4",
 		"react-dom": "19.2.4",

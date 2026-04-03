@@ -14,7 +14,8 @@ describe('EnvConfig', () => {
 				DATABASE_NAME: 'database',
 				DATABASE_URL: 'postgres://user:password@localhost:5432/database',
 				BETTER_AUTH_URL: 'http://localhost:3001',
-				BETTER_AUTH_SECRET: 'secret'
+				BETTER_AUTH_SECRET: 'secret',
+				UI_URL: 'http://localhost:3000'
 			}
 
 			expect(() => validate(config)).not.toThrow()
