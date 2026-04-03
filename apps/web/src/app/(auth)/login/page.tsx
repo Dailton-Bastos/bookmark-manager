@@ -6,6 +6,22 @@ import { LoginForm } from '@/components/auth/login-form'
 import { authClient } from '@/lib/auth-client'
 import { DEFAULT_LOGIN_REDIRECT } from '@/routes'
 
+function getSafeCallbackUrl(callbackUrl: string | null): string {
+	if (!callbackUrl) return DEFAULT_LOGIN_REDIRECT
+
+	try {
+		const decoded = decodeURIComponent(callbackUrl)
+
+		if (decoded.startsWith('/') && !decoded.startsWith('//')) {
+			return decoded
+		}
+	} catch {
+		// decodeURIComponent failed; fall through to default
+	}
+
+	return DEFAULT_LOGIN_REDIRECT
+}
+
 export default function LoginPage() {
 	const searchParams = useSearchParams()
 
@@ -15,9 +31,7 @@ export default function LoginPage() {
 		await authClient.signIn.email({
 			email: data.email,
 			password: data.password,
-			callbackURL: callbackUrl
-				? decodeURIComponent(callbackUrl)
-				: DEFAULT_LOGIN_REDIRECT
+			callbackURL: getSafeCallbackUrl(callbackUrl)
 		})
 	}
 
