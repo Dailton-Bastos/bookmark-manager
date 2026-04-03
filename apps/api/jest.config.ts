@@ -5,6 +5,11 @@ const config: Config = {
 	...jestApiConfig,
 	rootDir: 'src',
 	collectCoverage: false,
+	moduleNameMapper: {
+		...jestApiConfig.moduleNameMapper,
+		'@thallesp/nestjs-better-auth':
+			'<rootDir>/auth/__mocks__/nestjs-better-auth.ts' // Mock for @thallesp/nestjs-better-auth
+	},
 	coverageDirectory: '../coverage',
 	collectCoverageFrom: [
 		'**/*.(t|j)s',
