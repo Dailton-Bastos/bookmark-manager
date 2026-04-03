@@ -20,7 +20,14 @@ const envSchema = z.object({
 	DATABASE_PASSWORD: z
 		.string()
 		.nonempty({ message: 'DATABASE_PASSWORD is required' }),
-	DATABASE_NAME: z.string().nonempty({ message: 'DATABASE_NAME is required' })
+	DATABASE_NAME: z.string().nonempty({ message: 'DATABASE_NAME is required' }),
+	BETTER_AUTH_URL: z.url({
+		protocol: /^https?$/,
+		message: 'BETTER_AUTH_URL must be a valid URL'
+	}),
+	BETTER_AUTH_SECRET: z
+		.string()
+		.nonempty({ message: 'BETTER_AUTH_SECRET is required' })
 })
 
 export const validate = (config: Record<string, unknown>) => {

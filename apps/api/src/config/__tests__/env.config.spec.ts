@@ -12,7 +12,9 @@ describe('EnvConfig', () => {
 				DATABASE_USER: 'user',
 				DATABASE_PASSWORD: 'password',
 				DATABASE_NAME: 'database',
-				DATABASE_URL: ''
+				DATABASE_URL: '',
+				BETTER_AUTH_URL: 'http://localhost:3001',
+				BETTER_AUTH_SECRET: 'secret'
 			}
 
 			expect(() => validate(config)).not.toThrow()

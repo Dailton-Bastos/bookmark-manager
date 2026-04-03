@@ -5,10 +5,12 @@ import {
 	HealthCheckService,
 	MemoryHealthIndicator
 } from '@nestjs/terminus'
+import { AllowAnonymous } from '@thallesp/nestjs-better-auth'
 import { DatabaseHealthIndicator } from '../database/database.health'
 import { DATABASE_HEALTH_INDICATOR } from '../shared/constants/database'
 
 @Controller('health')
+@AllowAnonymous()
 export class HealthController {
 	constructor(
 		private health: HealthCheckService,
