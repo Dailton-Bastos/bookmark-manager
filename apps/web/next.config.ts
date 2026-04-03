@@ -1,11 +1,17 @@
 import type { NextConfig } from 'next'
 
+const apiUrl = process.env.API_URL
+
+if (!apiUrl) {
+	throw new Error('Missing required environment variable: API_URL')
+}
+
 const nextConfig: NextConfig = {
 	async rewrites() {
 		return [
 			{
 				source: '/api/:path*',
-				destination: `${process.env.API_URL}/api/:path*`
+				destination: `${apiUrl}/api/:path*`
 			}
 		]
 	},
