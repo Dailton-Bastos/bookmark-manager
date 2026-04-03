@@ -8,6 +8,7 @@ import {
 import { TerminusModule } from '@nestjs/terminus'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
+import { Environment } from '../config/env.config'
 import { EnvModule } from '../env/env.module'
 import { EnvService } from '../env/env.service'
 import {
@@ -16,6 +17,7 @@ import {
 	DATABASE_POOL
 } from '../shared/constants/database'
 import { DatabaseHealthIndicator } from './database.health'
+import { schema } from './schemas'
 
 @Injectable()
 class DatabasePoolCleanupService implements OnApplicationShutdown {
@@ -47,10 +49,14 @@ class DatabasePoolCleanupService implements OnApplicationShutdown {
 		},
 		{
 			provide: DATABASE_CONNECTION,
-			useFactory: (pool: Pool) => {
-				return drizzle({ client: pool })
+			useFactory: (client: Pool, envService: EnvService) => {
+				return drizzle({
+					client,
+					schema,
+					logger: envService.get('NODE_ENV') === Environment.Development
+				})
 			},
-			inject: [DATABASE_POOL]
+			inject: [DATABASE_POOL, EnvService]
 		},
 		{
 			provide: DATABASE_HEALTH_INDICATOR,

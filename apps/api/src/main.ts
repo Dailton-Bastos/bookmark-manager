@@ -8,7 +8,9 @@ import { EnvService } from './env/env.service'
 async function bootstrap() {
 	const logger = new Logger('Bootstrap')
 
-	const app = await NestFactory.create<NestExpressApplication>(AppModule)
+	const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+		bodyParser: false
+	})
 	app.enableShutdownHooks()
 
 	appConfig(app)
