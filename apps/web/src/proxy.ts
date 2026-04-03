@@ -1,19 +1,12 @@
 import { getSessionCookie } from 'better-auth/cookies'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import {
-	authApiRoutePrefix,
-	authRoutes,
-	DEFAULT_LOGIN_REDIRECT
-} from './routes'
+import { authRoutes, DEFAULT_LOGIN_REDIRECT } from './routes'
 
 export function proxy(request: NextRequest) {
 	const { pathname, search } = request.nextUrl
 
-	const isApiAuthRoute = pathname.startsWith(authApiRoutePrefix)
 	const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route))
-
-	if (isApiAuthRoute) return NextResponse.next()
 
 	const sessionCookie = getSessionCookie(request)
 
