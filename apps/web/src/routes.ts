@@ -6,7 +6,7 @@
 export const authRoutes: string[] = ['/login', '/signup']
 
 /**
- * The default redirect path after loggin in
+ * The default redirect path after logging in
  * @type {string}
  */
 export const DEFAULT_LOGIN_REDIRECT: string = '/'
