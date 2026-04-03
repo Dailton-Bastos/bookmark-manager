@@ -11,6 +11,11 @@ import { downMock } from '../__mock__/down.mock'
 import { upMock } from '../__mock__/up.mock'
 import { HealthController } from '../health.controller'
 
+jest.mock('@thallesp/nestjs-better-auth', () => ({
+	// biome-ignore lint/suspicious/noEmptyBlockStatements: <NOTE> This is a mock, so it's fine to have empty implementations
+	AllowAnonymous: jest.fn(() => () => {})
+}))
+
 describe('HealthController', () => {
 	let healthController: HealthController
 	let health: HealthCheckService
