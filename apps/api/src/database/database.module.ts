@@ -16,6 +16,7 @@ import {
 	DATABASE_POOL
 } from '../shared/constants/database'
 import { DatabaseHealthIndicator } from './database.health'
+import { schema } from './schemas'
 
 @Injectable()
 class DatabasePoolCleanupService implements OnApplicationShutdown {
@@ -47,9 +48,7 @@ class DatabasePoolCleanupService implements OnApplicationShutdown {
 		},
 		{
 			provide: DATABASE_CONNECTION,
-			useFactory: (pool: Pool) => {
-				return drizzle({ client: pool })
-			},
+			useFactory: (client: Pool) => drizzle({ client, schema, logger: true }),
 			inject: [DATABASE_POOL]
 		},
 		{

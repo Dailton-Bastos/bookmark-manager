@@ -25,8 +25,13 @@ import { DATABASE_CONNECTION } from './shared/constants/database'
 			useFactory: (database: NodePgDatabase) => ({
 				auth: betterAuth({
 					database: drizzleAdapter(database, {
-						provider: 'pg'
-					})
+						provider: 'pg',
+						usePlural: true
+					}),
+					user: { modelName: 'users' },
+					session: { modelName: 'sessions' },
+					account: { modelName: 'accounts' },
+					verificationToken: { modelName: 'verifications' }
 				})
 			}),
 			inject: [DATABASE_CONNECTION]
