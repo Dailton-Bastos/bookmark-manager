@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { manrope, roboto } from './fonts'
 import './globals.css'
+import { AppProvider } from '@/providers/app-provider'
 
 export const metadata: Metadata = {
 	title: 'Bookmark Manager',
@@ -17,7 +18,9 @@ export default function RootLayout({
 			lang="en"
 			className={`${manrope.variable} ${roboto.variable} h-full antialiased`}
 		>
-			<body className="min-h-full flex flex-col">{children}</body>
+			<body className="min-h-full flex flex-col">
+				<AppProvider>{children}</AppProvider>
+			</body>
 		</html>
 	)
 }
