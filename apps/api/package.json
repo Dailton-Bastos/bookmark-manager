@@ -37,7 +37,7 @@
 		"@nestjs/platform-express": "^11.0.1",
 		"@nestjs/terminus": "^11.1.1",
 		"@thallesp/nestjs-better-auth": "^2.5.3",
-		"better-auth": "^1.5.6",
+		"better-auth": "catalog:",
 		"drizzle-orm": "^0.45.2",
 		"pg": "^8.20.0",
 		"reflect-metadata": "^0.2.2",

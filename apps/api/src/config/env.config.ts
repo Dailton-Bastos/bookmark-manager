@@ -28,7 +28,11 @@ const envSchema = z.object({
 	}),
 	BETTER_AUTH_SECRET: z
 		.string()
-		.nonempty({ message: 'BETTER_AUTH_SECRET is required' })
+		.nonempty({ message: 'BETTER_AUTH_SECRET is required' }),
+	UI_URL: z.url({
+		protocol: /^https?$/,
+		message: 'UI_URL must be a valid URL'
+	})
 })
 
 export const validate = (config: Record<string, unknown>) => {

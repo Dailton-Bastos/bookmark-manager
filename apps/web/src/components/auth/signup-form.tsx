@@ -16,7 +16,11 @@ import {
 import { Input } from 'ui/components/shadcn/ui/input'
 import { CardWrapper } from './card-wrapper'
 
-export const SignupForm = () => {
+interface SignupFormProps {
+	onSubmit: (data: SignupFormData) => Promise<void>
+}
+
+export const SignupForm = ({ onSubmit }: SignupFormProps) => {
 	const form = useForm<SignupFormData>({
 		resolver: zodResolver(signupSchema),
 		defaultValues: {
@@ -25,10 +29,6 @@ export const SignupForm = () => {
 			password: ''
 		}
 	})
-
-	const onSubmit = (data: SignupFormData) => {
-		return data
-	}
 
 	return (
 		<CardWrapper
