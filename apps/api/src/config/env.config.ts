@@ -21,7 +21,7 @@ const envSchema = z.object({
 		.string()
 		.nonempty({ message: 'DATABASE_PASSWORD is required' }),
 	DATABASE_NAME: z.string().nonempty({ message: 'DATABASE_NAME is required' }),
-	DATABASE_URL: z.string().nonempty({ message: 'DATABASE_URL is required' }),
+	DATABASE_URL: z.string().nonempty().optional(),
 	BETTER_AUTH_URL: z.url({
 		protocol: /^https?$/,
 		message: 'BETTER_AUTH_URL must be a valid URL'
