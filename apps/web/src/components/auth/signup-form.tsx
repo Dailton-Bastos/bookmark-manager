@@ -21,10 +21,7 @@ interface SignupFormProps {
 	isPending: boolean
 }
 
-export const SignupForm = ({
-	onSubmit,
-	isPending = false
-}: SignupFormProps) => {
+export const SignupForm = ({ onSubmit, isPending }: SignupFormProps) => {
 	const form = useForm<SignupFormData>({
 		resolver: zodResolver(signupSchema),
 		defaultValues: {
