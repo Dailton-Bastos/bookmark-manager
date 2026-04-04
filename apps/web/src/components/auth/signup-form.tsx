@@ -18,9 +18,13 @@ import { CardWrapper } from './card-wrapper'
 
 interface SignupFormProps {
 	onSubmit: (data: SignupFormData) => Promise<void>
+	isPending: boolean
 }
 
-export const SignupForm = ({ onSubmit }: SignupFormProps) => {
+export const SignupForm = ({
+	onSubmit,
+	isPending = false
+}: SignupFormProps) => {
 	const form = useForm<SignupFormData>({
 		resolver: zodResolver(signupSchema),
 		defaultValues: {
@@ -122,8 +126,9 @@ export const SignupForm = ({ onSubmit }: SignupFormProps) => {
 						<Button
 							type="submit"
 							className="w-full h-11.5 rounded-lg hover:bg-chart-3 cursor-pointer font-semibold"
+							disabled={isPending}
 						>
-							Create account
+							{isPending ? 'Creating account...' : 'Create account'}
 						</Button>
 
 						<div className="flex flex-col gap-3 w-full mt-8">
