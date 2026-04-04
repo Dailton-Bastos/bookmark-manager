@@ -29,9 +29,11 @@
 		"@tanstack/react-query": "catalog:",
 		"better-auth": "catalog:",
 		"next": "16.2.1",
+		"next-themes": "catalog:",
 		"react": "19.2.4",
 		"react-dom": "19.2.4",
 		"react-hook-form": "^7.72.0",
+		"sonner": "catalog:",
 		"ui": "workspace:*"
 	},
 	"devDependencies": {
