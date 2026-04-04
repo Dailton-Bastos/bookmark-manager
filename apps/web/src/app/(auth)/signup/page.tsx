@@ -36,7 +36,10 @@ export default function SignupPage() {
 		onError: (error) =>
 			alert(error instanceof Error ? error.message : 'An error occurred'),
 		onSettled: () =>
-			queryClient.invalidateQueries({ queryKey: ['session', 'current-user'] })
+			Promise.all([
+				queryClient.invalidateQueries({ queryKey: ['session'] }),
+				queryClient.invalidateQueries({ queryKey: ['current-user'] })
+			])
 	})
 
 	return (
