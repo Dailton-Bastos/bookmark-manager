@@ -26,6 +26,7 @@
 	"dependencies": {
 		"@hookform/resolvers": "^5.2.2",
 		"@repo/schemas": "workspace:*",
+		"@tanstack/react-query": "catalog:",
 		"better-auth": "catalog:",
 		"next": "16.2.1",
 		"react": "19.2.4",
@@ -40,6 +41,7 @@
 		"@repo/testing-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"@tailwindcss/postcss": "catalog:",
+		"@tanstack/react-query-devtools": "^5.96.2",
 		"@types/node": "catalog:",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
