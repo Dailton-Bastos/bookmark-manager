@@ -18,7 +18,7 @@ export const AppProvider = ({
 			<LoadingBarContainer
 				props={{
 					shadow: false,
-					color: '#004746',
+					color: 'var(--primary)',
 					loaderSpeed: 600
 				}}
 			>
