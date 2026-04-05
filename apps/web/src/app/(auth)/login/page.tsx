@@ -52,7 +52,13 @@ export default function LoginPage() {
 				}
 			)
 		},
-		onSuccess: () => router.push(getSafeCallbackUrl(callbackUrl))
+		onSuccess: () => router.push(getSafeCallbackUrl(callbackUrl)),
+		onSettled: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ['session'] }),
+				queryClient.invalidateQueries({ queryKey: ['current-user'] })
+			])
+		}
 	})
 
 	const onSubmit = async (data: LoginFormData) => {
