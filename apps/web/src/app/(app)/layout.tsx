@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { useLoadingBar } from 'react-top-loading-bar'
+import { AlertError } from 'ui/components/alert-error'
 import { authClient } from '@/lib/auth-client'
 import { SessionProvider } from '@/providers/session-provider'
 import { DEFAULT_UNAUTHENTICATED_REDIRECT } from '@/routes'
@@ -53,7 +54,16 @@ export default function AppLayout({
 	}, [isPending, session, router])
 
 	if (error) {
-		return <p>Error: {error.message}</p>
+		return (
+			<main className="flex items-center justify-end w-full p-4">
+				<AlertError
+					title="Ops! Something went wrong"
+					description="There was a problem processing your request. Please try again."
+					showDismissButton={false}
+					onRetry={() => router.refresh()}
+				/>
+			</main>
+		)
 	}
 
 	if (isPending) {
