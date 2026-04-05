@@ -9,8 +9,8 @@ interface SessionProviderProps {
 	}
 }
 
-const SessionContext = createContext<SessionProviderProps['data']>(
-	{} as SessionProviderProps['data']
+const SessionContext = createContext<SessionProviderProps['data'] | undefined>(
+	undefined
 )
 
 export const SessionProvider = ({
