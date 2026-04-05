@@ -1,10 +1,11 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
 import { SessionProvider } from '@/providers/session-provider'
-import { DEFAULT_LOGIN_REDIRECT } from '@/routes'
+import { DEFAULT_UNAUTHENTICATED_REDIRECT } from '@/routes'
 
 export default function AppLayout({
 	children
@@ -31,6 +32,12 @@ export default function AppLayout({
 		retry: 3
 	})
 
+	useEffect(() => {
+		if (!isPending && !session) {
+			router.replace(DEFAULT_UNAUTHENTICATED_REDIRECT)
+		}
+	}, [isPending, session, router])
+
 	if (isPending) {
 		return <p>Loading...</p>
 	}
@@ -39,7 +46,9 @@ export default function AppLayout({
 		return <p>Error: {error.message}</p>
 	}
 
-	if (!session) return router.push(DEFAULT_LOGIN_REDIRECT)
+	if (!session) {
+		return null
+	}
 
 	return (
 		<main>
