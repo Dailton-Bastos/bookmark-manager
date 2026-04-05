@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { LoadingBarContainer } from 'react-top-loading-bar'
 import { Check, LoaderCircle, X } from 'ui/components/icons'
 import { Toaster } from 'ui/components/shadcn/ui/sonner'
 
@@ -14,7 +15,15 @@ export const AppProvider = ({
 }>) => {
 	return (
 		<QueryClientProvider client={queryClient}>
-			{children}
+			<LoadingBarContainer
+				props={{
+					shadow: false,
+					color: '#004746',
+					loaderSpeed: 600
+				}}
+			>
+				{children}
+			</LoadingBarContainer>
 			<Toaster
 				position="top-right"
 				toastOptions={{
