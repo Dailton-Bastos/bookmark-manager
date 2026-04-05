@@ -10,3 +10,9 @@ export const authRoutes: string[] = ['/login', '/signup']
  * @type {string}
  */
 export const DEFAULT_LOGIN_REDIRECT: string = '/'
+
+/**
+ * The default redirect path for unauthenticated users
+ * @type {string}
+ */
+export const DEFAULT_UNAUTHENTICATED_REDIRECT: string = '/login'

@@ -18,9 +18,10 @@ import { CardWrapper } from './card-wrapper'
 
 interface LoginFormProps {
 	onSubmit: (data: LoginFormData) => Promise<void>
+	isPending: boolean
 }
 
-export const LoginForm = ({ onSubmit }: LoginFormProps) => {
+export const LoginForm = ({ onSubmit, isPending }: LoginFormProps) => {
 	const form = useForm<LoginFormData>({
 		resolver: zodResolver(loginSchema),
 		defaultValues: {
@@ -91,6 +92,7 @@ export const LoginForm = ({ onSubmit }: LoginFormProps) => {
 						<Button
 							type="submit"
 							className="w-full h-11.5 rounded-lg hover:bg-chart-3 cursor-pointer font-semibold"
+							disabled={isPending}
 						>
 							Log in
 						</Button>
