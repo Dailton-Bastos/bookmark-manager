@@ -56,6 +56,15 @@ export default function AppLayout({
 		return <p>Error: {error.message}</p>
 	}
 
+	if (isPending) {
+		return (
+			<main>
+				<p role="status" aria-live="polite" className="sr-only">
+					Loading session...
+				</p>
+			</main>
+		)
+	}
 	if (!session) return null
 
 	return (
