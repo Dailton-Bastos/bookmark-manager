@@ -3,24 +3,19 @@
 import type { LoginFormData } from '@repo/schemas'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { use } from 'react'
 import { toast } from 'sonner'
 import { LoginForm } from '@/components/auth/login-form'
 import { authClient } from '@/lib/auth-client'
 import { getSafeCallbackUrl } from '@/utils/get-safe-callback-url'
 
-export const Login = ({
-	searchParams
-}: {
-	searchParams: Promise<{ callbackUrl?: string }>
-}) => {
-	const params = use(searchParams)
+interface LoginProps {
+	callbackUrl?: string
+}
 
+export const Login = ({ callbackUrl }: LoginProps) => {
 	const queryClient = useQueryClient()
 
 	const router = useRouter()
-
-	const callbackUrl = params.callbackUrl
 
 	const { mutateAsync, isPending } = useMutation({
 		mutationFn: async (formData: LoginFormData) => {
