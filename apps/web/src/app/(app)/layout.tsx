@@ -42,6 +42,8 @@ export default function AppLayout({
 		}
 
 		complete()
+
+		return () => complete()
 	}, [isPending, start, complete])
 
 	useEffect(() => {
