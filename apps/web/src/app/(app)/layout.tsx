@@ -4,6 +4,10 @@ import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { useLoadingBar } from 'react-top-loading-bar'
+import { AlertError } from 'ui/components/alert-error'
+import { SidebarInset, SidebarProvider } from 'ui/components/shadcn/ui/sidebar'
+import { AppHeader } from '@/components/app/app-header'
+import { AppSidebar } from '@/components/app/app-sidebar'
 import { authClient } from '@/lib/auth-client'
 import { SessionProvider } from '@/providers/session-provider'
 import { DEFAULT_UNAUTHENTICATED_REDIRECT } from '@/routes'
@@ -53,7 +57,16 @@ export default function AppLayout({
 	}, [isPending, session, router])
 
 	if (error) {
-		return <p>Error: {error.message}</p>
+		return (
+			<main className="flex items-center justify-end w-full p-4">
+				<AlertError
+					title="Oops! Something went wrong"
+					description="There was a problem processing your request. Please try again."
+					showDismissButton={false}
+					onRetry={() => router.refresh()}
+				/>
+			</main>
+		)
 	}
 
 	if (isPending) {
@@ -68,8 +81,22 @@ export default function AppLayout({
 	if (!session) return null
 
 	return (
-		<main>
-			<SessionProvider data={session}>{children}</SessionProvider>
-		</main>
+		<div className="[--header-height:calc(--spacing(14))]">
+			<SessionProvider data={session}>
+				<SidebarProvider
+					style={
+						{
+							'--sidebar-width': '18.5rem'
+						} as React.CSSProperties
+					}
+				>
+					<AppSidebar />
+					<SidebarInset>
+						<AppHeader />
+						{children}
+					</SidebarInset>
+				</SidebarProvider>
+			</SessionProvider>
+		</div>
 	)
 }

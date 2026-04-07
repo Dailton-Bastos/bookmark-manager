@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { LoadingBarContainer } from 'react-top-loading-bar'
 import { Check, LoaderCircle, X } from 'ui/components/icons'
 import { Toaster } from 'ui/components/shadcn/ui/sonner'
+import { TooltipProvider } from 'ui/components/shadcn/ui/tooltip'
 
 const queryClient = new QueryClient()
 
@@ -22,7 +23,7 @@ export const AppProvider = ({
 					loaderSpeed: 600
 				}}
 			>
-				{children}
+				<TooltipProvider>{children}</TooltipProvider>
 			</LoadingBarContainer>
 			<Toaster
 				position="top-right"
