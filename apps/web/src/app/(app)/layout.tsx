@@ -81,17 +81,6 @@ export default function AppLayout({
 	if (!session) return null
 
 	return (
-		// <div className="[--header-height:calc(--spacing(14))]">
-		// 	<SessionProvider data={session}>
-		// 		<SidebarProvider className="flex flex-col">
-		// 			<AppHeader />
-		// 			<div className="flex flex-1">
-		// 				<div>AppSidebar</div>
-		// 				<SidebarInset>{children}</SidebarInset>
-		// 			</div>
-		// 		</SidebarProvider>
-		// 	</SessionProvider>
-		// </div>
 		<div className="[--header-height:calc(--spacing(14))]">
 			<SessionProvider data={session}>
 				<SidebarProvider
