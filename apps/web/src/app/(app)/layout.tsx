@@ -60,7 +60,7 @@ export default function AppLayout({
 		return (
 			<main className="flex items-center justify-end w-full p-4">
 				<AlertError
-					title="Ops! Something went wrong"
+					title="Oops! Something went wrong"
 					description="There was a problem processing your request. Please try again."
 					showDismissButton={false}
 					onRetry={() => router.refresh()}
@@ -86,8 +86,7 @@ export default function AppLayout({
 				<SidebarProvider
 					style={
 						{
-							'--sidebar-width': '18.5rem',
-							'--sidebar-width-mobile': '18rem'
+							'--sidebar-width': '18.5rem'
 						} as React.CSSProperties
 					}
 				>
