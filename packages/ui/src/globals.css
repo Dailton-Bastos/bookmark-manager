@@ -22,14 +22,14 @@
 	--destructive: oklch(0.5314 0.2145 29.3752);
 	--destructive-foreground: oklch(1 0 0);
 	--border: oklch(0.9244 0.0131 185.0775);
-	--input: oklch(0.9488 0.0086 188.1083);
+	--input: oklch(0.657 0.013 183.8788);
 	--ring: oklch(0.3597 0.0614 191.5495);
 	--chart-1: oklch(0.3597 0.0614 191.5495);
 	--chart-2: oklch(0.657 0.013 183.8788);
 	--chart-3: oklch(0.3223 0.0547 192.9229);
 	--chart-4: oklch(0.8422 0.0168 182.63);
 	--chart-5: oklch(0.9244 0.0131 185.0775);
-	--sidebar: oklch(0.9488 0.0086 188.1083);
+	--sidebar: oklch(1 0 0);
 	--sidebar-foreground: oklch(0.1804 0.0232 185.1825);
 	--sidebar-primary: oklch(0.3597 0.0614 191.5495);
 	--sidebar-primary-foreground: oklch(1 0 0);

@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { useLoadingBar } from 'react-top-loading-bar'
 import { AlertError } from 'ui/components/alert-error'
+import { SidebarInset, SidebarProvider } from 'ui/components/shadcn/ui/sidebar'
+import { AppHeader } from '@/components/app/app-header'
+import { AppSidebar } from '@/components/app/app-sidebar'
 import { authClient } from '@/lib/auth-client'
 import { SessionProvider } from '@/providers/session-provider'
 import { DEFAULT_UNAUTHENTICATED_REDIRECT } from '@/routes'
@@ -78,8 +81,34 @@ export default function AppLayout({
 	if (!session) return null
 
 	return (
-		<main>
-			<SessionProvider data={session}>{children}</SessionProvider>
-		</main>
+		// <div className="[--header-height:calc(--spacing(14))]">
+		// 	<SessionProvider data={session}>
+		// 		<SidebarProvider className="flex flex-col">
+		// 			<AppHeader />
+		// 			<div className="flex flex-1">
+		// 				<div>AppSidebar</div>
+		// 				<SidebarInset>{children}</SidebarInset>
+		// 			</div>
+		// 		</SidebarProvider>
+		// 	</SessionProvider>
+		// </div>
+		<div className="[--header-height:calc(--spacing(14))]">
+			<SessionProvider data={session}>
+				<SidebarProvider
+					style={
+						{
+							'--sidebar-width': '18.5rem',
+							'--sidebar-width-mobile': '18rem'
+						} as React.CSSProperties
+					}
+				>
+					<AppSidebar />
+					<SidebarInset>
+						<AppHeader />
+						{children}
+					</SidebarInset>
+				</SidebarProvider>
+			</SessionProvider>
+		</div>
 	)
 }
