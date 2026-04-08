@@ -9,7 +9,7 @@ export const AppHeader = () => {
 	const { toggleSidebar } = useSidebar()
 
 	return (
-		<header className="sticky top-0 z-50 flex w-full items-center border-b bg-primary-foreground py-4 px-8">
+		<header className="sticky top-0 z-50 flex w-full items-center border-b bg-header py-4 px-8">
 			<div className="flex flex-1 items-center gap-2">
 				<Button
 					className="h-8 w-8 lg:hidden"

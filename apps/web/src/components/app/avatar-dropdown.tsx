@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { useTheme } from 'next-themes'
 import { LogOutIcon, MoonIcon, PaletteIcon, SunIcon } from 'ui/components/icons'
 import { Button } from 'ui/components/shadcn/ui/button'
 import {
@@ -15,6 +16,7 @@ import { UserAvatar } from '../shared/user-avatar'
 
 export const AvatarDropdown = () => {
 	const { user, signOut } = useSession()
+	const { theme, setTheme } = useTheme()
 
 	const { mutateAsync: signOutAsync, isPending: isSigningOut } = signOut
 
@@ -67,13 +69,14 @@ export const AvatarDropdown = () => {
 								Theme
 							</div>
 
-							<Tabs defaultValue="light" className="ml-auto">
+							<Tabs defaultValue={theme} className="ml-auto">
 								<TabsList>
 									<TabsTrigger
 										value="light"
 										aria-label='Theme "light"'
 										title="Light theme"
 										className="text-foreground cursor-pointer data-[state=active]:bg-card"
+										onClick={() => setTheme('light')}
 									>
 										<SunIcon className="w-4 h-4" />
 									</TabsTrigger>
@@ -83,6 +86,7 @@ export const AvatarDropdown = () => {
 										aria-label='Theme "dark"'
 										title="Dark theme"
 										className="text-foreground cursor-pointer data-[state=active]:bg-card"
+										onClick={() => setTheme('dark')}
 									>
 										<MoonIcon className="w-4 h-4" />
 									</TabsTrigger>
