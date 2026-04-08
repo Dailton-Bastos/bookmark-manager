@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { useTheme } from 'next-themes'
 import { LogOutIcon, MoonIcon, PaletteIcon, SunIcon } from 'ui/components/icons'
 import { Button } from 'ui/components/shadcn/ui/button'
 import {
@@ -14,7 +15,10 @@ import { useSession } from '@/providers/session-provider'
 import { UserAvatar } from '../shared/user-avatar'
 
 export const AvatarDropdown = () => {
-	const { user } = useSession()
+	const { user, signOut } = useSession()
+	const { setTheme, resolvedTheme } = useTheme()
+
+	const { mutateAsync: signOutAsync, isPending: isSigningOut } = signOut
 
 	return (
 		<DropdownMenu>
@@ -31,7 +35,7 @@ export const AvatarDropdown = () => {
 			<DropdownMenuContent
 				align="end"
 				sideOffset={12}
-				className="max-w-62 shadow-lg rounded-lg py-1 border border-secondary"
+				className="max-w-62 min-w-62 shadow-lg rounded-lg py-1 border border-secondary"
 			>
 				<DropdownMenuGroup className="font-semibold text-muted-foreground text-sm">
 					<DropdownMenuItem
@@ -65,7 +69,7 @@ export const AvatarDropdown = () => {
 								Theme
 							</div>
 
-							<Tabs defaultValue="light" className="ml-auto">
+							<Tabs value={resolvedTheme} onValueChange={setTheme} className="ml-auto">
 								<TabsList>
 									<TabsTrigger
 										value="light"
@@ -92,7 +96,11 @@ export const AvatarDropdown = () => {
 					<DropdownMenuSeparator className="bg-input/20" />
 
 					<div className="px-2">
-						<DropdownMenuItem className="cursor-pointer focus:bg-sidebar-accent px-2 py-3">
+						<DropdownMenuItem
+							className="cursor-pointer focus:bg-sidebar-accent px-2 py-3"
+							onSelect={() => signOutAsync()}
+							disabled={isSigningOut}
+						>
 							<LogOutIcon className="w-4 h-4" />
 							Logout
 						</DropdownMenuItem>

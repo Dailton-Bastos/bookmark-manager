@@ -34,7 +34,7 @@ export const NavTags = ({ tags }: NavTagsProps) => {
 										<Checkbox
 											id={`tag-${tag.name}`}
 											name={`tag-${tag.name}`}
-											className="cursor-pointer rounded-sm focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
+											className="border-checkbox cursor-pointer rounded-sm focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
 										/>
 										<FieldLabel
 											htmlFor={`tag-${tag.name}`}
