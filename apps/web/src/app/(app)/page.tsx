@@ -1,11 +1,16 @@
-'use client'
-
-import { useSession } from '@/providers/session-provider'
+import { SortByDropdown } from '@/components/app/sort-by-dropdown'
 
 const Home = () => {
-	const { user } = useSession()
-
-	return <h1>Dashboard - {user?.name}</h1>
+	return (
+		<div className="w-full p-8">
+			<div className="flex items-center justify-between">
+				<h1 className="text-2xl font-bold text-foreground">All bookmarks</h1>
+				<div className="ml-auto flex items-center gap-4">
+					<SortByDropdown />
+				</div>
+			</div>
+		</div>
+	)
 }
 
 export default Home
