@@ -6,7 +6,9 @@ import {
 	EllipsisVertical,
 	ExternalLink,
 	PinIcon,
-	SquarePen
+	RotateCcw,
+	SquarePen,
+	Trash2
 } from 'ui/components/icons'
 import { Button } from 'ui/components/shadcn/ui/button'
 import {
@@ -17,7 +19,15 @@ import {
 	DropdownMenuTrigger
 } from 'ui/components/shadcn/ui/dropdown-menu'
 
-export const BookmarkDropdown = () => {
+interface BookmarkDropdownProps {
+	pinned: boolean
+	isArchived: boolean
+}
+
+export const BookmarkDropdown = ({
+	pinned,
+	isArchived
+}: BookmarkDropdownProps) => {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -56,20 +66,43 @@ export const BookmarkDropdown = () => {
 						Copy URL
 					</DropdownMenuItem>
 
-					<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
-						<PinIcon className="text-muted-foreground" />
-						Pin
-					</DropdownMenuItem>
+					{!isArchived && (
+						<>
+							{pinned ? (
+								<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
+									<PinIcon className="text-muted-foreground rotate-45" />
+									Unpin
+								</DropdownMenuItem>
+							) : (
+								<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
+									<PinIcon className="text-muted-foreground" />
+									Pin
+								</DropdownMenuItem>
+							)}
+							<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
+								<SquarePen className="text-muted-foreground" />
+								Edit
+							</DropdownMenuItem>
+							<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
+								<Archive className="text-muted-foreground" />
+								Archive
+							</DropdownMenuItem>
+						</>
+					)}
 
-					<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
-						<SquarePen className="text-muted-foreground" />
-						Edit
-					</DropdownMenuItem>
+					{isArchived && (
+						<>
+							<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
+								<RotateCcw className="text-muted-foreground" />
+								Unarchive
+							</DropdownMenuItem>
 
-					<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
-						<Archive className="text-muted-foreground" />
-						Archive
-					</DropdownMenuItem>
+							<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
+								<Trash2 className="text-muted-foreground" />
+								Delete Permanently
+							</DropdownMenuItem>
+						</>
+					)}
 				</DropdownMenuGroup>
 			</DropdownMenuContent>
 		</DropdownMenu>
