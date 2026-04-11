@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+import { toast } from 'sonner'
 import {
 	Archive,
 	Copy,
@@ -8,7 +10,8 @@ import {
 	PinIcon,
 	RotateCcw,
 	SquarePen,
-	Trash2
+	Trash2,
+	TriangleAlert
 } from 'ui/components/icons'
 import { Button } from 'ui/components/shadcn/ui/button'
 import {
@@ -18,16 +21,39 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from 'ui/components/shadcn/ui/dropdown-menu'
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 
 interface BookmarkDropdownProps {
 	pinned: boolean
 	isArchived: boolean
+	url: string
 }
 
 export const BookmarkDropdown = ({
 	pinned,
-	isArchived
+	isArchived,
+	url
 }: BookmarkDropdownProps) => {
+	const [copyToClipboard, copyResult] = useCopyToClipboard()
+
+	useEffect(() => {
+		if (copyResult) {
+			const { state, message } = copyResult
+
+			if (state === 'success') {
+				toast.success('Link copied to clipboard!', {
+					icon: <Copy className="size-4 stroke-foreground" />
+				})
+			}
+
+			if (state === 'error') {
+				toast.error(message, {
+					icon: <TriangleAlert className="size-4 stroke-foreground" />
+				})
+			}
+		}
+	}, [copyResult])
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -51,7 +77,7 @@ export const BookmarkDropdown = ({
 						onSelect={(e) => e.preventDefault()}
 					>
 						<a
-							href="http://www.example.com"
+							href={url}
 							target="_blank"
 							rel="noopener noreferrer"
 							className="flex items-center gap-2"
@@ -61,7 +87,10 @@ export const BookmarkDropdown = ({
 						</a>
 					</DropdownMenuItem>
 
-					<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
+					<DropdownMenuItem
+						className="focus:bg-sidebar-accent p-2 mb-1"
+						onSelect={() => copyToClipboard({ text: url })}
+					>
 						<Copy className="text-muted-foreground" />
 						Copy URL
 					</DropdownMenuItem>

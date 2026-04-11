@@ -1,5 +1,3 @@
-'use client'
-
 import { Bookmark } from '@/components/shared/bookmark'
 
 interface Bookmark {

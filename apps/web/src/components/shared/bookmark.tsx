@@ -1,5 +1,3 @@
-'use client'
-
 import Image from 'next/image'
 import { Calendar, Clock, Eye, Globe, Pin } from 'ui/components/icons'
 import { Badge } from 'ui/components/shadcn/ui/badge'
@@ -71,7 +69,7 @@ export const Bookmark = ({
 				</div>
 
 				<CardAction className="mt-1 ml-3">
-					<BookmarkDropdown pinned={pinned} isArchived={isArchived} />
+					<BookmarkDropdown pinned={pinned} isArchived={isArchived} url={url} />
 				</CardAction>
 			</CardHeader>
 
