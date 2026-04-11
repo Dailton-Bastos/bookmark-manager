@@ -9,7 +9,8 @@ async function bootstrap() {
 	const logger = new Logger('Bootstrap')
 
 	const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-		bodyParser: false
+		bodyParser: false,
+		logger: ['log', 'error']
 	})
 	app.enableShutdownHooks()
 
