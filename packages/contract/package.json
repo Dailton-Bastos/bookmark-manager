@@ -1,0 +1,25 @@
+{
+	"name": "@repo/contract",
+	"version": "1.0.0",
+	"description": "Contract-first development for the bookmark manager application",
+	"keywords": [
+		"contract",
+		"oRPC",
+		"openRPC"
+	],
+	"license": "MIT",
+	"packageManager": "pnpm@10.30.3",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"check-types": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@orpc/contract": "^1.13.14",
+		"@repo/schemas": "workspace:*"
+	},
+	"devDependencies": {
+		"@repo/typescript-config": "workspace:*"
+	}
+}
