@@ -52,7 +52,7 @@ const logger = new Logger('oRPC')
 			inject: [DATABASE_CONNECTION, EnvService]
 		}),
 		ORPCModule.forRoot({
-			context: () => ({ request: requestContextStorage.getStore()! }), // per-request context via AsyncLocalStorage
+			context: () => ({ request: requestContextStorage.getStore() as Request }), // per-request context via AsyncLocalStorage
 			eventIteratorKeepAliveInterval: 5000, // Keep-alive interval for event streams for 5 seconds.
 			customJsonSerializers: [],
 			plugins: [
@@ -70,6 +70,7 @@ const logger = new Logger('oRPC')
 })
 export class AppModule implements NestModule {
 	configure(consumer: MiddlewareConsumer) {
+		// Inject per-request context into the oRPC handlers via AsyncLocalStorage
 		consumer.apply(RequestContextMiddleware).forRoutes('*')
 	}
 }
