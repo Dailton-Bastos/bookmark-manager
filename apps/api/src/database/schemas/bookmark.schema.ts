@@ -1,3 +1,4 @@
+import { relations } from 'drizzle-orm'
 import {
 	boolean,
 	index,
@@ -7,7 +8,6 @@ import {
 	text,
 	timestamp
 } from 'drizzle-orm/pg-core'
-import { relations } from 'drizzle-orm/relations'
 import { timestamps } from '../helpers/columns.helpers'
 import { users } from './auth.schema'
 

@@ -28,11 +28,11 @@
 	},
 	"dependencies": {
 		"@orpc/contract": "^1.13.14",
-		"@repo/biome-config": "workspace:*",
 		"@repo/schemas": "workspace:*",
 		"zod": "catalog:"
 	},
 	"devDependencies": {
+		"@repo/biome-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"typescript": "catalog:"
 	}

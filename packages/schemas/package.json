@@ -31,6 +31,7 @@
 		"zod": "catalog:"
 	},
 	"devDependencies": {
+		"@jest/globals": "^30.3.0",
 		"@repo/biome-config": "workspace:*",
 		"@repo/testing-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",

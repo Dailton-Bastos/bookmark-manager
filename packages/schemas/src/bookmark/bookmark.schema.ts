@@ -1,18 +1,18 @@
 import z from 'zod'
 
-export const BookmarkSchema = z.object({
+export const bookmarkSchema = z.object({
 	id: z.number(),
 	title: z.string(),
-	description: z.string().optional(),
+	description: z.string().nullable(),
 	url: z.url(),
 	pinned: z.boolean(),
 	isArchived: z.boolean(),
 	visitCount: z.number(),
 	createdAt: z.string(),
-	lastVisited: z.string().optional()
+	lastVisited: z.iso.datetime().nullable()
 })
 
-export const CreateBookmarkSchema = z.object({
+export const createBookmarkSchema = z.object({
 	title: z.string().min(1, 'Title is required'),
 	description: z.string().optional(),
 	url: z.url({
@@ -21,5 +21,5 @@ export const CreateBookmarkSchema = z.object({
 	})
 })
 
-export type Bookmark = z.infer<typeof BookmarkSchema>
-export type CreateBookmark = z.infer<typeof CreateBookmarkSchema>
+export type Bookmark = z.infer<typeof bookmarkSchema>
+export type CreateBookmark = z.infer<typeof createBookmarkSchema>

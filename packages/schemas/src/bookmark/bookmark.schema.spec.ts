@@ -1,3 +1,4 @@
+import { describe, expect, it } from '@jest/globals'
 import { ZodError } from 'zod'
 import { BookmarkSchema, CreateBookmarkSchema } from './bookmark.schema'
 
@@ -16,7 +17,7 @@ describe('BookmarkSchema', () => {
 			isArchived: false,
 			visitCount: 0,
 			createdAt: new Date().toISOString(),
-			lastVisited: ''
+			lastVisited: null
 		}
 
 		const result = BookmarkSchema.safeParse(validBookmark)

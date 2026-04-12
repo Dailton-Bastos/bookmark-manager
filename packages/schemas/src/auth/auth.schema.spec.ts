@@ -1,3 +1,4 @@
+import { describe, expect, it } from '@jest/globals'
 import { ZodError } from 'zod'
 import { loginSchema, signupSchema } from './auth.schema'
 
