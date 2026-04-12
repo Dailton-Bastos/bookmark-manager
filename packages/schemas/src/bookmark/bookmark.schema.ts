@@ -8,8 +8,8 @@ export const bookmarkSchema = z.object({
 	pinned: z.boolean(),
 	isArchived: z.boolean(),
 	visitCount: z.number(),
-	createdAt: z.string(),
-	lastVisited: z.iso.datetime().nullable()
+	createdAt: z.date(),
+	lastVisited: z.date().nullable()
 })
 
 export const createBookmarkSchema = z.object({
