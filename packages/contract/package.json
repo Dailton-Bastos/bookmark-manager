@@ -9,17 +9,25 @@
 	],
 	"license": "MIT",
 	"packageManager": "pnpm@10.30.3",
+	"main": "dist/index.js",
 	"exports": {
-		".": "./src/index.ts"
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
 	},
 	"scripts": {
+		"build": "tsc -b",
+		"dev": "tsc -b --watch",
 		"check-types": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@orpc/contract": "^1.13.14",
-		"@repo/schemas": "workspace:*"
+		"@repo/schemas": "workspace:*",
+		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"@repo/typescript-config": "workspace:*"
+		"@repo/typescript-config": "workspace:*",
+		"typescript": "catalog:"
 	}
 }
