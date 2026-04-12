@@ -1,11 +1,11 @@
 {
-	"name": "@repo/schemas",
+	"name": "@repo/contract",
 	"version": "1.0.0",
-	"description": "Schemas validation for the bookmark manager application",
+	"description": "Contract-first development for the bookmark manager application",
 	"keywords": [
-		"schemas",
-		"validation",
-		"zod"
+		"contract",
+		"oRPC",
+		"openRPC"
 	],
 	"license": "MIT",
 	"packageManager": "pnpm@10.30.3",
@@ -19,8 +19,7 @@
 	"scripts": {
 		"build": "tsc -b",
 		"dev": "tsc -b --watch",
-		"test": "jest",
-		"test:watch": "jest --watch",
+		"check-types": "tsc --noEmit",
 		"lint": "biome lint .",
 		"check": "biome check .",
 		"lint:fix": "biome lint . --fix",
@@ -28,15 +27,13 @@
 		"check:fix": "biome check . --fix"
 	},
 	"dependencies": {
+		"@orpc/contract": "^1.13.14",
+		"@repo/schemas": "workspace:*",
 		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"@jest/globals": "^30.3.0",
 		"@repo/biome-config": "workspace:*",
-		"@repo/testing-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@types/jest": "catalog:",
-		"jest": "catalog:",
 		"typescript": "catalog:"
 	}
 }

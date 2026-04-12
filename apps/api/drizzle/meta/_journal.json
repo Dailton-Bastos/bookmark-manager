@@ -15,6 +15,13 @@
 			"when": 1775225510143,
 			"tag": "20260403141150_add_default_value_updateAt",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1776006062245,
+			"tag": "20260412150102_create_bookmarks_table",
+			"breakpoints": true
 		}
 	]
 }
