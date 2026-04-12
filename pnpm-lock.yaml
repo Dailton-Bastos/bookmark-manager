@@ -325,6 +325,9 @@ importers:
       '@orpc/contract':
         specifier: ^1.13.14
         version: 1.13.14(@opentelemetry/api@1.9.1)
+      '@repo/biome-config':
+        specifier: workspace:*
+        version: link:../biome-config
       '@repo/schemas':
         specifier: workspace:*
         version: link:../schemas

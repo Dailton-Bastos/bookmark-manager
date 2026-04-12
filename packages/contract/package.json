@@ -19,10 +19,16 @@
 	"scripts": {
 		"build": "tsc -b",
 		"dev": "tsc -b --watch",
-		"check-types": "tsc --noEmit"
+		"check-types": "tsc --noEmit",
+		"lint": "biome lint .",
+		"check": "biome check .",
+		"lint:fix": "biome lint . --fix",
+		"format:fix": "biome format . --write",
+		"check:fix": "biome check . --fix"
 	},
 	"dependencies": {
 		"@orpc/contract": "^1.13.14",
+		"@repo/biome-config": "workspace:*",
 		"@repo/schemas": "workspace:*",
 		"zod": "catalog:"
 	},
