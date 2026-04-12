@@ -9,12 +9,13 @@ export const bookmarkSchema = z.object({
 	isArchived: z.boolean(),
 	visitCount: z.number(),
 	createdAt: z.date(),
+	updatedAt: z.date(),
 	lastVisited: z.date().nullable()
 })
 
 export const createBookmarkSchema = z.object({
 	title: z.string().min(1, 'Title is required'),
-	description: z.string().optional(),
+	description: z.string().nullable(),
 	url: z.url({
 		protocol: /^https?$/,
 		message: 'URL must be a valid HTTP or HTTPS URL'
