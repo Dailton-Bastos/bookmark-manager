@@ -32,6 +32,10 @@ const envSchema = z.object({
 	UI_URL: z.url({
 		protocol: /^https?$/,
 		message: 'UI_URL must be a valid URL'
+	}),
+	API_URL: z.url({
+		protocol: /^https?$/,
+		message: 'API_URL must be a valid URL'
 	})
 })
 
