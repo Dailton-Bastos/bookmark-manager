@@ -30,6 +30,7 @@ ignoredBuiltDependencies:
 
 onlyBuiltDependencies:
   - '@nestjs/core'
+  - '@scarf/scarf'
   - '@swc/core'
   - esbuild
   - sharp
