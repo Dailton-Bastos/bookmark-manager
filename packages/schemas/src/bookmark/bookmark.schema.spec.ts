@@ -1,10 +1,10 @@
 import { describe, expect, it } from '@jest/globals'
 import { ZodError } from 'zod'
-import { BookmarkSchema, CreateBookmarkSchema } from './bookmark.schema'
+import { bookmarkSchema, createBookmarkSchema } from './bookmark.schema'
 
 describe('BookmarkSchema', () => {
 	it('should be defined', () => {
-		expect(BookmarkSchema).toBeDefined()
+		expect(bookmarkSchema).toBeDefined()
 	})
 
 	it('should validate a valid bookmark object', () => {
@@ -20,7 +20,7 @@ describe('BookmarkSchema', () => {
 			lastVisited: null
 		}
 
-		const result = BookmarkSchema.safeParse(validBookmark)
+		const result = bookmarkSchema.safeParse(validBookmark)
 
 		expect(result.success).toBe(true)
 
@@ -42,7 +42,7 @@ describe('BookmarkSchema', () => {
 			createdAt: 'invalid-date'
 		}
 
-		const result = BookmarkSchema.safeParse(invalidBookmark)
+		const result = bookmarkSchema.safeParse(invalidBookmark)
 
 		expect(result.success).toBe(false)
 
@@ -55,7 +55,7 @@ describe('BookmarkSchema', () => {
 
 describe('CreateBookmarkSchema', () => {
 	it('should be defined', () => {
-		expect(CreateBookmarkSchema).toBeDefined()
+		expect(createBookmarkSchema).toBeDefined()
 	})
 
 	it('should validate a valid create bookmark object', () => {
@@ -65,7 +65,7 @@ describe('CreateBookmarkSchema', () => {
 			url: 'https://example.com'
 		}
 
-		const result = CreateBookmarkSchema.safeParse(validCreateBookmark)
+		const result = createBookmarkSchema.safeParse(validCreateBookmark)
 
 		expect(result.success).toBe(true)
 
@@ -81,7 +81,7 @@ describe('CreateBookmarkSchema', () => {
 			url: 'invalid-url'
 		}
 
-		const result = CreateBookmarkSchema.safeParse(invalidCreateBookmark)
+		const result = createBookmarkSchema.safeParse(invalidCreateBookmark)
 
 		expect(result.success).toBe(false)
 
