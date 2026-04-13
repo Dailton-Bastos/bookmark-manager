@@ -17,6 +17,7 @@ describe('BookmarkSchema', () => {
 			isArchived: false,
 			visitCount: 0,
 			createdAt: new Date().toISOString(),
+			updatedAt: '2020-01-01T06:15:00.123456Z',
 			lastVisited: null
 		}
 
@@ -39,7 +40,8 @@ describe('BookmarkSchema', () => {
 			pinned: 'not-a-boolean',
 			isArchived: 'not-a-boolean',
 			visitCount: 'not-a-number',
-			createdAt: 'invalid-date'
+			createdAt: 'invalid-date',
+			lastVisited: '2020-01-01T06:15:00+02:00'
 		}
 
 		const result = bookmarkSchema.safeParse(invalidBookmark)
