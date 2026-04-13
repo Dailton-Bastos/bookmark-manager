@@ -7,6 +7,7 @@ import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { Request } from 'express'
+import { BookmarksModule } from './bookmarks/bookmarks.module'
 import { validate } from './config/env.config'
 import { RequestContextMiddleware } from './core/request-context.middleware'
 import { DatabaseModule } from './database/database.module'
@@ -63,7 +64,8 @@ const logger = new Logger('oRPC')
 				})
 			],
 			interceptors: [onError((error) => logger.error(error.message))]
-		})
+		}),
+		BookmarksModule
 	],
 	controllers: [],
 	providers: []

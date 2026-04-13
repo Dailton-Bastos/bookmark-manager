@@ -41,6 +41,7 @@
 		"@orpc/server": "^1.13.14",
 		"@orpc/zod": "^1.13.14",
 		"@repo/contract": "workspace:*",
+		"@repo/schemas": "workspace:*",
 		"@thallesp/nestjs-better-auth": "^2.5.3",
 		"better-auth": "catalog:",
 		"drizzle-orm": "^0.45.2",

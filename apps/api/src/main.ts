@@ -20,6 +20,8 @@ async function bootstrap() {
 
 	appConfig(app)
 
+	const configService = app.get(EnvService)
+
 	const generator = new OpenAPIGenerator({
 		schemaConverters: [new ZodToJsonSchemaConverter()]
 	})
@@ -28,15 +30,14 @@ async function bootstrap() {
 		info: {
 			title: 'Bookmark Manager API',
 			version: '1.0.0'
-		}
+		},
+		servers: [{ url: `${configService.get('API_URL')}/api` }]
 	})
 
 	app
 		.getHttpAdapter()
 		.getInstance()
 		.use('/api-docs', swaggerUi.serve, swaggerUi.setup(spec))
-
-	const configService = app.get(EnvService)
 
 	const PORT = configService.get('PORT')
 	const HOST = configService.get('HOST')
