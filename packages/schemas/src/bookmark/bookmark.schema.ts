@@ -8,9 +8,10 @@ export const bookmarkSchema = z.object({
 	pinned: z.boolean(),
 	isArchived: z.boolean(),
 	visitCount: z.number(),
-	createdAt: z.iso.datetime(),
-	updatedAt: z.iso.datetime(),
-	lastVisited: z.iso.datetime().nullable()
+	createdAt: z.coerce.date(),
+	updatedAt: z.coerce.date(),
+	lastVisited: z.coerce.date().nullable(),
+	ownerId: z.string()
 })
 
 export const createBookmarkSchema = z.object({

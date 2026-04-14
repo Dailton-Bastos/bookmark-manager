@@ -11,7 +11,7 @@ export class BookmarksService {
 		private readonly db: NodePgDatabase<typeof schema>
 	) {}
 
-	async create(createBookmarkInput: CreateBookmark) {
+	async create(createBookmarkInput: CreateBookmark, ownerId: string) {
 		const { title, description, url } = createBookmarkInput
 
 		const [bookmark] = await this.db
@@ -20,7 +20,7 @@ export class BookmarksService {
 				title,
 				description,
 				url,
-				ownerId: 'bhTCrJD1eVBICPD2U8LDALLM3rrYJyBZ' // TODO: Replace with actual user ID from authentication context
+				ownerId
 			})
 			.returning()
 
