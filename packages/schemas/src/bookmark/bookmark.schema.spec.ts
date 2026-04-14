@@ -18,7 +18,8 @@ describe('BookmarkSchema', () => {
 			visitCount: 0,
 			createdAt: new Date().toISOString(),
 			updatedAt: '2020-01-01T06:15:00.123456Z',
-			lastVisited: null
+			lastVisited: null,
+			ownerId: 'user-123'
 		}
 
 		const result = bookmarkSchema.safeParse(validBookmark)
