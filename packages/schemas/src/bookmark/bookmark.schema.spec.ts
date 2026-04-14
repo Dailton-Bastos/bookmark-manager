@@ -16,8 +16,8 @@ describe('BookmarkSchema', () => {
 			pinned: false,
 			isArchived: false,
 			visitCount: 0,
-			createdAt: new Date().toISOString(),
-			updatedAt: '2020-01-01T06:15:00.123456Z',
+			createdAt: new Date('2024-06-01T10:00:00.000Z'),
+			updatedAt: new Date('2020-01-01T06:15:00.123Z'),
 			lastVisited: null,
 			ownerId: 'user-123'
 		}
@@ -30,6 +30,9 @@ describe('BookmarkSchema', () => {
 			expect(result.data.id).toBe(1)
 			expect(result.data.title).toBe('Example Bookmark')
 			expect(result.data.url).toBe('https://example.com')
+			expect(result.data.createdAt).toBeInstanceOf(Date)
+			expect(result.data.updatedAt).toBeInstanceOf(Date)
+			expect(result.data.lastVisited).toBeNull()
 		}
 	})
 
