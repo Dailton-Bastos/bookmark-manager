@@ -42,23 +42,21 @@ describe('BookmarksService', () => {
 		}
 		const ownerId = 'user-123'
 
+		const insert = db.insert as jest.Mock
+		const values = (db as unknown as { values: jest.Mock }).values as jest.Mock
+		const returning = (db as unknown as { returning: jest.Mock })
+			.returning as jest.Mock
+
 		const result = await service.create(createBookmarkInput, ownerId)
 
-		expect(db.insert).toHaveBeenCalledWith(schema.bookmarks)
-		expect(db.insert(schema.bookmarks).values).toHaveBeenCalledWith({
+		expect(insert).toHaveBeenCalledWith(schema.bookmarks)
+		expect(values).toHaveBeenCalledWith({
 			title: createBookmarkInput.title,
 			description: createBookmarkInput.description,
 			url: createBookmarkInput.url,
 			ownerId
 		})
-		expect(
-			db.insert(schema.bookmarks).values({
-				title: createBookmarkInput.title,
-				description: createBookmarkInput.description,
-				url: createBookmarkInput.url,
-				ownerId
-			}).returning
-		).toHaveBeenCalled()
+		expect(returning).toHaveBeenCalled()
 		expect(result).toEqual(mockBookmark)
 	})
 })

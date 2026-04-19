@@ -88,12 +88,12 @@ describe('BookmarksController', () => {
 			resolver({ input: mockCreateBookmarkInput })
 		)
 
-		try {
-			await controller.create(mockUserSession)
-			fail('Expected controller.create to throw')
-		} catch (error) {
-			expect(error).toBeInstanceOf(ORPCError)
-			expect(error).toHaveProperty('message', 'Failed to create bookmark')
-		}
+		await expect(controller.create(mockUserSession)).rejects.toBeInstanceOf(
+			ORPCError
+		)
+		await expect(controller.create(mockUserSession)).rejects.toHaveProperty(
+			'message',
+			'Failed to create bookmark'
+		)
 	})
 })

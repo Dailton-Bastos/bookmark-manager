@@ -9,7 +9,7 @@ export class BookmarksController {
 	constructor(private readonly bookmarksService: BookmarksService) {}
 
 	@Implement(contract.bookmark.create)
-	async create(@Session() session: UserSession) {
+	create(@Session() session: UserSession) {
 		return implement(contract.bookmark.create).handler(async ({ input }) => {
 			const bookmark = await this.bookmarksService.create(
 				input,
