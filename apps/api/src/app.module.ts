@@ -94,7 +94,14 @@ const logger = new Logger('oRPC')
 						})
 					}
 
-					logger.error(error.message, error.stack)
+					if (
+						!(
+							error instanceof ORPCError &&
+							error.cause instanceof ValidationError
+						)
+					) {
+						logger.error(error.message, error.stack)
+					}
 				})
 			]
 		}),
