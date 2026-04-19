@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
+import { Logger, MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { ORPCError, ORPCModule, onError } from '@orpc/nest'
 import { ValidationError } from '@orpc/server'
@@ -27,6 +27,8 @@ declare module '@orpc/nest' {
 		request: Request
 	}
 }
+
+const logger = new Logger('oRPC')
 
 @Module({
 	imports: [
@@ -91,6 +93,8 @@ declare module '@orpc/nest' {
 							cause: error.cause
 						})
 					}
+
+					logger.error(error.message, error.stack)
 				})
 			]
 		}),
