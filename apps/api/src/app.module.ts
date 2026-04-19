@@ -1,12 +1,14 @@
 import { Logger, MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { ORPCError, ORPCModule, onError } from '@orpc/nest'
+import { ValidationError } from '@orpc/server'
 import { experimental_RethrowHandlerPlugin as RethrowHandlerPlugin } from '@orpc/server/plugins'
 import { AuthModule } from '@thallesp/nestjs-better-auth'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { Request } from 'express'
+import z from 'zod'
 import { BookmarksModule } from './bookmarks/bookmarks.module'
 import { validate } from './config/env.config'
 import { RequestContextMiddleware } from './core/request-context.middleware'
@@ -63,7 +65,45 @@ const logger = new Logger('oRPC')
 					filter: (error) => !(error instanceof ORPCError)
 				})
 			],
-			interceptors: [onError((error) => logger.error(error.message))]
+			interceptors: [
+				onError((error) => {
+					if (
+						error instanceof ORPCError &&
+						error.code === 'BAD_REQUEST' &&
+						error.cause instanceof ValidationError
+					) {
+						const zodError = new z.ZodError(
+							error.cause.issues as z.core.$ZodIssue[]
+						)
+
+						throw new ORPCError('INPUT_VALIDATION_FAILED', {
+							status: 422,
+							message: z.prettifyError(zodError),
+							data: z.flattenError(zodError),
+							cause: error.cause
+						})
+					}
+
+					if (
+						error instanceof ORPCError &&
+						error.code === 'INTERNAL_SERVER_ERROR' &&
+						error.cause instanceof ValidationError
+					) {
+						throw new ORPCError('OUTPUT_VALIDATION_FAILED', {
+							cause: error.cause
+						})
+					}
+
+					if (
+						!(
+							error instanceof ORPCError &&
+							error.cause instanceof ValidationError
+						)
+					) {
+						logger.error(error.message, error.stack)
+					}
+				})
+			]
 		}),
 		BookmarksModule
 	],
