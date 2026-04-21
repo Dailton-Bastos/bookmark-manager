@@ -25,6 +25,11 @@
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^5.2.2",
+		"@orpc/client": "catalog:",
+		"@orpc/contract": "catalog:",
+		"@orpc/openapi-client": "catalog:",
+		"@orpc/tanstack-query": "^1.13.14",
+		"@repo/contract": "workspace:*",
 		"@repo/schemas": "workspace:*",
 		"@tanstack/react-query": "catalog:",
 		"better-auth": "catalog:",
@@ -35,7 +40,8 @@
 		"react-hook-form": "^7.72.0",
 		"react-top-loading-bar": "^3.0.2",
 		"sonner": "catalog:",
-		"ui": "workspace:*"
+		"ui": "workspace:*",
+		"zustand": "^5.0.12"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",

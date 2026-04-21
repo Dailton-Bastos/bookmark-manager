@@ -27,7 +27,7 @@
 		"check:fix": "biome check . --fix"
 	},
 	"dependencies": {
-		"@orpc/contract": "^1.13.14",
+		"@orpc/contract": "catalog:",
 		"@repo/schemas": "workspace:*",
 		"zod": "catalog:"
 	},

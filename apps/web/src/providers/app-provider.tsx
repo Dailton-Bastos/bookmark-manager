@@ -6,6 +6,7 @@ import { LoadingBarContainer } from 'react-top-loading-bar'
 import { Check, LoaderCircle, X } from 'ui/components/icons'
 import { Toaster } from 'ui/components/shadcn/ui/sonner'
 import { TooltipProvider } from 'ui/components/shadcn/ui/tooltip'
+import { ModalProvider } from './modal-provider'
 
 const queryClient = new QueryClient()
 
@@ -43,6 +44,7 @@ export const AppProvider = ({
 				}}
 				closeButton
 			/>
+			<ModalProvider />
 			<ReactQueryDevtools initialIsOpen={false} />
 		</QueryClientProvider>
 	)
