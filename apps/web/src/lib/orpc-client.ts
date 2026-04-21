@@ -6,7 +6,13 @@ import { createTanstackQueryUtils } from '@orpc/tanstack-query'
 import { contract } from '@repo/contract'
 
 const link = new OpenAPILink(contract, {
-	url: '/api',
+	url: () => {
+		if (typeof window === 'undefined') {
+			throw new Error('OpenAPILink is not allowed on the server side.')
+		}
+
+		return `${window.location.origin}/api`
+	},
 	fetch: (request, init) => {
 		return globalThis.fetch(request, {
 			...init,
