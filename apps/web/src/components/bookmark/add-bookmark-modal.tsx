@@ -93,7 +93,6 @@ export const AddBookmarkModal = () => {
 							<DialogClose asChild>
 								<Button
 									variant="ghost"
-									onClick={handleClose}
 									disabled={isPending}
 									className="h-11.5 min-w-22.5 rounded-lg border cursor-pointer font-semibold text-base text-foreground hover:bg-secondary"
 								>
