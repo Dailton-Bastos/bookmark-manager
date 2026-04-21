@@ -4,6 +4,9 @@ packages:
 
 catalog:
   '@biomejs/biome': ^2.4.4
+  '@orpc/client': ^1.13.14
+  '@orpc/contract': ^1.13.14
+  '@orpc/openapi-client': ^1.13.14
   '@swc/core': ^1.15.21
   '@swc/jest': ^0.2.39
   '@tailwindcss/postcss': ^4.2.2

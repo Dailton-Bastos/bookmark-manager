@@ -10,6 +10,15 @@ catalogs:
     '@biomejs/biome':
       specifier: ^2.4.4
       version: 2.4.11
+    '@orpc/client':
+      specifier: ^1.13.14
+      version: 1.13.14
+    '@orpc/contract':
+      specifier: ^1.13.14
+      version: 1.13.14
+    '@orpc/openapi-client':
+      specifier: ^1.13.14
+      version: 1.13.14
     '@swc/core':
       specifier: ^1.15.21
       version: 1.15.24
@@ -244,6 +253,21 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.72.1(react@19.2.4))
+      '@orpc/client':
+        specifier: 'catalog:'
+        version: 1.13.14(@opentelemetry/api@1.9.1)
+      '@orpc/contract':
+        specifier: 'catalog:'
+        version: 1.13.14(@opentelemetry/api@1.9.1)
+      '@orpc/openapi-client':
+        specifier: 'catalog:'
+        version: 1.13.14(@opentelemetry/api@1.9.1)
+      '@orpc/tanstack-query':
+        specifier: ^1.13.14
+        version: 1.13.14(@opentelemetry/api@1.9.1)(@orpc/client@1.13.14(@opentelemetry/api@1.9.1))(@tanstack/query-core@5.99.0)
+      '@repo/contract':
+        specifier: workspace:*
+        version: link:../../packages/contract
       '@repo/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
@@ -253,6 +277,9 @@ importers:
       better-auth:
         specifier: 'catalog:'
         version: 1.6.2(@opentelemetry/api@1.9.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(kysely@0.28.16)(pg@8.20.0))(next@16.2.1(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(pg@8.20.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vitest@3.2.4(@types/node@20.19.39)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.32.0)(msw@2.13.2(@types/node@20.19.39)(typescript@5.9.3))(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      fetch:
+        specifier: link:@orpc/openapi-client/fetch
+        version: link:@orpc/openapi-client/fetch
       next:
         specifier: 16.2.1
         version: 16.2.1(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -329,7 +356,7 @@ importers:
   packages/contract:
     dependencies:
       '@orpc/contract':
-        specifier: ^1.13.14
+        specifier: 'catalog:'
         version: 1.13.14(@opentelemetry/api@1.9.1)
       '@repo/schemas':
         specifier: workspace:*
@@ -2233,6 +2260,12 @@ packages:
 
   '@orpc/standard-server@1.13.14':
     resolution: {integrity: sha512-o8PaDERiwREFQpIZO0mQ1PhguchyNzrf1w7m3eK1JB4rPjHu1VJUgqCpy/sV3Id5ji4bX/gKHEC3NZjDX6mEWQ==}
+
+  '@orpc/tanstack-query@1.13.14':
+    resolution: {integrity: sha512-5rq1Z1anVTVBseYeNBi5RJSgWPxpD0MqK7MYej3xnt56jjc6mFmWpUGNz9xy0BXPh3KmA/xDTNuB23kKgJ5JmQ==}
+    peerDependencies:
+      '@orpc/client': 1.13.14
+      '@tanstack/query-core': '>=5.80.2'
 
   '@orpc/zod@1.13.14':
     resolution: {integrity: sha512-lpF8Nyb+WdW0PieZcJB3KvKztGveXvckOqXMyWTWvyrylV3rCPmeUneVQghjZOLqJdAevo4jqV2/BgHWSt3EEA==}
@@ -8858,6 +8891,14 @@ snapshots:
   '@orpc/standard-server@1.13.14(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/shared': 1.13.14(@opentelemetry/api@1.9.1)
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
+  '@orpc/tanstack-query@1.13.14(@opentelemetry/api@1.9.1)(@orpc/client@1.13.14(@opentelemetry/api@1.9.1))(@tanstack/query-core@5.99.0)':
+    dependencies:
+      '@orpc/client': 1.13.14(@opentelemetry/api@1.9.1)
+      '@orpc/shared': 1.13.14(@opentelemetry/api@1.9.1)
+      '@tanstack/query-core': 5.99.0
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
