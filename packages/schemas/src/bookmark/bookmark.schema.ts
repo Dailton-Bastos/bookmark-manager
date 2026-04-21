@@ -16,7 +16,10 @@ export const bookmarkSchema = z.object({
 
 export const createBookmarkSchema = z.object({
 	title: z.string().min(1, 'Title is required'),
-	description: z.string().nullish(),
+	description: z
+		.string()
+		.max(280, 'Description must be at most 280 characters')
+		.nullish(),
 	url: z.url({
 		protocol: /^https?$/,
 		message: 'URL must be a valid HTTP or HTTPS URL'

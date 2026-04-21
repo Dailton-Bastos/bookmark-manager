@@ -1,12 +1,14 @@
 import { Plus, SidebarIcon } from 'ui/components/icons'
 import { Button } from 'ui/components/shadcn/ui/button'
 import { useSidebar } from 'ui/components/shadcn/ui/sidebar'
+import { useAddBookmarkModal } from '@/hooks/useBookmarkModal'
 import { PrimaryButton as AddBookmarkButton } from '../shared/primary-button'
 import { AvatarDropdown } from './avatar-dropdown'
 import { SearchForm } from './search-form'
 
 export const AppHeader = () => {
 	const { toggleSidebar } = useSidebar()
+	const { onOpen } = useAddBookmarkModal()
 
 	return (
 		<header className="sticky top-0 z-50 flex w-full items-center border-b bg-header py-4 px-8">
@@ -25,7 +27,12 @@ export const AppHeader = () => {
 
 			<div className="ml-auto flex items-center gap-4">
 				<div className="w-full">
-					<AddBookmarkButton type="button" title="Add Bookmark" icon={Plus} />
+					<AddBookmarkButton
+						type="button"
+						title="Add Bookmark"
+						icon={Plus}
+						onClick={onOpen}
+					/>
 				</div>
 
 				<AvatarDropdown />

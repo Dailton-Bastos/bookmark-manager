@@ -35,7 +35,8 @@
 		"react-hook-form": "^7.72.0",
 		"react-top-loading-bar": "^3.0.2",
 		"sonner": "catalog:",
-		"ui": "workspace:*"
+		"ui": "workspace:*",
+		"zustand": "^5.0.12"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
