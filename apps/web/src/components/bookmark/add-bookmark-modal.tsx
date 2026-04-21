@@ -1,7 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type CreateBookmark, createBookmarkSchema } from '@repo/schemas'
+import { useMutation } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { X } from 'ui/components/icons'
 import { Button } from 'ui/components/shadcn/ui/button'
 import {
@@ -14,6 +16,7 @@ import {
 	DialogTitle
 } from 'ui/components/shadcn/ui/dialog'
 import { useAddBookmarkModal } from '@/hooks/useBookmarkModal'
+import { orpcClient } from '@/lib/orpc-client'
 import { normalizeFormData } from '@/utils/normalize-form-data'
 import { PrimaryButton as AddBookmarkButton } from '../shared/primary-button'
 import { AddBookmarkForm } from './add-bookmark-form'
@@ -29,15 +32,26 @@ export const AddBookmarkModal = () => {
 		}
 	})
 
+	const { mutateAsync, isPending } = useMutation(
+		orpcClient.bookmark.create.mutationOptions({
+			onSuccess: () => {
+				form.reset()
+				onClose()
+			}
+		})
+	)
+
 	const onSubmit = async (data: CreateBookmark) => {
 		const normalizedData = normalizeFormData<CreateBookmark>(data)
 
-		return new Promise((resolve) => {
-			setTimeout(() => {
-				resolve(normalizedData)
-				form.reset()
-				onClose()
-			}, 1000)
+		toast.promise(mutateAsync(normalizedData), {
+			loading: 'Saving bookmark...',
+			success: 'Bookmark added successfully!',
+			error: (err) => {
+				if (err instanceof Error) return err.message
+
+				return 'An error occurred while adding the bookmark.'
+			}
 		})
 	}
 
@@ -80,6 +94,7 @@ export const AddBookmarkModal = () => {
 								<Button
 									variant="ghost"
 									onClick={handleClose}
+									disabled={isPending}
 									className="h-11.5 min-w-22.5 rounded-lg border cursor-pointer font-semibold text-base text-foreground hover:bg-secondary"
 								>
 									Cancel
@@ -90,6 +105,7 @@ export const AddBookmarkModal = () => {
 								type="submit"
 								title="Add Bookmark"
 								className="w-36.25"
+								disabled={isPending}
 							/>
 						</DialogFooter>
 					</form>
