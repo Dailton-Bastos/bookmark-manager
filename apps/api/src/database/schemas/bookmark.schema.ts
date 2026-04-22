@@ -10,6 +10,7 @@ import {
 } from 'drizzle-orm/pg-core'
 import { timestamps } from '../helpers/columns.helpers'
 import { users } from './auth.schema'
+import { bookmarkTags } from './tag.schema'
 
 export const bookmarks = pgTable(
 	'bookmarks',
@@ -33,9 +34,10 @@ export const bookmarks = pgTable(
 	]
 )
 
-export const bookmarksRelations = relations(bookmarks, ({ one }) => ({
+export const bookmarksRelations = relations(bookmarks, ({ one, many }) => ({
 	owner: one(users, {
 		fields: [bookmarks.ownerId],
 		references: [users.id]
-	})
+	}),
+	tags: many(bookmarkTags)
 }))

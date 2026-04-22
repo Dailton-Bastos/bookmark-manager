@@ -22,6 +22,13 @@
 			"when": 1776006062245,
 			"tag": "20260412150102_create_bookmarks_table",
 			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1776820148981,
+			"tag": "20260422010908_create_tags_table",
+			"breakpoints": true
 		}
 	]
 }
