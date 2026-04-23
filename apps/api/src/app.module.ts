@@ -18,6 +18,7 @@ import { EnvService } from './env/env.service'
 import { HealthModule } from './health/health.module'
 import { DATABASE_CONNECTION } from './shared/constants/database'
 import { requestContextStorage } from './shared/request-context'
+import { TagsModule } from './tags/tags.module'
 
 declare module '@orpc/nest' {
 	/**
@@ -105,7 +106,8 @@ const logger = new Logger('oRPC')
 				})
 			]
 		}),
-		BookmarksModule
+		BookmarksModule,
+		TagsModule
 	],
 	controllers: [],
 	providers: []
