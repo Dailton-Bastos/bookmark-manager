@@ -8,19 +8,27 @@ import { TagsService } from '../tags.service'
 describe('TagsService', () => {
 	let service: TagsService
 	let db: NodePgDatabase<typeof schema>
+	let mockDb: {
+		insert: jest.Mock
+		values: jest.Mock
+		returning: jest.Mock
+		onConflictDoUpdate: jest.Mock
+	}
 
 	beforeEach(async () => {
+		mockDb = {
+			insert: jest.fn().mockReturnThis(),
+			values: jest.fn().mockReturnThis(),
+			returning: jest.fn().mockResolvedValue([mockTag]),
+			onConflictDoUpdate: jest.fn().mockReturnThis()
+		}
+
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				TagsService,
 				{
 					provide: DATABASE_CONNECTION,
-					useValue: {
-						insert: jest.fn().mockReturnThis(),
-						values: jest.fn().mockReturnThis(),
-						returning: jest.fn().mockResolvedValue([mockTag]),
-						onConflictDoUpdate: jest.fn().mockReturnThis()
-					} as unknown as NodePgDatabase<typeof schema>
+					useValue: mockDb as unknown as NodePgDatabase<typeof schema>
 				}
 			]
 		}).compile()
