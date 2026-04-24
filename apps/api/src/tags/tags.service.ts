@@ -11,15 +11,18 @@ export class TagsService {
 		private readonly db: NodePgDatabase<typeof schema>
 	) {}
 
-	async create(createTagInput: CreateTag) {
+	async create(
+		createTagInput: CreateTag,
+		db: NodePgDatabase<typeof schema> = this.db
+	) {
 		const { name } = createTagInput
 
-		const [tag] = await this.db
+		const [tag] = await db
 			.insert(schema.tags)
 			.values({ name })
 			.onConflictDoUpdate({
 				target: schema.tags.name,
-				set: { name: schema.tags.name }
+				set: { name }
 			})
 			.returning()
 

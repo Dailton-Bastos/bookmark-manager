@@ -1,10 +1,5 @@
-import {
-	Inject,
-	Injectable,
-	InternalServerErrorException
-} from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import type { CreateBookmark } from '@repo/schemas'
-import { eq } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { schema } from '../database/schemas'
 import { DATABASE_CONNECTION } from '../shared/constants/database'
@@ -21,58 +16,58 @@ export class BookmarksService {
 	async create(createBookmarkInput: CreateBookmark, ownerId: string) {
 		const { title, description, url, tags } = createBookmarkInput
 
-		const [bookmark] = await this.db
-			.insert(schema.bookmarks)
-			.values({
-				title,
-				description,
-				url,
-				ownerId
-			})
-			.returning()
+		return await this.db.transaction(async (tx) => {
+			const [bookmark] = await tx
+				.insert(schema.bookmarks)
+				.values({
+					title,
+					description,
+					url,
+					ownerId
+				})
+				.returning()
 
-		if (!bookmark) return null
+			if (!bookmark) return null
 
-		if (!tags || tags.length === 0) {
-			return {
-				...bookmark,
-				tags: []
+			if (!tags || tags.length === 0) {
+				return {
+					...bookmark,
+					tags: []
+				}
 			}
-		}
 
-		const validTags = await this.createBookmarkTags(bookmark.id, tags)
+			const uniqueTags = [...new Set(tags)]
 
-		return {
-			...bookmark,
-			tags: validTags
-		}
-	}
-
-	private async createBookmarkTags(bookmarkId: number, tags: string[]) {
-		try {
 			const createdTags = await Promise.all(
-				tags.map((tag) => this.tagsService.create({ name: tag }))
+				uniqueTags.map((tag) =>
+					this.tagsService.create(
+						{ name: tag },
+						tx as unknown as NodePgDatabase<typeof schema>
+					)
+				)
 			)
 
 			const validTags = createdTags.filter(
 				(tag): tag is NonNullable<typeof tag> => tag !== null
 			)
 
-			if (validTags.length === 0) return []
+			if (validTags.length === 0) {
+				return {
+					...bookmark,
+					tags: []
+				}
+			}
 
-			await this.db
+			await tx
 				.insert(schema.bookmarkTags)
-				.values(validTags.map((tag) => ({ bookmarkId, tagId: tag.id })))
+				.values(
+					validTags.map((tag) => ({ bookmarkId: bookmark.id, tagId: tag.id }))
+				)
 
-			return validTags
-		} catch (error) {
-			await this.db
-				.delete(schema.bookmarks)
-				.where(eq(schema.bookmarks.id, bookmarkId))
-
-			throw new InternalServerErrorException('Failed to create bookmark tags', {
-				cause: error instanceof Error ? error : undefined
-			})
-		}
+			return {
+				...bookmark,
+				tags: validTags
+			}
+		})
 	}
 }
