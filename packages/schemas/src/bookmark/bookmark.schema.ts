@@ -34,7 +34,8 @@ export const createBookmarkSchema = z.object({
 				.max(50, 'Tag name must be at most 50 characters')
 		)
 		.max(10, 'You can add up to 10 tags')
-		.nullable()
+		.nullish()
+		.default([])
 })
 
 export type Bookmark = z.infer<typeof bookmarkSchema>
