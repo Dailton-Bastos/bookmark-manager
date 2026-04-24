@@ -11,22 +11,33 @@ describe('BookmarksService', () => {
 	let service: BookmarksService
 	let tagsService: TagsService
 	let db: NodePgDatabase<typeof schema>
+	let mockDb: {
+		insert: jest.Mock
+		values: jest.Mock
+		returning: jest.Mock
+		onConflictDoUpdate: jest.Mock
+		transaction: jest.Mock
+	}
 
 	beforeEach(async () => {
+		mockDb = {
+			insert: jest.fn().mockReturnThis(),
+			values: jest.fn().mockReturnThis(),
+			returning: jest.fn().mockResolvedValue([mockBookmark]),
+			onConflictDoUpdate: jest.fn().mockReturnThis(),
+			transaction: jest.fn()
+		}
+		mockDb.transaction.mockImplementation(
+			async (cb: (tx: typeof mockDb) => Promise<unknown>) => cb(mockDb)
+		)
+
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				BookmarksService,
 				TagsService,
 				{
 					provide: DATABASE_CONNECTION,
-					useValue: {
-						insert: jest.fn().mockReturnThis(),
-						values: jest.fn().mockReturnThis(),
-						returning: jest.fn().mockResolvedValue([mockBookmark]),
-						delete: jest.fn().mockReturnThis(),
-						where: jest.fn().mockReturnThis(),
-						onConflictDoUpdate: jest.fn().mockReturnThis()
-					} as unknown as NodePgDatabase<typeof schema>
+					useValue: mockDb as unknown as NodePgDatabase<typeof schema>
 				}
 			]
 		}).compile()
@@ -77,9 +88,12 @@ describe('BookmarksService', () => {
 			await expect(
 				service.create(createBookmarkInput, ownerId)
 			).rejects.toThrow('Failed to create bookmark tags')
+			expect(mockDb.transaction).toHaveBeenCalled()
 			expect(insert).toHaveBeenCalledWith(schema.bookmarks)
-			expect(tagsService.create).toHaveBeenCalledWith({ name: 'Test Tag' })
-			expect(db.delete).toHaveBeenCalledWith(schema.bookmarks)
+			expect(tagsService.create).toHaveBeenCalledWith(
+				{ name: 'Test Tag' },
+				expect.anything()
+			)
 		})
 
 		it('should return the created bookmark with tags', async () => {
@@ -98,7 +112,10 @@ describe('BookmarksService', () => {
 			expect(insert).toHaveBeenCalledWith(schema.bookmarks)
 			expect(tagsService.create).toHaveBeenCalledTimes(1)
 			expect(insert).toHaveBeenCalledWith(schema.bookmarkTags)
-			expect(tagsService.create).toHaveBeenCalledWith({ name: 'Test Tag' })
+			expect(tagsService.create).toHaveBeenCalledWith(
+				{ name: 'Test Tag' },
+				expect.anything()
+			)
 			expect(result).toEqual({
 				...mockBookmark,
 				tags: [

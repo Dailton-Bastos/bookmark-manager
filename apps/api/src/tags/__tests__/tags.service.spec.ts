@@ -53,7 +53,7 @@ describe('TagsService', () => {
 		expect(values).toHaveBeenCalledWith({ name: createTagInput.name })
 		expect(onConflictDoUpdate).toHaveBeenCalledWith({
 			target: schema.tags.name,
-			set: { name: schema.tags.name }
+			set: { name: createTagInput.name }
 		})
 		expect(returning).toHaveBeenCalled()
 		expect(result).toEqual(mockTag)
