@@ -19,7 +19,7 @@ export class TagsService {
 			.values({ name })
 			.onConflictDoUpdate({
 				target: schema.tags.name,
-				set: { name: schema.tags.name }
+				set: { name }
 			})
 			.returning()
 
