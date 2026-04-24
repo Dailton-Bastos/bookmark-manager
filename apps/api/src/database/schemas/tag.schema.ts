@@ -1,6 +1,5 @@
 import { relations } from 'drizzle-orm'
 import {
-	index,
 	integer,
 	pgTable,
 	serial,
@@ -10,14 +9,10 @@ import {
 import { timestamps } from '../helpers/columns.helpers'
 import { bookmarks } from './bookmark.schema'
 
-export const tags = pgTable(
-	'tags',
-	{
-		id: serial().primaryKey(),
-		name: varchar({ length: 50 }).unique().notNull()
-	},
-	(table) => [uniqueIndex('name_idx').on(table.name)]
-)
+export const tags = pgTable('tags', {
+	id: serial().primaryKey(),
+	name: varchar({ length: 50 }).unique().notNull()
+})
 
 export const bookmarkTags = pgTable(
 	'bookmark_tags',
@@ -32,13 +27,12 @@ export const bookmarkTags = pgTable(
 		...timestamps
 	},
 	(table) => [
-		index('bookmarkId_idx').on(table.bookmarkId),
-		index('tagId_idx').on(table.tagId)
+		uniqueIndex('bookmark_tag_unique_idx').on(table.bookmarkId, table.tagId)
 	]
 )
 
 export const tagsRelations = relations(tags, ({ many }) => ({
-	bookmarks: many(bookmarkTags)
+	bookmarkTags: many(bookmarkTags)
 }))
 
 export const bookmarkTagsRelations = relations(bookmarkTags, ({ one }) => ({
