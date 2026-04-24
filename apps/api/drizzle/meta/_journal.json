@@ -29,6 +29,20 @@
 			"when": 1776820148981,
 			"tag": "20260422010908_create_tags_table",
 			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1776996158962,
+			"tag": "20260424020238_remove_uniqueIndex_tag_name",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "7",
+			"when": 1776996857885,
+			"tag": "20260424021417_adding_unique_index_composite_bookmark_tags",
+			"breakpoints": true
 		}
 	]
 }
