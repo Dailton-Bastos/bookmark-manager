@@ -1,4 +1,5 @@
 import z from 'zod'
+import { tagSchema } from '../tag/tag.schema'
 
 export const bookmarkSchema = z.object({
 	id: z.number(),
@@ -11,7 +12,8 @@ export const bookmarkSchema = z.object({
 	createdAt: z.coerce.date(),
 	updatedAt: z.coerce.date(),
 	lastVisited: z.coerce.date().nullable(),
-	ownerId: z.string()
+	ownerId: z.string(),
+	tags: z.array(tagSchema).nullable()
 })
 
 export const createBookmarkSchema = z.object({
@@ -23,7 +25,16 @@ export const createBookmarkSchema = z.object({
 	url: z.url({
 		protocol: /^https?$/,
 		message: 'URL must be a valid HTTP or HTTPS URL'
-	})
+	}),
+	tags: z
+		.array(
+			z
+				.string()
+				.min(1, 'Tag name cannot be empty')
+				.max(50, 'Tag name must be at most 50 characters')
+		)
+		.max(10, 'You can add up to 10 tags')
+		.nullable()
 })
 
 export type Bookmark = z.infer<typeof bookmarkSchema>

@@ -19,7 +19,11 @@ describe('BookmarkSchema', () => {
 			createdAt: new Date('2024-06-01T10:00:00.000Z'),
 			updatedAt: new Date('2020-01-01T06:15:00.123Z'),
 			lastVisited: null,
-			ownerId: 'user-123'
+			ownerId: 'user-123',
+			tags: [
+				{ id: 1, name: 'example' },
+				{ id: 2, name: 'bookmark' }
+			]
 		}
 
 		const result = bookmarkSchema.safeParse(validBookmark)
@@ -33,6 +37,11 @@ describe('BookmarkSchema', () => {
 			expect(result.data.createdAt).toBeInstanceOf(Date)
 			expect(result.data.updatedAt).toBeInstanceOf(Date)
 			expect(result.data.lastVisited).toBeNull()
+			expect(result.data.ownerId).toBe('user-123')
+			expect(result.data.tags).toEqual([
+				{ id: 1, name: 'example' },
+				{ id: 2, name: 'bookmark' }
+			])
 		}
 	})
 
@@ -68,7 +77,8 @@ describe('CreateBookmarkSchema', () => {
 		const validCreateBookmark = {
 			title: 'Example Bookmark',
 			description: 'This is an example bookmark.',
-			url: 'https://example.com'
+			url: 'https://example.com',
+			tags: ['example', 'bookmark']
 		}
 
 		const result = createBookmarkSchema.safeParse(validCreateBookmark)
@@ -78,6 +88,7 @@ describe('CreateBookmarkSchema', () => {
 		if (result.success) {
 			expect(result.data.title).toBe('Example Bookmark')
 			expect(result.data.url).toBe('https://example.com')
+			expect(result.data.tags).toEqual(['example', 'bookmark'])
 		}
 	})
 
