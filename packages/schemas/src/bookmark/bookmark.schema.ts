@@ -13,7 +13,7 @@ export const bookmarkSchema = z.object({
 	updatedAt: z.coerce.date(),
 	lastVisited: z.coerce.date().nullable(),
 	ownerId: z.string(),
-	tags: z.array(tagSchema).nullable()
+	tags: z.array(tagSchema).nullable().default([])
 })
 
 export const createBookmarkSchema = z.object({
@@ -36,6 +36,7 @@ export const createBookmarkSchema = z.object({
 		.max(10, 'You can add up to 10 tags')
 		.nullish()
 		.default([])
+		.optional()
 })
 
 export type Bookmark = z.infer<typeof bookmarkSchema>

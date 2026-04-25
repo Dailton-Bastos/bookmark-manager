@@ -28,7 +28,8 @@ export const AddBookmarkModal = () => {
 		resolver: zodResolver(createBookmarkSchema),
 		defaultValues: {
 			url: '',
-			title: ''
+			title: '',
+			tags: []
 		}
 	})
 

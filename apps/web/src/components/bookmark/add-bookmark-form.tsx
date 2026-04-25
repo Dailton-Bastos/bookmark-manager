@@ -1,5 +1,10 @@
 import type { CreateBookmark } from '@repo/schemas'
+import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
+import { X } from 'ui/components/icons'
+import { InputTag } from 'ui/components/input-tag'
+import { Badge } from 'ui/components/shadcn/ui/badge'
+import { Button } from 'ui/components/shadcn/ui/button'
 import {
 	Field,
 	FieldDescription,
@@ -9,15 +14,29 @@ import {
 } from 'ui/components/shadcn/ui/field'
 import { Input } from 'ui/components/shadcn/ui/input'
 import { Textarea } from 'ui/components/shadcn/ui/textarea'
+import { useTagInput } from '@/hooks/useTagInput'
+
+const MAX_TAGS = 5
 
 export const AddBookmarkForm = () => {
 	const {
 		register,
+		setValue,
 		watch,
 		formState: { errors }
 	} = useFormContext<CreateBookmark>()
 
+	const { tags, addTag, removeTag } = useTagInput({ maxTags: MAX_TAGS })
+
 	const description = watch('description')
+
+	useEffect(() => {
+		register('tags')
+	}, [register])
+
+	useEffect(() => {
+		setValue('tags', tags)
+	}, [tags, setValue])
 
 	return (
 		<FieldGroup className="gap-4">
@@ -76,6 +95,46 @@ export const AddBookmarkForm = () => {
 				{errors.description && (
 					<FieldError errors={[errors.description]} className="font-medium" />
 				)}
+			</Field>
+
+			<Field className="gap-1.5" data-invalid={errors.tags}>
+				<FieldLabel htmlFor="tags" className="text-foreground">
+					Tags
+				</FieldLabel>
+				<div className="w-full">
+					<InputTag
+						tags={tags}
+						addTag={addTag}
+						removeTag={removeTag}
+						aria-invalid={errors.tags ? 'true' : 'false'}
+						id="tags"
+						placeholder='e.g. "work", "personal", "react"'
+						disabled={tags.length >= MAX_TAGS}
+					/>
+					{errors.tags && (
+						<FieldError errors={[errors.tags]} className="font-medium" />
+					)}
+					<FieldDescription className="text-xs text-muted-foreground pt-2">
+						Press "Enter" or "Space" to add a tag (Up to {MAX_TAGS} tags).
+					</FieldDescription>
+				</div>
+
+				<div className="flex flex-wrap gap-2 mt-2">
+					{tags.map((tag) => (
+						<Badge key={tag} variant="secondary">
+							{tag}
+							<Button
+								variant="outline"
+								size="icon"
+								className="ml-1 h-3 w-3 rounded-full p-0 text-muted-foreground cursor-pointer hover:bg-transparent disabled:pointer-events-none"
+								onClick={() => removeTag(tag)}
+								aria-label={`Remove tag ${tag}`}
+							>
+								<X className="h-3 w-3" />
+							</Button>
+						</Badge>
+					))}
+				</div>
 			</Field>
 		</FieldGroup>
 	)
