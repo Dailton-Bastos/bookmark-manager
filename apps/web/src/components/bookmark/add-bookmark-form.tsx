@@ -16,7 +16,7 @@ import { Input } from 'ui/components/shadcn/ui/input'
 import { Textarea } from 'ui/components/shadcn/ui/textarea'
 import { useTagInput } from '@/hooks/useTagInput'
 
-const MAX_TAGS = 5
+const MAX_TAGS = 10
 
 export const AddBookmarkForm = () => {
 	const {
@@ -103,9 +103,7 @@ export const AddBookmarkForm = () => {
 				</FieldLabel>
 				<div className="w-full">
 					<InputTag
-						tags={tags}
 						addTag={addTag}
-						removeTag={removeTag}
 						aria-invalid={errors.tags ? 'true' : 'false'}
 						id="tags"
 						placeholder='e.g. "work", "personal", "react"'
@@ -124,6 +122,7 @@ export const AddBookmarkForm = () => {
 						<Badge key={tag} variant="secondary">
 							{tag}
 							<Button
+								type="button"
 								variant="outline"
 								size="icon"
 								className="ml-1 h-3 w-3 rounded-full p-0 text-muted-foreground cursor-pointer hover:bg-transparent disabled:pointer-events-none"

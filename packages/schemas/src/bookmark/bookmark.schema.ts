@@ -35,8 +35,6 @@ export const createBookmarkSchema = z.object({
 		)
 		.max(10, 'You can add up to 10 tags')
 		.nullish()
-		.default([])
-		.optional()
 })
 
 export type Bookmark = z.infer<typeof bookmarkSchema>

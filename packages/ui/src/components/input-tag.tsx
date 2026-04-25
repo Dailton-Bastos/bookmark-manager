@@ -1,18 +1,13 @@
+"use client";
+
 import { useCallback, useState } from "react";
 import { Input } from "ui/components/shadcn/ui/input";
 
 interface InputTagProps extends React.ComponentProps<typeof Input> {
-	tags: string[];
 	addTag: (tag: string) => void;
-	removeTag: (tag: string) => void;
 }
 
-export const InputTag = ({
-	tags,
-	addTag,
-	removeTag,
-	...props
-}: InputTagProps) => {
+export const InputTag = ({ addTag, ...props }: InputTagProps) => {
 	const [inputValue, setInputValue] = useState("");
 
 	const handleInputChange = useCallback(
@@ -38,14 +33,13 @@ export const InputTag = ({
 
 	return (
 		<Input
+			{...props}
 			value={inputValue}
 			onChange={handleInputChange}
 			onKeyDown={handleKeyDown}
-			id="title"
 			type="text"
 			autoComplete="off"
 			className="hover:bg-secondary focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
-			{...props}
 		/>
 	);
 };
