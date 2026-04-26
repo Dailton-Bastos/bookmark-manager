@@ -7,14 +7,20 @@ interface InputTagProps extends React.ComponentProps<typeof Input> {
 	addTag: (tag: string) => void;
 }
 
-export const InputTag = ({ addTag, ...props }: InputTagProps) => {
+export const InputTag = ({
+	addTag,
+	onChange: onChangeProp,
+	onKeyDown: onKeyDownProp,
+	...props
+}: InputTagProps) => {
 	const [inputValue, setInputValue] = useState("");
 
 	const handleInputChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
 			setInputValue(e.target.value);
+			onChangeProp?.(e);
 		},
-		[],
+		[onChangeProp],
 	);
 
 	const handleKeyDown = useCallback(
@@ -27,8 +33,9 @@ export const InputTag = ({ addTag, ...props }: InputTagProps) => {
 					setInputValue("");
 				}
 			}
+			onKeyDownProp?.(e);
 		},
-		[inputValue, addTag],
+		[inputValue, addTag, onKeyDownProp],
 	);
 
 	return (
