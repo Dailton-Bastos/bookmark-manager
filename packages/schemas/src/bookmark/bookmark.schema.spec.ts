@@ -45,6 +45,55 @@ describe('BookmarkSchema', () => {
 		}
 	})
 
+	it('should default tags to an empty array when tags is omitted', () => {
+		const bookmarkWithoutTags = {
+			id: 1,
+			title: 'Example Bookmark',
+			description: null,
+			url: 'https://example.com',
+			pinned: false,
+			isArchived: false,
+			visitCount: 0,
+			createdAt: new Date('2024-06-01T10:00:00.000Z'),
+			updatedAt: new Date('2024-06-01T10:00:00.000Z'),
+			lastVisited: null,
+			ownerId: 'user-123'
+		}
+
+		const result = bookmarkSchema.safeParse(bookmarkWithoutTags)
+
+		expect(result.success).toBe(true)
+
+		if (result.success) {
+			expect(result.data.tags).toEqual([])
+		}
+	})
+
+	it('should allow tags to be null', () => {
+		const bookmarkWithNullTags = {
+			id: 1,
+			title: 'Example Bookmark',
+			description: null,
+			url: 'https://example.com',
+			pinned: false,
+			isArchived: false,
+			visitCount: 0,
+			createdAt: new Date('2024-06-01T10:00:00.000Z'),
+			updatedAt: new Date('2024-06-01T10:00:00.000Z'),
+			lastVisited: null,
+			ownerId: 'user-123',
+			tags: null
+		}
+
+		const result = bookmarkSchema.safeParse(bookmarkWithNullTags)
+
+		expect(result.success).toBe(true)
+
+		if (result.success) {
+			expect(result.data.tags).toBeNull()
+		}
+	})
+
 	it('should fail validation for an invalid bookmark object', () => {
 		const invalidBookmark = {
 			id: 'not-a-number',
@@ -89,6 +138,39 @@ describe('CreateBookmarkSchema', () => {
 			expect(result.data.title).toBe('Example Bookmark')
 			expect(result.data.url).toBe('https://example.com')
 			expect(result.data.tags).toEqual(['example', 'bookmark'])
+		}
+	})
+
+	it('should allow tags to be omitted (nullish)', () => {
+		const bookmarkWithoutTags = {
+			title: 'Example Bookmark',
+			description: 'This is an example bookmark.',
+			url: 'https://example.com'
+		}
+
+		const result = createBookmarkSchema.safeParse(bookmarkWithoutTags)
+
+		expect(result.success).toBe(true)
+
+		if (result.success) {
+			expect(result.data.tags).toBeUndefined()
+		}
+	})
+
+	it('should allow tags to be null (nullish)', () => {
+		const bookmarkWithNullTags = {
+			title: 'Example Bookmark',
+			description: 'This is an example bookmark.',
+			url: 'https://example.com',
+			tags: null
+		}
+
+		const result = createBookmarkSchema.safeParse(bookmarkWithNullTags)
+
+		expect(result.success).toBe(true)
+
+		if (result.success) {
+			expect(result.data.tags).toBeNull()
 		}
 	})
 
