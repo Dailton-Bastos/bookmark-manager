@@ -13,7 +13,7 @@ export const bookmarkSchema = z.object({
 	updatedAt: z.coerce.date(),
 	lastVisited: z.coerce.date().nullable(),
 	ownerId: z.string(),
-	tags: z.array(tagSchema).nullable().default([])
+	tags: z.array(tagSchema).nullish().default([])
 })
 
 export const createBookmarkSchema = z.object({
