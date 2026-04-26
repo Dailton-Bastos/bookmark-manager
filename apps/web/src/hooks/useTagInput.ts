@@ -5,17 +5,19 @@ export const useTagInput = ({ maxTags = 5 }: { maxTags?: number }) => {
 	const [tags, setTags] = useState<string[]>([])
 
 	const addTag = (tag: string) => {
-		if (tags.length >= maxTags) {
-			toast.error(`You can only add up to ${maxTags} tags.`)
-			return
-		}
+		setTags((prevTags) => {
+			if (prevTags.length >= maxTags) {
+				toast.error(`You can only add up to ${maxTags} tags.`)
+				return prevTags
+			}
 
-		if (tags.includes(tag)) {
-			toast.error('This tag has already been added.')
-			return
-		}
+			if (prevTags.includes(tag)) {
+				toast.error('This tag has already been added.')
+				return prevTags
+			}
 
-		setTags((prevTags) => [...prevTags, tag])
+			return [...prevTags, tag]
+		})
 	}
 
 	const removeTag = (tag: string) => {
