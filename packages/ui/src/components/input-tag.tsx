@@ -2,12 +2,13 @@
 
 import { useCallback, useState } from "react";
 import { Input } from "ui/components/shadcn/ui/input";
+import { cn } from "../lib/utils";
 
 interface InputTagProps extends React.ComponentProps<typeof Input> {
 	addTag: (tag: string) => void;
 }
 
-export const InputTag = ({ addTag, ...props }: InputTagProps) => {
+export const InputTag = ({ addTag, className, ...props }: InputTagProps) => {
 	const [inputValue, setInputValue] = useState("");
 
 	const handleInputChange = useCallback(
@@ -39,7 +40,10 @@ export const InputTag = ({ addTag, ...props }: InputTagProps) => {
 			onKeyDown={handleKeyDown}
 			type="text"
 			autoComplete="off"
-			className="hover:bg-secondary focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
+			className={cn(
+				"hover:bg-secondary focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60",
+				className,
+			)}
 		/>
 	);
 };
