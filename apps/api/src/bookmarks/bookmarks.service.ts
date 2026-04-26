@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
-import type { CreateBookmark } from '@repo/schemas'
+import type { CreateBookmark, ListBookmarks, Tag } from '@repo/schemas'
+import { eq, inArray } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { schema } from '../database/schemas'
 import { DATABASE_CONNECTION } from '../shared/constants/database'
@@ -69,5 +70,41 @@ export class BookmarksService {
 				tags: validTags
 			}
 		})
+	}
+
+	async list(
+		{ limit }: { limit: number },
+		ownerId: string
+	): Promise<ListBookmarks> {
+		const bookmarks = await this.db
+			.select()
+			.from(schema.bookmarks)
+			.where(eq(schema.bookmarks.ownerId, ownerId))
+			.limit(limit)
+
+		const bookmarkIds = bookmarks.map((bookmark) => bookmark.id)
+
+		const bookmarkTags = await this.db
+			.select({ bookmarkId: schema.bookmarkTags.bookmarkId, tag: schema.tags })
+			.from(schema.bookmarkTags)
+			.leftJoin(schema.tags, eq(schema.tags.id, schema.bookmarkTags.tagId))
+			.where(inArray(schema.bookmarkTags.bookmarkId, bookmarkIds))
+
+		const tagsByBookmarkId: Record<number, Tag[]> = {}
+
+		for (const { bookmarkId, tag } of bookmarkTags) {
+			if (!tagsByBookmarkId[bookmarkId]) {
+				tagsByBookmarkId[bookmarkId] = []
+			}
+
+			if (!tag) continue
+
+			tagsByBookmarkId[bookmarkId].push(tag)
+		}
+
+		return bookmarks.map((bookmark) => ({
+			...bookmark,
+			tags: tagsByBookmarkId[bookmark.id] || []
+		}))
 	}
 }

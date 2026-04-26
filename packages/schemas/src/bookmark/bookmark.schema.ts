@@ -37,5 +37,20 @@ export const createBookmarkSchema = z.object({
 		.nullish()
 })
 
+export const listBookmarksInputSchema = z.object({
+	limit: z.coerce
+		.number()
+		.int()
+		.positive()
+		.min(1)
+		.max(100)
+		.optional()
+		.default(10)
+})
+
+export const listBookmarksSchema = z.array(bookmarkSchema)
+
 export type Bookmark = z.infer<typeof bookmarkSchema>
 export type CreateBookmark = z.infer<typeof createBookmarkSchema>
+export type ListBookmarks = z.infer<typeof listBookmarksSchema>
+export type ListBookmarksInput = z.infer<typeof listBookmarksInputSchema>
