@@ -16,6 +16,7 @@ import { DatabaseModule } from './database/database.module'
 import { EnvModule } from './env/env.module'
 import { EnvService } from './env/env.service'
 import { HealthModule } from './health/health.module'
+import { PaginationModule } from './pagination/pagination.module'
 import { DATABASE_CONNECTION } from './shared/constants/database'
 import { requestContextStorage } from './shared/request-context'
 import { TagsModule } from './tags/tags.module'
@@ -107,7 +108,8 @@ const logger = new Logger('oRPC')
 			]
 		}),
 		BookmarksModule,
-		TagsModule
+		TagsModule,
+		PaginationModule
 	],
 	controllers: [],
 	providers: []
