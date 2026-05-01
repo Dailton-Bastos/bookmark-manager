@@ -8,8 +8,8 @@ export const paginationQuerySchema = z.object({
 export const paginationMetaSchema = z.object({
 	itemsPerPage: z.number().int().positive().max(100).default(10),
 	currentPage: z.number().int().positive(),
-	totalItems: z.number().nonnegative(),
-	totalPages: z.number().nonnegative(),
+	totalItems: z.number().int().nonnegative(),
+	totalPages: z.number().int().nonnegative(),
 	hasNextPage: z.boolean(),
 	hasPreviousPage: z.boolean()
 })
