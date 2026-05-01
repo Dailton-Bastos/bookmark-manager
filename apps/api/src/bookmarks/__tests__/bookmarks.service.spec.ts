@@ -2,14 +2,21 @@ import { Test, TestingModule } from '@nestjs/testing'
 import type { CreateBookmark } from '@repo/schemas'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { schema } from '../../database/schemas'
+import { mockMetaPagination } from '../../pagination/__mocks__/pagination.mock'
+import { PaginationProvider } from '../../pagination/pagination.provider'
 import { DATABASE_CONNECTION } from '../../shared/constants/database'
 import { TagsService } from '../../tags/tags.service'
-import { mockBookmark } from '../__mocks__/bookmark.mock'
+import {
+	mockBookmark,
+	mockBookmarkWithoutTags,
+	mockBookmarkWithTags
+} from '../__mocks__/bookmark.mock'
 import { BookmarksService } from '../bookmarks.service'
 
 describe('BookmarksService', () => {
 	let service: BookmarksService
 	let tagsService: TagsService
+	let paginationProvider: PaginationProvider
 	let db: NodePgDatabase<typeof schema>
 	let mockDb: {
 		insert: jest.Mock
@@ -17,6 +24,7 @@ describe('BookmarksService', () => {
 		returning: jest.Mock
 		onConflictDoUpdate: jest.Mock
 		transaction: jest.Mock
+		select: jest.Mock
 	}
 
 	beforeEach(async () => {
@@ -25,7 +33,8 @@ describe('BookmarksService', () => {
 			values: jest.fn().mockReturnThis(),
 			returning: jest.fn().mockResolvedValue([mockBookmark]),
 			onConflictDoUpdate: jest.fn().mockReturnThis(),
-			transaction: jest.fn()
+			transaction: jest.fn(),
+			select: jest.fn().mockReturnThis()
 		}
 		mockDb.transaction.mockImplementation(
 			async (cb: (tx: typeof mockDb) => Promise<unknown>) => cb(mockDb)
@@ -35,6 +44,7 @@ describe('BookmarksService', () => {
 			providers: [
 				BookmarksService,
 				TagsService,
+				PaginationProvider,
 				{
 					provide: DATABASE_CONNECTION,
 					useValue: mockDb as unknown as NodePgDatabase<typeof schema>
@@ -44,12 +54,14 @@ describe('BookmarksService', () => {
 
 		service = module.get<BookmarksService>(BookmarksService)
 		tagsService = module.get<TagsService>(TagsService)
+		paginationProvider = module.get<PaginationProvider>(PaginationProvider)
 		db = module.get<NodePgDatabase<typeof schema>>(DATABASE_CONNECTION)
 	})
 
 	it('should be defined', () => {
 		expect(service).toBeDefined()
 		expect(tagsService).toBeDefined()
+		expect(paginationProvider).toBeDefined()
 		expect(db).toBeDefined()
 	})
 
@@ -143,6 +155,148 @@ describe('BookmarksService', () => {
 			expect(result).toEqual({
 				...mockBookmark,
 				tags: []
+			})
+		})
+	})
+
+	describe('list', () => {
+		it('should return empty paginated result if no bookmarks are found', async () => {
+			const select = db.select as jest.Mock
+
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([])
+			})
+
+			const result = await service.list(
+				{ limit: 10, page: 1, order: 'asc' },
+				'user-123'
+			)
+
+			expect(select).toHaveBeenCalledWith({ bookmarksCount: expect.anything() })
+			expect(result).toEqual({
+				data: [],
+				meta: { ...mockMetaPagination }
+			})
+		})
+
+		it('should return paginated bookmarks with tags', async () => {
+			const select = db.select as jest.Mock
+
+			// Mock the total count query
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+			})
+
+			// Mock the bookmarks query
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				limit: jest.fn().mockReturnThis(),
+				offset: jest.fn().mockReturnThis(),
+				orderBy: jest.fn().mockResolvedValueOnce([mockBookmark])
+			})
+
+			// Mock the bookmark tags query
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				leftJoin: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([
+					{
+						bookmarkId: 1,
+						tag: { id: 1, name: 'Test Tag' }
+					}
+				])
+			})
+
+			jest
+				.spyOn(paginationProvider, 'paginateQuery')
+				.mockImplementationOnce(({ paginationQuery, data, totalCount }) => ({
+					data,
+					meta: {
+						itemsPerPage: paginationQuery.limit,
+						currentPage: paginationQuery.page,
+						totalItems: totalCount,
+						totalPages: Math.ceil(totalCount / paginationQuery.limit),
+						hasNextPage:
+							paginationQuery.page * paginationQuery.limit < totalCount,
+						hasPreviousPage: paginationQuery.page > 1
+					}
+				}))
+
+			const result = await service.list(
+				{ limit: 10, page: 1, order: 'asc' },
+				'user-123'
+			)
+
+			expect(select).toHaveBeenCalledWith()
+			expect(select).toHaveBeenCalledTimes(3)
+			expect(select).toHaveBeenCalledWith({ bookmarksCount: expect.anything() })
+			expect(select).toHaveBeenCalledWith({
+				bookmarkId: expect.anything(),
+				tag: expect.anything()
+			})
+			expect(paginationProvider.paginateQuery).toHaveBeenCalledWith({
+				paginationQuery: { page: 1, limit: 10 },
+				data: expect.any(Array),
+				totalCount: expect.any(Number)
+			})
+
+			expect(result).toEqual({
+				data: [mockBookmarkWithTags],
+				meta: { ...mockMetaPagination, totalItems: 1, totalPages: 1 }
+			})
+		})
+
+		it('should return paginated bookmarks without tags if no tags are found', async () => {
+			const select = db.select as jest.Mock
+
+			// Mock the total count query
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+			})
+
+			// Mock the bookmarks query
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				limit: jest.fn().mockReturnThis(),
+				offset: jest.fn().mockReturnThis(),
+				orderBy: jest.fn().mockResolvedValueOnce([mockBookmark])
+			})
+
+			// Mock the bookmark tags query to return no tags
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				leftJoin: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([])
+			})
+
+			jest
+				.spyOn(paginationProvider, 'paginateQuery')
+				.mockImplementationOnce(({ paginationQuery, data, totalCount }) => ({
+					data,
+					meta: {
+						itemsPerPage: paginationQuery.limit,
+						currentPage: paginationQuery.page,
+						totalItems: totalCount,
+						totalPages: Math.ceil(totalCount / paginationQuery.limit),
+						hasNextPage:
+							paginationQuery.page * paginationQuery.limit < totalCount,
+						hasPreviousPage: paginationQuery.page > 1
+					}
+				}))
+
+			const result = await service.list(
+				{ limit: 10, page: 1, order: 'asc' },
+				'user-123'
+			)
+
+			expect(result).toEqual({
+				data: [mockBookmarkWithoutTags],
+				meta: { ...mockMetaPagination, totalItems: 1, totalPages: 1 }
 			})
 		})
 	})

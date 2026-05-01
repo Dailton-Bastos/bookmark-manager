@@ -110,7 +110,10 @@ export const AddBookmarkForm = () => {
 						disabled={tags.length >= MAX_TAGS}
 					/>
 					{errors.tags && (
-						<FieldError errors={[errors.tags]} className="font-medium" />
+						<FieldError
+							errors={Array.isArray(errors.tags) ? errors.tags : [errors.tags]}
+							className="font-medium"
+						/>
 					)}
 					<FieldDescription className="text-xs text-muted-foreground pt-2">
 						Press "Enter" or "Space" to add a tag (Up to {MAX_TAGS} tags).

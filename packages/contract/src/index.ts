@@ -1,9 +1,10 @@
 import { populateContractRouterPaths } from '@orpc/contract'
 
-import { createBookmarkContract } from './bookmark'
+import { createBookmarkContract, listBookmarksContract } from './bookmark'
 
 export const contract = populateContractRouterPaths({
 	bookmark: {
-		create: createBookmarkContract
+		create: createBookmarkContract,
+		list: listBookmarksContract
 	}
 })

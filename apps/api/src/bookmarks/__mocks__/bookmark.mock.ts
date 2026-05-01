@@ -1,6 +1,7 @@
+import type { Bookmark } from '@repo/schemas'
 import type { UserSession } from '@thallesp/nestjs-better-auth'
 
-export const mockBookmark = {
+export const mockBookmark: Bookmark = {
 	id: 1,
 	title: 'Test Bookmark',
 	description: 'This is a test bookmark.',
@@ -11,7 +12,8 @@ export const mockBookmark = {
 	createdAt: new Date(),
 	updatedAt: new Date(),
 	lastVisited: null,
-	ownerId: 'user-123'
+	ownerId: 'user-123',
+	tags: []
 }
 
 export const mockCreateBookmarkInput = {
@@ -23,3 +25,13 @@ export const mockCreateBookmarkInput = {
 export const mockUserSession = {
 	user: { id: 'user-123', name: 'Test User', email: 'test@example.com' }
 } as UserSession
+
+export const mockBookmarkWithTags = {
+	...mockBookmark,
+	tags: [{ id: 1, name: 'Test Tag' }]
+}
+
+export const mockBookmarkWithoutTags = {
+	...mockBookmark,
+	tags: []
+}

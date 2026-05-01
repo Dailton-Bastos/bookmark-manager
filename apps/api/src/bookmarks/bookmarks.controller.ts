@@ -25,4 +25,13 @@ export class BookmarksController {
 			return bookmark
 		})
 	}
+
+	@Implement(contract.bookmark.list)
+	list(@Session() session: UserSession) {
+		return implement(contract.bookmark.list).handler(async ({ input }) => {
+			const bookmarks = await this.bookmarksService.list(input, session.user.id)
+
+			return bookmarks
+		})
+	}
 }

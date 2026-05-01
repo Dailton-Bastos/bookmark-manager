@@ -1,5 +1,10 @@
 import { oc } from '@orpc/contract'
-import { bookmarkSchema, createBookmarkSchema } from '@repo/schemas'
+import {
+	bookmarkSchema,
+	createBookmarkSchema,
+	listBookmarksInputSchema,
+	listBookmarksSchema
+} from '@repo/schemas'
 
 export const createBookmarkContract = oc
 	.route({
@@ -10,3 +15,13 @@ export const createBookmarkContract = oc
 	})
 	.input(createBookmarkSchema)
 	.output(bookmarkSchema)
+
+export const listBookmarksContract = oc
+	.route({
+		method: 'GET',
+		path: '/bookmarks',
+		summary: 'List bookmarks with pagination',
+		tags: ['Bookmarks']
+	})
+	.input(listBookmarksInputSchema)
+	.output(listBookmarksSchema)

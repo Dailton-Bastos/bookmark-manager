@@ -1,6 +1,12 @@
 import { describe, expect, it } from '@jest/globals'
 import { ZodError } from 'zod'
-import { bookmarkSchema, createBookmarkSchema } from './bookmark.schema'
+import type { ListBookmarks, ListBookmarksInput } from './bookmark.schema'
+import {
+	bookmarkSchema,
+	createBookmarkSchema,
+	listBookmarksInputSchema,
+	listBookmarksSchema
+} from './bookmark.schema'
 
 describe('BookmarkSchema', () => {
 	it('should be defined', () => {
@@ -199,6 +205,112 @@ describe('CreateBookmarkSchema', () => {
 			expect(urlIssue).toBeDefined()
 			expect(titleIssue?.code).toBe('too_small')
 			expect(urlIssue?.code).toBe('invalid_format')
+		}
+	})
+})
+
+describe('ListBookmarksInputSchema', () => {
+	it('should be defined', () => {
+		expect(listBookmarksInputSchema).toBeDefined()
+	})
+
+	it('should validate a valid list bookmarks input object', () => {
+		const validInput: ListBookmarksInput = {
+			page: 1,
+			limit: 10,
+			order: 'desc'
+		}
+
+		const result = listBookmarksInputSchema.safeParse(validInput)
+
+		expect(result.success).toBe(true)
+
+		if (result.success) {
+			expect(result.data.page).toBe(1)
+			expect(result.data.limit).toBe(10)
+			expect(result.data.order).toBe('desc')
+		}
+	})
+})
+
+describe('ListBookmarksSchema', () => {
+	it('should be defined', () => {
+		expect(listBookmarksSchema).toBeDefined()
+	})
+
+	it('should validate a valid list bookmarks object', () => {
+		const validListBookmarks: ListBookmarks = {
+			data: [
+				{
+					id: 1,
+					title: 'Example Bookmark',
+					description: 'This is an example bookmark.',
+					url: 'https://example.com',
+					pinned: false,
+					isArchived: false,
+					visitCount: 0,
+					createdAt: new Date('2024-06-01T10:00:00.000Z'),
+					updatedAt: new Date('2024-06-01T10:00:00.000Z'),
+					lastVisited: null,
+					ownerId: 'user-123',
+					tags: [
+						{ id: 1, name: 'example' },
+						{ id: 2, name: 'bookmark' }
+					]
+				}
+			],
+			meta: {
+				itemsPerPage: 10,
+				currentPage: 1,
+				totalItems: 1,
+				totalPages: 1,
+				hasNextPage: false,
+				hasPreviousPage: false
+			}
+		}
+
+		const result = listBookmarksSchema.safeParse(validListBookmarks)
+
+		expect(result.success).toBe(true)
+
+		if (result.success) {
+			expect(result.data.data.length).toBe(1)
+			expect(result.data.meta.currentPage).toBe(1)
+			expect(result.data.meta.totalItems).toBe(1)
+		}
+	})
+
+	it('should fail validation for an invalid list bookmarks object', () => {
+		const invalidListBookmarks = {
+			data: [
+				{
+					id: 'not-a-number',
+					title: '',
+					url: 'invalid-url',
+					pinned: 'not-a-boolean',
+					isArchived: 'not-a-boolean',
+					visitCount: 'not-a-number',
+					createdAt: 'invalid-date',
+					lastVisited: '2020-01-01T06:15:00+02:00'
+				}
+			],
+			meta: {
+				itemsPerPage: -1,
+				currentPage: 0,
+				totalItems: -5,
+				totalPages: -1,
+				hasNextPage: 'not-a-boolean',
+				hasPreviousPage: 'not-a-boolean'
+			}
+		}
+
+		const result = listBookmarksSchema.safeParse(invalidListBookmarks)
+
+		expect(result.success).toBe(false)
+
+		if (!result.success) {
+			expect(result.error).toBeInstanceOf(ZodError)
+			expect(result.error.issues.length).toBeGreaterThan(0)
 		}
 	})
 })

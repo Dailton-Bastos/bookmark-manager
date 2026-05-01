@@ -1,4 +1,8 @@
 import z from 'zod'
+import {
+	paginationMetaSchema,
+	paginationQuerySchema
+} from '../pagination/pagination.schema'
 import { tagSchema } from '../tag/tag.schema'
 
 export const bookmarkSchema = z.object({
@@ -37,5 +41,16 @@ export const createBookmarkSchema = z.object({
 		.nullish()
 })
 
+export const listBookmarksInputSchema = paginationQuerySchema.extend({
+	order: z.enum(['asc', 'desc']).default('asc')
+})
+
+export const listBookmarksSchema = z.object({
+	data: z.array(bookmarkSchema),
+	meta: paginationMetaSchema
+})
+
 export type Bookmark = z.infer<typeof bookmarkSchema>
 export type CreateBookmark = z.infer<typeof createBookmarkSchema>
+export type ListBookmarks = z.infer<typeof listBookmarksSchema>
+export type ListBookmarksInput = z.infer<typeof listBookmarksInputSchema>

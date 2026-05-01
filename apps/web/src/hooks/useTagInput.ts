@@ -16,6 +16,11 @@ export const useTagInput = ({ maxTags = 5 }: { maxTags?: number }) => {
 				return prevTags
 			}
 
+			if (tag.trim().length > 50) {
+				toast.error('Tag name cannot be longer than 50 characters.')
+				return prevTags
+			}
+
 			return [...prevTags, tag]
 		})
 	}
