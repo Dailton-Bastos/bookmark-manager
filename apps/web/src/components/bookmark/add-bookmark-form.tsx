@@ -109,16 +109,12 @@ export const AddBookmarkForm = () => {
 						placeholder='e.g. "work", "personal", "react"'
 						disabled={tags.length >= MAX_TAGS}
 					/>
-					{errors.tags &&
-						Array.isArray(errors.tags) &&
-						errors.tags.length > 0 &&
-						errors.tags.map((error) => (
-							<FieldError
-								key={`tag-error-${Date.now()}`}
-								errors={[error]}
-								className="font-medium"
-							/>
-						))}
+					{errors.tags && (
+						<FieldError
+							errors={Array.isArray(errors.tags) ? errors.tags : [errors.tags]}
+							className="font-medium"
+						/>
+					)}
 					<FieldDescription className="text-xs text-muted-foreground pt-2">
 						Press "Enter" or "Space" to add a tag (Up to {MAX_TAGS} tags).
 					</FieldDescription>
