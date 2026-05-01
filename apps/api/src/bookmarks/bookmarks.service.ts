@@ -114,6 +114,14 @@ export class BookmarksService {
 						: desc(schema.bookmarks.createdAt)
 				)
 
+			if (bookmarks.length === 0) {
+				return this.paginationProvider.paginateQuery<Bookmark>({
+					paginationQuery: { page, limit },
+					data: [],
+					totalCount: 0
+				})
+			}
+
 			const bookmarkIds = bookmarks.map((bookmark) => bookmark.id)
 
 			const bookmarkTags = await tx
