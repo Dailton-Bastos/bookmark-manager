@@ -38,7 +38,7 @@ jest.mock('@thallesp/nestjs-better-auth', () => ({
 
 describe('BookmarksController', () => {
 	let controller: BookmarksController
-	let bookmarksServiceMock: { create: jest.Mock }
+	let bookmarksServiceMock: { create: jest.Mock; list: jest.Mock }
 
 	beforeEach(async () => {
 		handlerMock.mockReset()
@@ -51,7 +51,8 @@ describe('BookmarksController', () => {
 				{
 					provide: BookmarksService,
 					useValue: {
-						create: jest.fn()
+						create: jest.fn(),
+						list: jest.fn()
 					}
 				}
 			]
@@ -95,5 +96,27 @@ describe('BookmarksController', () => {
 			'message',
 			'Failed to create bookmark'
 		)
+	})
+
+	it('should return a list of bookmarks', async () => {
+		const mockListBookmarks = {
+			bookmarks: [mockBookmark],
+			total: 1,
+			page: 1,
+			limit: 10
+		}
+		bookmarksServiceMock.list.mockResolvedValue(mockListBookmarks)
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({ input: { limit: 10, page: 1, order: 'asc' } })
+		)
+
+		const result = await controller.list(mockUserSession)
+
+		expect(implement).toHaveBeenCalledWith(contract.bookmark.list)
+		expect(bookmarksServiceMock.list).toHaveBeenCalledWith(
+			{ limit: 10, page: 1, order: 'asc' },
+			mockUserSession.user.id
+		)
+		expect(result).toEqual(mockListBookmarks)
 	})
 })
