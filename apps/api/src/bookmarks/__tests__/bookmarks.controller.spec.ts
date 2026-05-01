@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { implement, ORPCError } from '@orpc/nest'
 import { contract } from '@repo/contract'
+import type { ListBookmarks } from '@repo/schemas'
+import { mockMetaPagination } from '../../pagination/__mocks__/pagination.mock'
 import {
 	mockBookmark,
 	mockCreateBookmarkInput,
@@ -27,7 +29,8 @@ jest.mock('@orpc/nest', () => ({
 jest.mock('@repo/contract', () => ({
 	contract: {
 		bookmark: {
-			create: 'bookmark.create'
+			create: 'bookmark.create',
+			list: 'bookmark.list'
 		}
 	}
 }))
@@ -99,11 +102,11 @@ describe('BookmarksController', () => {
 	})
 
 	it('should return a list of bookmarks', async () => {
-		const mockListBookmarks = {
-			bookmarks: [mockBookmark],
-			total: 1,
-			page: 1,
-			limit: 10
+		const mockListBookmarks: ListBookmarks = {
+			data: [mockBookmark],
+			meta: {
+				...mockMetaPagination
+			}
 		}
 		bookmarksServiceMock.list.mockResolvedValue(mockListBookmarks)
 		handlerMock.mockImplementation(async (resolver) =>
