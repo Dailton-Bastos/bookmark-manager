@@ -57,6 +57,7 @@ describe('BookmarksService', () => {
 					useValue: {
 						get: jest.fn(),
 						set: jest.fn(),
+						del: jest.fn(),
 						clear: jest.fn()
 					} as unknown as Cache
 				}
@@ -157,7 +158,12 @@ describe('BookmarksService', () => {
 			const returning = (db as unknown as { returning: jest.Mock })
 				.returning as jest.Mock
 
+			const registryKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
+			const cachedListKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_1_10_asc`
+
 			returning.mockResolvedValueOnce([mockBookmark])
+			const mockRegistry: string[] = [cachedListKey]
+			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockRegistry)
 
 			const result = await service.create(
 				{ ...createBookmarkInput, tags: [] },
@@ -165,7 +171,9 @@ describe('BookmarksService', () => {
 			)
 
 			expect(insert).toHaveBeenCalledWith(schema.bookmarks)
-			expect(cacheManager.clear).toHaveBeenCalled()
+			expect(cacheManager.get).toHaveBeenCalledWith(registryKey)
+			expect(cacheManager.del).toHaveBeenCalledWith(cachedListKey)
+			expect(cacheManager.del).toHaveBeenCalledWith(registryKey)
 			expect(result).toEqual({
 				...mockBookmark,
 				tags: []
@@ -177,8 +185,13 @@ describe('BookmarksService', () => {
 			const returning = (db as unknown as { returning: jest.Mock })
 				.returning as jest.Mock
 
+			const registryKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
+			const cachedListKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_1_10_asc`
+
 			returning.mockResolvedValueOnce([mockBookmark])
 			jest.spyOn(tagsService, 'create').mockResolvedValueOnce(null)
+			const mockRegistry: string[] = [cachedListKey]
+			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockRegistry)
 
 			const result = await service.create(createBookmarkInput, ownerId)
 
@@ -187,7 +200,9 @@ describe('BookmarksService', () => {
 				{ name: 'Test Tag' },
 				expect.anything()
 			)
-			expect(cacheManager.clear).toHaveBeenCalled()
+			expect(cacheManager.get).toHaveBeenCalledWith(registryKey)
+			expect(cacheManager.del).toHaveBeenCalledWith(cachedListKey)
+			expect(cacheManager.del).toHaveBeenCalledWith(registryKey)
 			expect(result).toEqual({
 				...mockBookmark,
 				tags: []
@@ -401,7 +416,71 @@ describe('BookmarksService', () => {
 			expect(db.transaction).not.toHaveBeenCalled()
 			expect(paginationProvider.paginateQuery).not.toHaveBeenCalled()
 			expect(cacheManager.set).not.toHaveBeenCalled()
-			expect(cacheManager.clear).not.toHaveBeenCalled()
+			expect(cacheManager.del).not.toHaveBeenCalled()
+		})
+
+		it('should cache the result on a cache miss and write back via cacheManager.set', async () => {
+			const select = db.select as jest.Mock
+
+			// Mock the total count query
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+			})
+
+			// Mock the bookmarks query
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				limit: jest.fn().mockReturnThis(),
+				offset: jest.fn().mockReturnThis(),
+				orderBy: jest.fn().mockResolvedValueOnce([mockBookmark])
+			})
+
+			// Mock the bookmark tags query
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				leftJoin: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([
+					{
+						bookmarkId: 1,
+						tag: { id: 1, name: 'Test Tag' }
+					}
+				])
+			})
+
+			jest
+				.spyOn(paginationProvider, 'paginateQuery')
+				.mockImplementationOnce(({ paginationQuery, data, totalCount }) => ({
+					data,
+					meta: {
+						itemsPerPage: paginationQuery.limit,
+						currentPage: paginationQuery.page,
+						totalItems: totalCount,
+						totalPages: Math.ceil(totalCount / paginationQuery.limit),
+						hasNextPage:
+							paginationQuery.page * paginationQuery.limit < totalCount,
+						hasPreviousPage: paginationQuery.page > 1
+					}
+				}))
+
+			const query = { limit: 10, page: 1, order: 'asc' as const }
+			const ownerId = 'user-123'
+			const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${query.page}_${query.limit}_${query.order}`
+			const registryKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
+
+			// Simulate cache miss for the main key, then empty registry
+			jest
+				.spyOn(cacheManager, 'get')
+				.mockResolvedValueOnce(undefined) // cache miss for cacheKey
+				.mockResolvedValueOnce(undefined) // no existing keys in registry
+
+			const result = await service.list(query, ownerId)
+
+			expect(cacheManager.get).toHaveBeenCalledWith(cacheKey)
+			expect(cacheManager.set).toHaveBeenCalledWith(cacheKey, result)
+			expect(cacheManager.get).toHaveBeenCalledWith(registryKey)
+			expect(cacheManager.set).toHaveBeenCalledWith(registryKey, [cacheKey])
 		})
 	})
 })

@@ -28,7 +28,7 @@ export class BookmarksService {
 	async create(createBookmarkInput: CreateBookmark, ownerId: string) {
 		const { title, description, url, tags } = createBookmarkInput
 
-		return this.db.transaction(async (tx) => {
+		const result = await this.db.transaction(async (tx) => {
 			const [bookmark] = await tx
 				.insert(schema.bookmarks)
 				.values({
@@ -42,9 +42,6 @@ export class BookmarksService {
 			if (!bookmark) return null
 
 			if (!tags || tags.length === 0) {
-				// Invalidate cache after creating a new bookmark without tags
-				await this.cacheManager.clear()
-
 				return { ...bookmark, tags: [] }
 			}
 
@@ -64,9 +61,6 @@ export class BookmarksService {
 			)
 
 			if (validTags.length === 0) {
-				// Invalidate cache after creating a new bookmark without valid tags
-				await this.cacheManager.clear()
-
 				return { ...bookmark, tags: [] }
 			}
 
@@ -76,11 +70,25 @@ export class BookmarksService {
 					validTags.map((tag) => ({ bookmarkId: bookmark.id, tagId: tag.id }))
 				)
 
-			// Invalidate cache after creating a new bookmark with tags
-			await this.cacheManager.clear()
-
 			return { ...bookmark, tags: validTags }
 		})
+
+		// Invalidate only this owner's bookmark list cache entries after the transaction commits
+		if (result !== null) {
+			await this.invalidateOwnerCache(ownerId)
+		}
+
+		return result
+	}
+
+	private async invalidateOwnerCache(ownerId: string): Promise<void> {
+		const registryKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
+		const cachedKeys = await this.cacheManager.get<string[]>(registryKey)
+
+		if (cachedKeys && cachedKeys.length > 0) {
+			await Promise.all(cachedKeys.map((key) => this.cacheManager.del(key)))
+			await this.cacheManager.del(registryKey)
+		}
 	}
 
 	async list(
@@ -93,7 +101,7 @@ export class BookmarksService {
 
 		if (cachedResult) return cachedResult
 
-		return this.db.transaction(async (tx) => {
+		const result = await this.db.transaction(async (tx) => {
 			const bookmarksTotalCount = await tx
 				.select({ bookmarksCount: count() })
 				.from(schema.bookmarks)
@@ -154,7 +162,7 @@ export class BookmarksService {
 				tagsByBookmarkId[bookmarkId].push(tag)
 			}
 
-			const result = this.paginationProvider.paginateQuery<Bookmark>({
+			return this.paginationProvider.paginateQuery<Bookmark>({
 				paginationQuery: { page, limit },
 				data: bookmarks.map((bookmark) => ({
 					...bookmark,
@@ -162,10 +170,29 @@ export class BookmarksService {
 				})),
 				totalCount: bookmarksCount
 			})
-
-			await this.cacheManager.set(cacheKey, result)
-
-			return result
 		})
+
+		await this.registerAndCacheResult(cacheKey, ownerId, result)
+
+		return result
+	}
+
+	private async registerAndCacheResult(
+		cacheKey: string,
+		ownerId: string,
+		result: ListBookmarks
+	): Promise<void> {
+		const registryKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
+
+		// Read the registry before caching to minimise the window for concurrent
+		// writes to miss each other's keys (best-effort; not fully atomic).
+		const existingKeys =
+			(await this.cacheManager.get<string[]>(registryKey)) ?? []
+
+		await this.cacheManager.set(cacheKey, result)
+
+		if (!existingKeys.includes(cacheKey)) {
+			await this.cacheManager.set(registryKey, [...existingKeys, cacheKey])
+		}
 	}
 }
