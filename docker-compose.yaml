@@ -154,7 +154,7 @@ services:
       - ./pgadmin:/var/lib/pgadmin
 
   redisinsight:
-   image: redis/redisinsight:latest
+   image: redis/redisinsight:3.4
    container_name: redisinsight
    restart: always
    ports:
