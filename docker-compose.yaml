@@ -57,6 +57,21 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
+  redis:
+    image: redis:8.4.2-alpine
+    container_name: redis
+    ports:
+      - '127.0.0.1:6379:6379'
+    volumes:
+      - ./redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: always
+
   api:
     container_name: api
     build:
@@ -69,6 +84,8 @@ services:
       workspace:
         condition: service_healthy
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     volumes:
       - .:/usr/src/app
@@ -135,6 +152,18 @@ services:
         condition: service_healthy
     volumes:
       - ./pgadmin:/var/lib/pgadmin
+
+  redisinsight:
+   image: redis/redisinsight:3.4
+   container_name: redisinsight
+   restart: always
+   ports:
+     - '127.0.0.1:5540:5540'
+   volumes:
+     - ./redisinsight:/data
+   depends_on:
+    redis:
+     condition: service_healthy
 
 volumes:
   node_modules:

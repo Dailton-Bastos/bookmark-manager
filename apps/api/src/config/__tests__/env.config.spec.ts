@@ -16,7 +16,9 @@ describe('EnvConfig', () => {
 				BETTER_AUTH_URL: 'http://localhost:3001',
 				BETTER_AUTH_SECRET: 'secret',
 				UI_URL: 'http://localhost:3000',
-				API_URL: 'http://localhost:3001'
+				API_URL: 'http://localhost:3001',
+				REDIS_URL: 'redis://localhost:6379',
+				CACHE_TTL: 60000
 			}
 
 			expect(() => validate(config)).not.toThrow()

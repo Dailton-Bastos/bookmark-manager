@@ -1,3 +1,5 @@
+import KeyvRedis from '@keyv/redis'
+import { CacheModule } from '@nestjs/cache-manager'
 import { Logger, MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { ORPCError, ORPCModule, onError } from '@orpc/nest'
@@ -6,8 +8,10 @@ import { experimental_RethrowHandlerPlugin as RethrowHandlerPlugin } from '@orpc
 import { AuthModule } from '@thallesp/nestjs-better-auth'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { KeyvCacheableMemory } from 'cacheable'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { Request } from 'express'
+import { Keyv } from 'keyv'
 import z from 'zod'
 import { BookmarksModule } from './bookmarks/bookmarks.module'
 import { validate } from './config/env.config'
@@ -39,9 +43,23 @@ const logger = new Logger('oRPC')
 			expandVariables: true,
 			validate
 		}),
-		EnvModule,
-		HealthModule,
-		DatabaseModule,
+		CacheModule.registerAsync({
+			isGlobal: true,
+			imports: [EnvModule],
+			useFactory: async (envService: EnvService) => {
+				return {
+					stores: [
+						new Keyv({
+							store: new KeyvCacheableMemory({
+								ttl: envService.get('CACHE_TTL')
+							})
+						}),
+						new KeyvRedis(envService.get('REDIS_URL'))
+					]
+				}
+			},
+			inject: [EnvService]
+		}),
 		AuthModule.forRootAsync({
 			imports: [DatabaseModule, EnvModule],
 			useFactory: (database: NodePgDatabase, envService: EnvService) => ({
@@ -107,6 +125,9 @@ const logger = new Logger('oRPC')
 				})
 			]
 		}),
+		EnvModule,
+		HealthModule,
+		DatabaseModule,
 		BookmarksModule,
 		TagsModule,
 		PaginationModule
