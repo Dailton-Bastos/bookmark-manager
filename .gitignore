@@ -42,6 +42,8 @@
 **/*.pid.lock
 pgdata/
 pgadmin/
+redis/
+redisinsight/
 
 # IDEs and editors
 **/.idea

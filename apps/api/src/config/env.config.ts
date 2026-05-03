@@ -36,7 +36,9 @@ const envSchema = z.object({
 	API_URL: z.url({
 		protocol: /^https?$/,
 		message: 'API_URL must be a valid URL'
-	})
+	}),
+	REDIS_URL: z.string().nonempty({ message: 'REDIS_URL is required' }),
+	CACHE_TTL: z.coerce.number().default(60000)
 })
 
 export const validate = (config: Record<string, unknown>) => {
