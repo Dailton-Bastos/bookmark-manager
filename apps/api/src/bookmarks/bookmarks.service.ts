@@ -1,3 +1,4 @@
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 import { Inject, Injectable } from '@nestjs/common'
 import type {
 	Bookmark,
@@ -10,6 +11,7 @@ import { asc, count, desc, eq, inArray } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { schema } from '../database/schemas'
 import { PaginationProvider } from '../pagination/pagination.provider'
+import { LISTBOOKMARKS_CACHE_KEY } from '../shared/constants/cache'
 import { DATABASE_CONNECTION } from '../shared/constants/database'
 import { TagsService } from '../tags/tags.service'
 
@@ -19,13 +21,14 @@ export class BookmarksService {
 		@Inject(DATABASE_CONNECTION)
 		private readonly db: NodePgDatabase<typeof schema>,
 		private readonly tagsService: TagsService,
-		private readonly paginationProvider: PaginationProvider
+		private readonly paginationProvider: PaginationProvider,
+		@Inject(CACHE_MANAGER) private cacheManager: Cache
 	) {}
 
 	async create(createBookmarkInput: CreateBookmark, ownerId: string) {
 		const { title, description, url, tags } = createBookmarkInput
 
-		return await this.db.transaction(async (tx) => {
+		return this.db.transaction(async (tx) => {
 			const [bookmark] = await tx
 				.insert(schema.bookmarks)
 				.values({
@@ -39,10 +42,10 @@ export class BookmarksService {
 			if (!bookmark) return null
 
 			if (!tags || tags.length === 0) {
-				return {
-					...bookmark,
-					tags: []
-				}
+				// Invalidate cache after creating a new bookmark without tags
+				await this.cacheManager.clear()
+
+				return { ...bookmark, tags: [] }
 			}
 
 			const uniqueTags = [...new Set(tags)]
@@ -61,10 +64,10 @@ export class BookmarksService {
 			)
 
 			if (validTags.length === 0) {
-				return {
-					...bookmark,
-					tags: []
-				}
+				// Invalidate cache after creating a new bookmark without valid tags
+				await this.cacheManager.clear()
+
+				return { ...bookmark, tags: [] }
 			}
 
 			await tx
@@ -73,10 +76,10 @@ export class BookmarksService {
 					validTags.map((tag) => ({ bookmarkId: bookmark.id, tagId: tag.id }))
 				)
 
-			return {
-				...bookmark,
-				tags: validTags
-			}
+			// Invalidate cache after creating a new bookmark with tags
+			await this.cacheManager.clear()
+
+			return { ...bookmark, tags: validTags }
 		})
 	}
 
@@ -84,6 +87,12 @@ export class BookmarksService {
 		{ limit, page, order }: ListBookmarksInput,
 		ownerId: string
 	): Promise<ListBookmarks> {
+		const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${page}_${limit}_${order}`
+
+		const cachedResult = await this.cacheManager.get<ListBookmarks>(cacheKey)
+
+		if (cachedResult) return cachedResult
+
 		return this.db.transaction(async (tx) => {
 			const bookmarksTotalCount = await tx
 				.select({ bookmarksCount: count() })
@@ -145,7 +154,7 @@ export class BookmarksService {
 				tagsByBookmarkId[bookmarkId].push(tag)
 			}
 
-			return this.paginationProvider.paginateQuery<Bookmark>({
+			const result = this.paginationProvider.paginateQuery<Bookmark>({
 				paginationQuery: { page, limit },
 				data: bookmarks.map((bookmark) => ({
 					...bookmark,
@@ -153,6 +162,10 @@ export class BookmarksService {
 				})),
 				totalCount: bookmarksCount
 			})
+
+			await this.cacheManager.set(cacheKey, result)
+
+			return result
 		})
 	}
 }
