@@ -158,7 +158,12 @@ describe('BookmarksService', () => {
 			const returning = (db as unknown as { returning: jest.Mock })
 				.returning as jest.Mock
 
+			const registryKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
+			const cachedListKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_1_10_asc`
+
 			returning.mockResolvedValueOnce([mockBookmark])
+			const mockRegistry: string[] = [cachedListKey]
+			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockRegistry)
 
 			const result = await service.create(
 				{ ...createBookmarkInput, tags: [] },
@@ -166,9 +171,9 @@ describe('BookmarksService', () => {
 			)
 
 			expect(insert).toHaveBeenCalledWith(schema.bookmarks)
-			expect(cacheManager.del).toHaveBeenCalledWith(
-				`${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
-			)
+			expect(cacheManager.get).toHaveBeenCalledWith(registryKey)
+			expect(cacheManager.del).toHaveBeenCalledWith(cachedListKey)
+			expect(cacheManager.del).toHaveBeenCalledWith(registryKey)
 			expect(result).toEqual({
 				...mockBookmark,
 				tags: []
@@ -180,8 +185,13 @@ describe('BookmarksService', () => {
 			const returning = (db as unknown as { returning: jest.Mock })
 				.returning as jest.Mock
 
+			const registryKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
+			const cachedListKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_1_10_asc`
+
 			returning.mockResolvedValueOnce([mockBookmark])
 			jest.spyOn(tagsService, 'create').mockResolvedValueOnce(null)
+			const mockRegistry: string[] = [cachedListKey]
+			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockRegistry)
 
 			const result = await service.create(createBookmarkInput, ownerId)
 
@@ -190,9 +200,9 @@ describe('BookmarksService', () => {
 				{ name: 'Test Tag' },
 				expect.anything()
 			)
-			expect(cacheManager.del).toHaveBeenCalledWith(
-				`${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
-			)
+			expect(cacheManager.get).toHaveBeenCalledWith(registryKey)
+			expect(cacheManager.del).toHaveBeenCalledWith(cachedListKey)
+			expect(cacheManager.del).toHaveBeenCalledWith(registryKey)
 			expect(result).toEqual({
 				...mockBookmark,
 				tags: []

@@ -87,9 +87,8 @@ export class BookmarksService {
 
 		if (cachedKeys && cachedKeys.length > 0) {
 			await Promise.all(cachedKeys.map((key) => this.cacheManager.del(key)))
+			await this.cacheManager.del(registryKey)
 		}
-
-		await this.cacheManager.del(registryKey)
 	}
 
 	async list(
@@ -185,10 +184,12 @@ export class BookmarksService {
 	): Promise<void> {
 		const registryKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
 
-		await this.cacheManager.set(cacheKey, result)
-
+		// Read the registry before caching to minimise the window for concurrent
+		// writes to miss each other's keys (best-effort; not fully atomic).
 		const existingKeys =
 			(await this.cacheManager.get<string[]>(registryKey)) ?? []
+
+		await this.cacheManager.set(cacheKey, result)
 
 		if (!existingKeys.includes(cacheKey)) {
 			await this.cacheManager.set(registryKey, [...existingKeys, cacheKey])
