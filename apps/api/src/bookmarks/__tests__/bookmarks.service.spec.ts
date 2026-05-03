@@ -1,9 +1,11 @@
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 import { Test, TestingModule } from '@nestjs/testing'
 import type { CreateBookmark } from '@repo/schemas'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { schema } from '../../database/schemas'
 import { mockMetaPagination } from '../../pagination/__mocks__/pagination.mock'
 import { PaginationProvider } from '../../pagination/pagination.provider'
+import { LISTBOOKMARKS_CACHE_KEY } from '../../shared/constants/cache'
 import { DATABASE_CONNECTION } from '../../shared/constants/database'
 import { TagsService } from '../../tags/tags.service'
 import {
@@ -17,6 +19,7 @@ describe('BookmarksService', () => {
 	let service: BookmarksService
 	let tagsService: TagsService
 	let paginationProvider: PaginationProvider
+	let cacheManager: Cache
 	let db: NodePgDatabase<typeof schema>
 	let mockDb: {
 		insert: jest.Mock
@@ -48,6 +51,14 @@ describe('BookmarksService', () => {
 				{
 					provide: DATABASE_CONNECTION,
 					useValue: mockDb as unknown as NodePgDatabase<typeof schema>
+				},
+				{
+					provide: CACHE_MANAGER,
+					useValue: {
+						get: jest.fn(),
+						set: jest.fn(),
+						clear: jest.fn()
+					} as unknown as Cache
 				}
 			]
 		}).compile()
@@ -56,6 +67,7 @@ describe('BookmarksService', () => {
 		tagsService = module.get<TagsService>(TagsService)
 		paginationProvider = module.get<PaginationProvider>(PaginationProvider)
 		db = module.get<NodePgDatabase<typeof schema>>(DATABASE_CONNECTION)
+		cacheManager = module.get<Cache>(CACHE_MANAGER)
 	})
 
 	it('should be defined', () => {
@@ -63,6 +75,7 @@ describe('BookmarksService', () => {
 		expect(tagsService).toBeDefined()
 		expect(paginationProvider).toBeDefined()
 		expect(db).toBeDefined()
+		expect(cacheManager).toBeDefined()
 	})
 
 	describe('create', () => {
@@ -152,6 +165,29 @@ describe('BookmarksService', () => {
 			)
 
 			expect(insert).toHaveBeenCalledWith(schema.bookmarks)
+			expect(cacheManager.clear).toHaveBeenCalled()
+			expect(result).toEqual({
+				...mockBookmark,
+				tags: []
+			})
+		})
+
+		it('should return the created bookmark without tags if all provided tags are invalid', async () => {
+			const insert = db.insert as jest.Mock
+			const returning = (db as unknown as { returning: jest.Mock })
+				.returning as jest.Mock
+
+			returning.mockResolvedValueOnce([mockBookmark])
+			jest.spyOn(tagsService, 'create').mockResolvedValueOnce(null)
+
+			const result = await service.create(createBookmarkInput, ownerId)
+
+			expect(insert).toHaveBeenCalledWith(schema.bookmarks)
+			expect(tagsService.create).toHaveBeenCalledWith(
+				{ name: 'Test Tag' },
+				expect.anything()
+			)
+			expect(cacheManager.clear).toHaveBeenCalled()
 			expect(result).toEqual({
 				...mockBookmark,
 				tags: []
@@ -160,7 +196,7 @@ describe('BookmarksService', () => {
 	})
 
 	describe('list', () => {
-		it('should return empty paginated result if no bookmarks are found', async () => {
+		it('should return empty paginated result if no bookmarks count is found', async () => {
 			const select = db.select as jest.Mock
 
 			select.mockReturnValueOnce({
@@ -177,6 +213,38 @@ describe('BookmarksService', () => {
 			expect(result).toEqual({
 				data: [],
 				meta: { ...mockMetaPagination }
+			})
+		})
+
+		it('should return empty paginated result if no bookmarks are found', async () => {
+			const select = db.select as jest.Mock
+
+			// Mock the total count query
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+			})
+
+			// Mock the bookmarks query to return no bookmarks
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				limit: jest.fn().mockReturnThis(),
+				offset: jest.fn().mockReturnThis(),
+				orderBy: jest.fn().mockResolvedValueOnce([])
+			})
+
+			const result = await service.list(
+				{ limit: 10, page: 1, order: 'asc' },
+				'user-123'
+			)
+
+			expect(select).toHaveBeenCalledWith()
+			expect(select).toHaveBeenCalledTimes(2)
+			expect(select).toHaveBeenCalledWith({ bookmarksCount: expect.anything() })
+			expect(result).toEqual({
+				data: [],
+				meta: { ...mockMetaPagination, totalItems: 0, totalPages: 0 }
 			})
 		})
 
@@ -298,6 +366,42 @@ describe('BookmarksService', () => {
 				data: [mockBookmarkWithoutTags],
 				meta: { ...mockMetaPagination, totalItems: 1, totalPages: 1 }
 			})
+		})
+
+		it('should return cached result if available', async () => {
+			const cachedBookmarks = {
+				data: [mockBookmarkWithTags],
+				meta: { ...mockMetaPagination, totalItems: 1, totalPages: 1 }
+			}
+
+			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(cachedBookmarks)
+			jest
+				.spyOn(paginationProvider, 'paginateQuery')
+				.mockImplementationOnce(({ paginationQuery, data, totalCount }) => ({
+					data,
+					meta: {
+						itemsPerPage: paginationQuery.limit,
+						currentPage: paginationQuery.page,
+						totalItems: totalCount,
+						totalPages: Math.ceil(totalCount / paginationQuery.limit),
+						hasNextPage:
+							paginationQuery.page * paginationQuery.limit < totalCount,
+						hasPreviousPage: paginationQuery.page > 1
+					}
+				}))
+
+			const query = { limit: 10, page: 1, order: 'asc' as const }
+			const ownerId = 'user-123'
+			const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${query.page}_${query.limit}_${query.order}`
+
+			const result = await service.list(query, ownerId)
+
+			expect(cacheManager.get).toHaveBeenCalledWith(cacheKey)
+			expect(result).toEqual(cachedBookmarks)
+			expect(db.transaction).not.toHaveBeenCalled()
+			expect(paginationProvider.paginateQuery).not.toHaveBeenCalled()
+			expect(cacheManager.set).not.toHaveBeenCalled()
+			expect(cacheManager.clear).not.toHaveBeenCalled()
 		})
 	})
 })
