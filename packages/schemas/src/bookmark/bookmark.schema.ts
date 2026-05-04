@@ -42,7 +42,9 @@ export const createBookmarkSchema = z.object({
 })
 
 export const listBookmarksInputSchema = paginationQuerySchema.extend({
-	order: z.enum(['asc', 'desc']).default('asc')
+	order: z
+		.enum(['asc', 'desc', 'recently_visited', 'most_visited'])
+		.default('asc')
 })
 
 export const listBookmarksSchema = z.object({
@@ -54,3 +56,4 @@ export type Bookmark = z.infer<typeof bookmarkSchema>
 export type CreateBookmark = z.infer<typeof createBookmarkSchema>
 export type ListBookmarks = z.infer<typeof listBookmarksSchema>
 export type ListBookmarksInput = z.infer<typeof listBookmarksInputSchema>
+export type ListBookmarksOrder = ListBookmarksInput['order']

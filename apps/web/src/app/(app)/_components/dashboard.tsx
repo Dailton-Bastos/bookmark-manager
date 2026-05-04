@@ -9,13 +9,16 @@ import { LoaderCircle, Plus } from 'ui/components/icons'
 import { Button } from 'ui/components/shadcn/ui/button'
 import { SortByDropdown } from '@/components/app/sort-by-dropdown'
 import { Bookmark } from '@/components/shared/bookmark'
+import { PrimaryButton as AddBookmarkButton } from '@/components/shared/primary-button'
 import { useAddBookmarkModal } from '@/hooks/useBookmarkModal'
+import { useBookmarks } from '@/hooks/useBookmarks'
 import { orpcClient } from '@/lib/orpc-client'
-import { PrimaryButton as AddBookmarkButton } from '../../../components/shared/primary-button'
 
 export const Dashboard = () => {
 	const { onOpen } = useAddBookmarkModal()
 	const { start, complete } = useLoadingBar()
+
+	const { limit, order, setOrder } = useBookmarks()
 
 	const {
 		data,
@@ -29,9 +32,9 @@ export const Dashboard = () => {
 	} = useInfiniteQuery(
 		orpcClient.bookmark.list.infiniteOptions({
 			input: (pageParam: number | undefined) => ({
-				limit: 10,
-				page: pageParam ?? 1,
-				order: 'desc'
+				limit,
+				order,
+				page: pageParam ?? 1
 			}),
 			initialPageParam: 1,
 			getNextPageParam: ({ meta }) =>
@@ -76,7 +79,7 @@ export const Dashboard = () => {
 		)
 	}
 
-	if (bookmarks.length === 0) {
+	if (!isPending && bookmarks.length === 0) {
 		return (
 			<section className="flex flex-col pt-28 items-center justify-center gap-4 w-full p-4">
 				<p className="text-muted-foreground font-medium text-sm">
@@ -104,7 +107,7 @@ export const Dashboard = () => {
 					)}
 				</div>
 				<div className="ml-auto flex items-center gap-4">
-					<SortByDropdown />
+					<SortByDropdown order={order} setOrder={setOrder} />
 				</div>
 			</div>
 
