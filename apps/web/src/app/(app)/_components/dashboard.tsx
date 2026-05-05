@@ -3,12 +3,14 @@
 import type { Bookmark as BookmarkData } from '@repo/schemas'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
+import { useInView } from 'react-intersection-observer'
 import { useLoadingBar } from 'react-top-loading-bar'
 import { AlertError } from 'ui/components/alert-error'
 import { LoaderCircle, Plus } from 'ui/components/icons'
 import { Button } from 'ui/components/shadcn/ui/button'
 import { SortByDropdown } from '@/components/app/sort-by-dropdown'
 import { Bookmark } from '@/components/shared/bookmark'
+import { CardsSkeleton } from '@/components/shared/cards-skeleton'
 import { PrimaryButton as AddBookmarkButton } from '@/components/shared/primary-button'
 import { useAddBookmarkModal } from '@/hooks/useBookmarkModal'
 import { useBookmarks } from '@/hooks/useBookmarks'
@@ -19,6 +21,8 @@ export const Dashboard = () => {
 	const { start, complete } = useLoadingBar()
 
 	const { limit, order, setOrder } = useBookmarks()
+
+	const { ref, inView } = useInView()
 
 	const {
 		data,
@@ -53,6 +57,12 @@ export const Dashboard = () => {
 					: null
 			}))
 		}) ?? []
+
+	useEffect(() => {
+		if (inView && hasNextPage && !isFetchingNextPage) {
+			fetchNextPage()
+		}
+	}, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 
 	useEffect(() => {
 		if (isPending) {
@@ -115,13 +125,17 @@ export const Dashboard = () => {
 				<div className="@container/main flex flex-1 flex-col gap-2">
 					<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
 						<div className="grid grid-cols-1 gap-3 *:data-[slot=card]:shadow-md @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
-							{bookmarks.map((bookmark: BookmarkData) => (
-								<Bookmark key={bookmark.id} {...bookmark} />
-							))}
+							{!isPending &&
+								bookmarks.map((bookmark: BookmarkData) => (
+									<Bookmark key={bookmark.id} {...bookmark} />
+								))}
+
+							{(isFetchingNextPage || isPending) && <CardsSkeleton />}
 						</div>
 
 						<div className="w-full flex items-center justify-center mt-8">
 							<Button
+								ref={ref}
 								type="button"
 								variant="ghost"
 								onClick={() => fetchNextPage()}

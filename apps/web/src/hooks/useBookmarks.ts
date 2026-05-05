@@ -9,7 +9,7 @@ interface BookmarksStore {
 }
 
 export const useBookmarks = create<BookmarksStore>((set) => ({
-	order: 'asc',
+	order: 'desc',
 	limit: 12,
 	setOrder: (order) => set({ order }),
 	setLimit: (limit) => set({ limit })
