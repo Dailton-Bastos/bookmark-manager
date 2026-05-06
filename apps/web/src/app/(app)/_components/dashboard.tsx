@@ -2,10 +2,10 @@
 
 import type { Bookmark as BookmarkData } from '@repo/schemas'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useInView } from 'react-intersection-observer'
 import { useLoadingBar } from 'react-top-loading-bar'
-import { AlertError } from 'ui/components/alert-error'
+import { toast } from 'sonner'
 import { LoaderCircle, Plus } from 'ui/components/icons'
 import { Button } from 'ui/components/shadcn/ui/button'
 import { SortByDropdown } from '@/components/app/sort-by-dropdown'
@@ -31,7 +31,6 @@ export const Dashboard = () => {
 		isFetchingNextPage,
 		fetchNextPage,
 		hasNextPage,
-		refetch,
 		isPending
 	} = useInfiniteQuery(
 		orpcClient.bookmark.list.infiniteOptions({
@@ -46,17 +45,23 @@ export const Dashboard = () => {
 		})
 	)
 
-	const bookmarks =
-		data?.pages.flatMap((page) => {
-			return page.data.map((bookmark) => ({
-				...bookmark,
-				createdAt: new Date(bookmark.createdAt),
-				updatedAt: new Date(bookmark.updatedAt),
-				lastVisited: bookmark.lastVisited
-					? new Date(bookmark.lastVisited)
-					: null
-			}))
-		}) ?? []
+	const bookmarks = useMemo(() => {
+		if (!data) return []
+
+		return data.pages.map((page) => {
+			return {
+				...page,
+				data: page.data.map((bookmark) => ({
+					...bookmark,
+					createdAt: new Date(bookmark.createdAt),
+					updatedAt: new Date(bookmark.updatedAt),
+					lastVisited: bookmark.lastVisited
+						? new Date(bookmark.lastVisited)
+						: null
+				}))
+			}
+		})
+	}, [data])
 
 	useEffect(() => {
 		if (inView && hasNextPage && !isFetchingNextPage) {
@@ -76,20 +81,15 @@ export const Dashboard = () => {
 		return () => complete()
 	}, [isPending, start, complete])
 
-	if (error) {
-		return (
-			<section className="flex items-center justify-center w-full p-4">
-				<AlertError
-					title="Oops! Something went wrong"
-					description="There was a problem fetching your bookmarks. Please try again."
-					showDismissButton={false}
-					onRetry={() => refetch()}
-				/>
-			</section>
-		)
-	}
+	useEffect(() => {
+		if (error) {
+			toast.error(
+				'There was a problem fetching your bookmarks. Please try again.'
+			)
+		}
+	}, [error])
 
-	if (!isPending && bookmarks.length === 0) {
+	if (!isPending && bookmarks[0]?.data.length === 0) {
 		return (
 			<section className="flex flex-col pt-28 items-center justify-center gap-4 w-full p-4">
 				<p className="text-muted-foreground font-medium text-sm">
@@ -125,12 +125,17 @@ export const Dashboard = () => {
 				<div className="@container/main flex flex-1 flex-col gap-2">
 					<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
 						<div className="grid grid-cols-1 gap-3 *:data-[slot=card]:shadow-md @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
-							{!isPending &&
-								bookmarks.map((bookmark: BookmarkData) => (
-									<Bookmark key={bookmark.id} {...bookmark} />
-								))}
+							{bookmarks.map((page) => (
+								<React.Fragment key={page.meta.currentPage}>
+									{page.data.map((bookmark: BookmarkData) => (
+										<Bookmark key={bookmark.id} {...bookmark} />
+									))}
+								</React.Fragment>
+							))}
 
-							{(isFetchingNextPage || isPending) && <CardsSkeleton />}
+							{(isFetchingNextPage || isPending) && (
+								<CardsSkeleton length={12} />
+							)}
 						</div>
 
 						<div className="w-full flex items-center justify-center mt-8">
