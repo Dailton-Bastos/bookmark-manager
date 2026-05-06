@@ -89,6 +89,16 @@ export const Dashboard = () => {
 		}
 	}, [error])
 
+	if (!isPending && error && !data) {
+		return (
+			<section className="flex flex-col pt-28 items-center justify-center gap-4 w-full p-4">
+				<p className="text-muted-foreground font-medium text-sm">
+					There was a problem fetching your bookmarks. Please try again.
+				</p>
+			</section>
+		)
+	}
+
 	if (!isPending && bookmarks[0]?.data.length === 0) {
 		return (
 			<section className="flex flex-col pt-28 items-center justify-center gap-4 w-full p-4">

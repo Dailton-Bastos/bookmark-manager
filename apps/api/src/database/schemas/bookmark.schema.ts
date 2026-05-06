@@ -30,7 +30,9 @@ export const bookmarks = pgTable(
 	},
 	(table) => [
 		index('title_idx').on(table.title),
-		index('ownerId_idx').on(table.ownerId)
+		index('ownerId_idx').on(table.ownerId),
+		index('lastVisited_idx').on(table.lastVisited),
+		index('visitCount_idx').on(table.visitCount)
 	]
 )
 

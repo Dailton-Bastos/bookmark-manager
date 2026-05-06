@@ -7,8 +7,9 @@ import type {
 	ListBookmarksInput,
 	Tag
 } from '@repo/schemas'
-import { count, desc, eq, inArray } from 'drizzle-orm'
+import { count, desc, eq, inArray, sql } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import type { SQL } from 'drizzle-orm'
 import { schema } from '../database/schemas'
 import { PaginationProvider } from '../pagination/pagination.provider'
 import { LISTBOOKMARKS_CACHE_KEY } from '../shared/constants/cache'
@@ -119,17 +120,26 @@ export class BookmarksService {
 
 			const offset = (page - 1) * limit
 
-			let orderByClause: ReturnType<typeof desc>
+			let orderByClauses: SQL[]
 
 			switch (order) {
 				case 'recently_visited':
-					orderByClause = desc(schema.bookmarks.lastVisited)
+					orderByClauses = [
+						sql`${schema.bookmarks.lastVisited} DESC NULLS LAST`,
+						desc(schema.bookmarks.id)
+					]
 					break
 				case 'most_visited':
-					orderByClause = desc(schema.bookmarks.visitCount)
+					orderByClauses = [
+						desc(schema.bookmarks.visitCount),
+						desc(schema.bookmarks.id)
+					]
 					break
 				default:
-					orderByClause = desc(schema.bookmarks.createdAt)
+					orderByClauses = [
+						desc(schema.bookmarks.createdAt),
+						desc(schema.bookmarks.id)
+					]
 			}
 
 			const bookmarks = await tx
@@ -138,7 +148,7 @@ export class BookmarksService {
 				.where(eq(schema.bookmarks.ownerId, ownerId))
 				.limit(limit)
 				.offset(offset)
-				.orderBy(orderByClause)
+				.orderBy(...orderByClauses)
 
 			if (bookmarks.length === 0) {
 				return this.paginationProvider.paginateQuery<Bookmark>({
