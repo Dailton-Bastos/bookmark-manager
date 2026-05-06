@@ -44,12 +44,24 @@ export const SortByDropdown = ({ order, setOrder }: SortByDropdownProps) => {
 						)}
 					</DropdownMenuItem>
 
-					<DropdownMenuItem className="focus:bg-sidebar-accent px-2 py-3">
+					<DropdownMenuItem
+						className="focus:bg-sidebar-accent px-2 py-3"
+						onSelect={() => setOrder('recently_visited')}
+					>
 						Recently visited
+						{order === 'recently_visited' && (
+							<Check className="size-4 text-foreground ml-auto" />
+						)}
 					</DropdownMenuItem>
 
-					<DropdownMenuItem className="focus:bg-sidebar-accent px-2 py-3">
+					<DropdownMenuItem
+						className="focus:bg-sidebar-accent px-2 py-3"
+						onSelect={() => setOrder('most_visited')}
+					>
 						Most visited
+						{order === 'most_visited' && (
+							<Check className="size-4 text-foreground ml-auto" />
+						)}
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 			</DropdownMenuContent>
