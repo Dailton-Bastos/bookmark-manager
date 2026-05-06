@@ -110,14 +110,14 @@ describe('BookmarksController', () => {
 		}
 		bookmarksServiceMock.list.mockResolvedValue(mockListBookmarks)
 		handlerMock.mockImplementation(async (resolver) =>
-			resolver({ input: { limit: 10, page: 1, order: 'asc' } })
+			resolver({ input: { limit: 10, page: 1, order: 'desc' } })
 		)
 
 		const result = await controller.list(mockUserSession)
 
 		expect(implement).toHaveBeenCalledWith(contract.bookmark.list)
 		expect(bookmarksServiceMock.list).toHaveBeenCalledWith(
-			{ limit: 10, page: 1, order: 'asc' },
+			{ limit: 10, page: 1, order: 'desc' },
 			mockUserSession.user.id
 		)
 		expect(result).toEqual(mockListBookmarks)

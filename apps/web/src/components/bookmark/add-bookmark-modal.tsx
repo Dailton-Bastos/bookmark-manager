@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type CreateBookmark, createBookmarkSchema } from '@repo/schemas'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -24,6 +24,8 @@ import { AddBookmarkForm } from './add-bookmark-form'
 export const AddBookmarkModal = () => {
 	const { isOpen, onClose } = useAddBookmarkModal()
 
+	const queryClient = useQueryClient()
+
 	const form = useForm<CreateBookmark>({
 		resolver: zodResolver(createBookmarkSchema),
 		defaultValues: {
@@ -36,6 +38,9 @@ export const AddBookmarkModal = () => {
 	const { mutateAsync, isPending } = useMutation(
 		orpcClient.bookmark.create.mutationOptions({
 			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: orpcClient.bookmark.list.key()
+				})
 				form.reset()
 				onClose()
 			}

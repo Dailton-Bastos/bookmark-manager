@@ -1,16 +1,22 @@
 'use client'
 
-import { ArrowUpDown, Check } from 'ui/components/icons'
+import type { ListBookmarksOrder } from '@repo/schemas'
+import { ArrowUpDown } from 'ui/components/icons'
 import { Button } from 'ui/components/shadcn/ui/button'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuGroup,
-	DropdownMenuItem,
+	DropdownMenuRadioGroup,
+	DropdownMenuRadioItem,
 	DropdownMenuTrigger
 } from 'ui/components/shadcn/ui/dropdown-menu'
 
-export const SortByDropdown = () => {
+interface SortByDropdownProps {
+	order: ListBookmarksOrder
+	setOrder: (order: ListBookmarksOrder) => void
+}
+
+export const SortByDropdown = ({ order, setOrder }: SortByDropdownProps) => {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -27,20 +33,32 @@ export const SortByDropdown = () => {
 				align="end"
 				className="min-w-50 max-w-50 shadow-lg rounded-lg py-1 border border-secondary"
 			>
-				<DropdownMenuGroup className="font-semibold text-muted-foreground text-sm">
-					<DropdownMenuItem className="focus:bg-sidebar-accent px-2 py-3">
+				<DropdownMenuRadioGroup
+					value={order}
+					onValueChange={(value) => setOrder(value as ListBookmarksOrder)}
+					className="font-semibold text-muted-foreground text-sm"
+				>
+					<DropdownMenuRadioItem
+						className="focus:bg-sidebar-accent px-2 py-3"
+						value="desc"
+					>
 						Recently added
-						<Check className="ml-auto text-muted-foreground" />
-					</DropdownMenuItem>
+					</DropdownMenuRadioItem>
 
-					<DropdownMenuItem className="focus:bg-sidebar-accent px-2 py-3">
+					<DropdownMenuRadioItem
+						className="focus:bg-sidebar-accent px-2 py-3"
+						value="recently_visited"
+					>
 						Recently visited
-					</DropdownMenuItem>
+					</DropdownMenuRadioItem>
 
-					<DropdownMenuItem className="focus:bg-sidebar-accent px-2 py-3">
+					<DropdownMenuRadioItem
+						className="focus:bg-sidebar-accent px-2 py-3"
+						value="most_visited"
+					>
 						Most visited
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
+					</DropdownMenuRadioItem>
+				</DropdownMenuRadioGroup>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	)

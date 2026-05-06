@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import type { Bookmark as BookmarkProps } from '@repo/schemas'
 import { Calendar, Clock, Eye, Globe, Pin } from 'ui/components/icons'
 import { Badge } from 'ui/components/shadcn/ui/badge'
 import {
@@ -14,26 +14,9 @@ import { Separator } from 'ui/components/shadcn/ui/separator'
 import { formatDate } from '@/utils/format-date'
 import { BookmarkDropdown } from '../app/bookmark-dropdown'
 
-interface Bookmark {
-	id: string
-	title: string
-	url: string
-	favicon: string | null
-	description: string
-	tags: string[]
-	pinned: boolean
-	isArchived: boolean
-	visitCount: number
-	createdAt: string
-	lastVisited: string | null
-}
-
-interface BookmarkProps extends Bookmark {}
-
 export const Bookmark = ({
 	title,
 	url,
-	favicon,
 	description,
 	tags,
 	pinned,
@@ -46,17 +29,7 @@ export const Bookmark = ({
 		<Card className="@container/card p-4 pb-3 gap-3 min-h-68">
 			<CardHeader className="p-0 pb-1 gap-0">
 				<div className="flex items-center gap-3">
-					{favicon ? (
-						<Image
-							src={favicon}
-							alt={title}
-							width={44}
-							height={44}
-							unoptimized
-						/>
-					) : (
-						<Globe className="size-11" />
-					)}
+					<Globe className="size-11" />
 
 					<div className="w-full min-w-0">
 						<CardTitle className="text-lg font-bold font-sans text-foreground">
@@ -80,17 +53,19 @@ export const Bookmark = ({
 					{description}
 				</p>
 
-				<div className="flex items-center flex-wrap gap-2 mt-4">
-					{tags.map((tag) => (
-						<Badge
-							key={tag}
-							variant="secondary"
-							className="rounded-sm text-muted-foreground"
-						>
-							{tag}
-						</Badge>
-					))}
-				</div>
+				{tags && tags.length > 0 && (
+					<div className="flex items-center flex-wrap gap-2 mt-4">
+						{tags.map((tag) => (
+							<Badge
+								key={tag.id}
+								variant="secondary"
+								className="rounded-sm text-muted-foreground"
+							>
+								{tag.name}
+							</Badge>
+						))}
+					</div>
+				)}
 			</CardContent>
 
 			<Separator className="mt-auto" />
@@ -104,19 +79,19 @@ export const Bookmark = ({
 						</span>
 					</div>
 
-					{lastVisited && (
-						<div className="flex items-center">
-							<Clock className="size-3 mr-1.5 text-muted-foreground" />
-							<span className="text-muted-foreground font-medium text-xs">
-								{formatDate(lastVisited)}
-							</span>
-						</div>
-					)}
+					<div className="flex items-center">
+						<Clock className="size-3 mr-1.5 text-muted-foreground" />
+						<span className="text-muted-foreground font-medium text-xs">
+							{lastVisited
+								? formatDate(new Date(lastVisited).toISOString())
+								: 'Never'}
+						</span>
+					</div>
 
 					<div className="flex items-center">
 						<Calendar className="size-3 mr-1.5 text-muted-foreground" />
 						<span className="text-muted-foreground font-medium text-xs">
-							{formatDate(createdAt)}
+							{formatDate(new Date(createdAt).toISOString())}
 						</span>
 					</div>
 				</div>

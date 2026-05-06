@@ -1,6 +1,7 @@
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 import { Test, TestingModule } from '@nestjs/testing'
 import type { CreateBookmark } from '@repo/schemas'
+import type { SQL } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { schema } from '../../database/schemas'
 import { mockMetaPagination } from '../../pagination/__mocks__/pagination.mock'
@@ -220,7 +221,7 @@ describe('BookmarksService', () => {
 			})
 
 			const result = await service.list(
-				{ limit: 10, page: 1, order: 'asc' },
+				{ limit: 10, page: 1, order: 'desc' },
 				'user-123'
 			)
 
@@ -250,7 +251,7 @@ describe('BookmarksService', () => {
 			})
 
 			const result = await service.list(
-				{ limit: 10, page: 1, order: 'asc' },
+				{ limit: 10, page: 1, order: 'desc' },
 				'user-123'
 			)
 
@@ -309,7 +310,7 @@ describe('BookmarksService', () => {
 				}))
 
 			const result = await service.list(
-				{ limit: 10, page: 1, order: 'asc' },
+				{ limit: 10, page: 1, order: 'desc' },
 				'user-123'
 			)
 
@@ -373,7 +374,7 @@ describe('BookmarksService', () => {
 				}))
 
 			const result = await service.list(
-				{ limit: 10, page: 1, order: 'asc' },
+				{ limit: 10, page: 1, order: 'desc' },
 				'user-123'
 			)
 
@@ -405,7 +406,7 @@ describe('BookmarksService', () => {
 					}
 				}))
 
-			const query = { limit: 10, page: 1, order: 'asc' as const }
+			const query = { limit: 10, page: 1, order: 'desc' as const }
 			const ownerId = 'user-123'
 			const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${query.page}_${query.limit}_${query.order}`
 
@@ -464,7 +465,7 @@ describe('BookmarksService', () => {
 					}
 				}))
 
-			const query = { limit: 10, page: 1, order: 'asc' as const }
+			const query = { limit: 10, page: 1, order: 'desc' as const }
 			const ownerId = 'user-123'
 			const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${query.page}_${query.limit}_${query.order}`
 			const registryKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
@@ -481,6 +482,82 @@ describe('BookmarksService', () => {
 			expect(cacheManager.set).toHaveBeenCalledWith(cacheKey, result)
 			expect(cacheManager.get).toHaveBeenCalledWith(registryKey)
 			expect(cacheManager.set).toHaveBeenCalledWith(registryKey, [cacheKey])
+		})
+
+		it('should sort by lastVisited DESC NULLS LAST when order is recently_visited', async () => {
+			const select = db.select as jest.Mock
+
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+			})
+
+			const orderByMock = jest.fn().mockResolvedValueOnce([mockBookmark])
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				limit: jest.fn().mockReturnThis(),
+				offset: jest.fn().mockReturnThis(),
+				orderBy: orderByMock
+			})
+
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				leftJoin: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([])
+			})
+
+			await service.list(
+				{ limit: 10, page: 1, order: 'recently_visited' },
+				'user-123'
+			)
+
+			expect(orderByMock).toHaveBeenCalledTimes(1)
+			const orderByArgs: SQL[] = orderByMock.mock.calls[0]
+			expect(orderByArgs).toHaveLength(2)
+			// Verify the first clause is a raw SQL template containing NULLS LAST
+			const queryChunks = (
+				orderByArgs[0] as unknown as {
+					queryChunks: Array<{ value?: string[] }>
+				}
+			).queryChunks
+			const hasNullsLast = queryChunks.some((chunk) =>
+				chunk.value?.includes(' DESC NULLS LAST')
+			)
+			expect(hasNullsLast).toBe(true)
+		})
+
+		it('should sort by visitCount DESC with id tiebreaker when order is most_visited', async () => {
+			const select = db.select as jest.Mock
+
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+			})
+
+			const orderByMock = jest.fn().mockResolvedValueOnce([mockBookmark])
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				limit: jest.fn().mockReturnThis(),
+				offset: jest.fn().mockReturnThis(),
+				orderBy: orderByMock
+			})
+
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				leftJoin: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([])
+			})
+
+			await service.list(
+				{ limit: 10, page: 1, order: 'most_visited' },
+				'user-123'
+			)
+
+			expect(orderByMock).toHaveBeenCalledTimes(1)
+			const orderByArgs: SQL[] = orderByMock.mock.calls[0]
+			expect(orderByArgs).toHaveLength(2)
 		})
 	})
 })

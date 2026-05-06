@@ -43,6 +43,13 @@
 			"when": 1776996857885,
 			"tag": "20260424021417_adding_unique_index_composite_bookmark_tags",
 			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "7",
+			"when": 1746489561000,
+			"tag": "20260506000000_add_bookmark_sort_indexes",
+			"breakpoints": true
 		}
 	]
 }
