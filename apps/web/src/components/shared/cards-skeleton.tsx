@@ -1,9 +1,13 @@
 import { uuid } from '@/utils/uuid'
 
-export const CardsSkeleton = () => {
+interface CardsSkeletonProps {
+	length?: number
+}
+
+export const CardsSkeleton = ({ length = 8 }: CardsSkeletonProps) => {
 	return (
 		<>
-			{Array.from({ length: 8 }).map((_) => (
+			{Array.from({ length }).map((_) => (
 				<div
 					key={`skeleton-${uuid()}`}
 					className="animate-pulse flex flex-col gap-2"
