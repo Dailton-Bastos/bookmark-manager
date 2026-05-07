@@ -218,7 +218,8 @@ describe('ListBookmarksInputSchema', () => {
 		const validInput: ListBookmarksInput = {
 			page: 1,
 			limit: 10,
-			order: 'desc'
+			order: 'desc',
+			archived: 'exclude'
 		}
 
 		const result = listBookmarksInputSchema.safeParse(validInput)
@@ -229,6 +230,21 @@ describe('ListBookmarksInputSchema', () => {
 			expect(result.data.page).toBe(1)
 			expect(result.data.limit).toBe(10)
 			expect(result.data.order).toBe('desc')
+			expect(result.data.archived).toBe('exclude')
+		}
+	})
+
+	it('should default archived to include when omitted', () => {
+		const result = listBookmarksInputSchema.safeParse({
+			page: 1,
+			limit: 10,
+			order: 'desc'
+		})
+
+		expect(result.success).toBe(true)
+
+		if (result.success) {
+			expect(result.data.archived).toBe('include')
 		}
 	})
 })

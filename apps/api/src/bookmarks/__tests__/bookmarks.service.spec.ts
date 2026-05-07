@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import type { CreateBookmark } from '@repo/schemas'
 import type { SQL } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import { PgDialect } from 'drizzle-orm/pg-core'
 import { schema } from '../../database/schemas'
 import { mockMetaPagination } from '../../pagination/__mocks__/pagination.mock'
 import { PaginationProvider } from '../../pagination/pagination.provider'
@@ -17,6 +18,7 @@ import {
 import { BookmarksService } from '../bookmarks.service'
 
 describe('BookmarksService', () => {
+	const pgDialect = new PgDialect()
 	let service: BookmarksService
 	let tagsService: TagsService
 	let paginationProvider: PaginationProvider
@@ -212,12 +214,101 @@ describe('BookmarksService', () => {
 	})
 
 	describe('list', () => {
+		it.each([
+			{
+				name: 'include',
+				query: {
+					limit: 10,
+					page: 1,
+					order: 'desc' as const,
+					archived: 'include' as const
+				},
+				expectedSql: '"bookmarks"."owner_id" = $1',
+				expectedParams: ['user-123']
+			},
+			{
+				name: 'exclude',
+				query: {
+					limit: 10,
+					page: 1,
+					order: 'desc' as const,
+					archived: 'exclude' as const
+				},
+				expectedSql:
+					'("bookmarks"."owner_id" = $1 and "bookmarks"."is_archived" = $2)',
+				expectedParams: ['user-123', false]
+			},
+			{
+				name: 'only',
+				query: {
+					limit: 10,
+					page: 1,
+					order: 'desc' as const,
+					archived: 'only' as const
+				},
+				expectedSql:
+					'("bookmarks"."owner_id" = $1 and "bookmarks"."is_archived" = $2)',
+				expectedParams: ['user-123', true]
+			},
+			{
+				name: 'default include',
+				query: { limit: 10, page: 1, order: 'desc' as const },
+				expectedSql: '"bookmarks"."owner_id" = $1',
+				expectedParams: ['user-123']
+			}
+		])('should apply the correct archived filter for $name', async ({
+			query,
+			expectedSql,
+			expectedParams
+		}) => {
+			const select = db.select as jest.Mock
+			const whereCountMock = jest.fn().mockReturnThis()
+			const whereBookmarksMock = jest.fn().mockReturnThis()
+			const whereTagsMock = jest.fn().mockResolvedValueOnce([])
+
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: whereCountMock,
+				groupBy: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+			})
+
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: whereBookmarksMock,
+				limit: jest.fn().mockReturnThis(),
+				offset: jest.fn().mockReturnThis(),
+				orderBy: jest.fn().mockResolvedValueOnce([mockBookmark])
+			})
+
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				leftJoin: jest.fn().mockReturnThis(),
+				where: whereTagsMock
+			})
+
+			await service.list(query, 'user-123')
+
+			const countWhereQuery = pgDialect.sqlToQuery(
+				whereCountMock.mock.calls[0][0] as SQL
+			)
+			const bookmarksWhereQuery = pgDialect.sqlToQuery(
+				whereBookmarksMock.mock.calls[0][0] as SQL
+			)
+
+			expect(countWhereQuery.sql).toBe(expectedSql)
+			expect(countWhereQuery.params).toEqual(expectedParams)
+			expect(bookmarksWhereQuery.sql).toBe(expectedSql)
+			expect(bookmarksWhereQuery.params).toEqual(expectedParams)
+			expect(whereTagsMock).toHaveBeenCalledTimes(1)
+		})
+
 		it('should return empty paginated result if no bookmarks count is found', async () => {
 			const select = db.select as jest.Mock
 
 			select.mockReturnValueOnce({
 				from: jest.fn().mockReturnThis(),
-				where: jest.fn().mockResolvedValueOnce([])
+				where: jest.fn().mockReturnThis(),
+				groupBy: jest.fn().mockResolvedValueOnce([])
 			})
 
 			const result = await service.list(
@@ -238,7 +329,8 @@ describe('BookmarksService', () => {
 			// Mock the total count query
 			select.mockReturnValueOnce({
 				from: jest.fn().mockReturnThis(),
-				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+				where: jest.fn().mockReturnThis(),
+				groupBy: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
 			})
 
 			// Mock the bookmarks query to return no bookmarks
@@ -270,7 +362,8 @@ describe('BookmarksService', () => {
 			// Mock the total count query
 			select.mockReturnValueOnce({
 				from: jest.fn().mockReturnThis(),
-				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+				where: jest.fn().mockReturnThis(),
+				groupBy: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
 			})
 
 			// Mock the bookmarks query
@@ -310,7 +403,7 @@ describe('BookmarksService', () => {
 				}))
 
 			const result = await service.list(
-				{ limit: 10, page: 1, order: 'desc' },
+				{ limit: 10, page: 1, order: 'desc', archived: 'exclude' },
 				'user-123'
 			)
 
@@ -339,7 +432,8 @@ describe('BookmarksService', () => {
 			// Mock the total count query
 			select.mockReturnValueOnce({
 				from: jest.fn().mockReturnThis(),
-				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+				where: jest.fn().mockReturnThis(),
+				groupBy: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
 			})
 
 			// Mock the bookmarks query
@@ -374,7 +468,7 @@ describe('BookmarksService', () => {
 				}))
 
 			const result = await service.list(
-				{ limit: 10, page: 1, order: 'desc' },
+				{ limit: 10, page: 1, order: 'desc', archived: 'only' },
 				'user-123'
 			)
 
@@ -406,9 +500,14 @@ describe('BookmarksService', () => {
 					}
 				}))
 
-			const query = { limit: 10, page: 1, order: 'desc' as const }
+			const query = {
+				limit: 10,
+				page: 1,
+				order: 'desc' as const,
+				archived: 'include' as const
+			}
 			const ownerId = 'user-123'
-			const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${query.page}_${query.limit}_${query.order}`
+			const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${query.page}_${query.limit}_${query.order}_${query.archived}`
 
 			const result = await service.list(query, ownerId)
 
@@ -426,7 +525,8 @@ describe('BookmarksService', () => {
 			// Mock the total count query
 			select.mockReturnValueOnce({
 				from: jest.fn().mockReturnThis(),
-				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+				where: jest.fn().mockReturnThis(),
+				groupBy: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
 			})
 
 			// Mock the bookmarks query
@@ -465,9 +565,14 @@ describe('BookmarksService', () => {
 					}
 				}))
 
-			const query = { limit: 10, page: 1, order: 'desc' as const }
+			const query = {
+				limit: 10,
+				page: 1,
+				order: 'desc' as const,
+				archived: 'exclude' as const
+			}
 			const ownerId = 'user-123'
-			const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${query.page}_${query.limit}_${query.order}`
+			const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${query.page}_${query.limit}_${query.order}_${query.archived}`
 			const registryKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
 
 			// Simulate cache miss for the main key, then empty registry
@@ -489,7 +594,8 @@ describe('BookmarksService', () => {
 
 			select.mockReturnValueOnce({
 				from: jest.fn().mockReturnThis(),
-				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+				where: jest.fn().mockReturnThis(),
+				groupBy: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
 			})
 
 			const orderByMock = jest.fn().mockResolvedValueOnce([mockBookmark])
@@ -508,7 +614,7 @@ describe('BookmarksService', () => {
 			})
 
 			await service.list(
-				{ limit: 10, page: 1, order: 'recently_visited' },
+				{ limit: 10, page: 1, order: 'recently_visited', archived: 'include' },
 				'user-123'
 			)
 
@@ -532,7 +638,8 @@ describe('BookmarksService', () => {
 
 			select.mockReturnValueOnce({
 				from: jest.fn().mockReturnThis(),
-				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+				where: jest.fn().mockReturnThis(),
+				groupBy: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
 			})
 
 			const orderByMock = jest.fn().mockResolvedValueOnce([mockBookmark])
