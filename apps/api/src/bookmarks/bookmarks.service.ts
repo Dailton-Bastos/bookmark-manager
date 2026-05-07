@@ -4,6 +4,7 @@ import type {
 	Bookmark,
 	CreateBookmark,
 	ListBookmarks,
+	ListBookmarksArchived,
 	ListBookmarksInput,
 	Tag
 } from '@repo/schemas'
@@ -93,7 +94,14 @@ export class BookmarksService {
 	}
 
 	async list(
-		{ limit, page, order, archived = 'exclude' }: ListBookmarksInput,
+		{
+			limit,
+			page,
+			order,
+			archived = 'include'
+		}: Omit<ListBookmarksInput, 'archived'> & {
+			archived?: ListBookmarksArchived
+		},
 		ownerId: string
 	): Promise<ListBookmarks> {
 		const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${page}_${limit}_${order}_${archived}`

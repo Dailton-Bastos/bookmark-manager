@@ -43,7 +43,7 @@ export const createBookmarkSchema = z.object({
 
 export const listBookmarksInputSchema = paginationQuerySchema.extend({
 	order: z.enum(['desc', 'recently_visited', 'most_visited']).default('desc'),
-	archived: z.enum(['include', 'exclude', 'only']).optional()
+	archived: z.enum(['include', 'exclude', 'only']).default('include')
 })
 
 export const listBookmarksSchema = z.object({
