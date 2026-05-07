@@ -218,7 +218,8 @@ describe('ListBookmarksInputSchema', () => {
 		const validInput: ListBookmarksInput = {
 			page: 1,
 			limit: 10,
-			order: 'desc'
+			order: 'desc',
+			archived: 'exclude'
 		}
 
 		const result = listBookmarksInputSchema.safeParse(validInput)

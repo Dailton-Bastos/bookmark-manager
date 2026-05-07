@@ -7,9 +7,9 @@ import type {
 	ListBookmarksInput,
 	Tag
 } from '@repo/schemas'
-import { count, desc, eq, inArray, sql } from 'drizzle-orm'
-import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { SQL } from 'drizzle-orm'
+import { and, count, desc, eq, inArray, sql } from 'drizzle-orm'
+import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { schema } from '../database/schemas'
 import { PaginationProvider } from '../pagination/pagination.provider'
 import { LISTBOOKMARKS_CACHE_KEY } from '../shared/constants/cache'
@@ -93,20 +93,40 @@ export class BookmarksService {
 	}
 
 	async list(
-		{ limit, page, order }: ListBookmarksInput,
+		{ limit, page, order, archived = 'exclude' }: ListBookmarksInput,
 		ownerId: string
 	): Promise<ListBookmarks> {
-		const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${page}_${limit}_${order}`
+		const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${page}_${limit}_${order}_${archived}`
 
 		const cachedResult = await this.cacheManager.get<ListBookmarks>(cacheKey)
 
 		if (cachedResult) return cachedResult
 
+		let whereClause: SQL | undefined
+
+		switch (archived) {
+			case 'include':
+				whereClause = eq(schema.bookmarks.ownerId, ownerId) // No filter on archived status
+				break
+			case 'only':
+				whereClause = and(
+					eq(schema.bookmarks.ownerId, ownerId),
+					eq(schema.bookmarks.isArchived, true) // Only archived bookmarks
+				)
+				break
+			default:
+				whereClause = and(
+					eq(schema.bookmarks.ownerId, ownerId),
+					eq(schema.bookmarks.isArchived, false) // Exclude archived bookmarks
+				)
+		}
+
 		const result = await this.db.transaction(async (tx) => {
 			const bookmarksTotalCount = await tx
 				.select({ bookmarksCount: count() })
 				.from(schema.bookmarks)
-				.where(eq(schema.bookmarks.ownerId, ownerId))
+				.where(whereClause)
+				.groupBy(schema.bookmarks.ownerId)
 
 			if (!bookmarksTotalCount || bookmarksTotalCount.length === 0) {
 				return this.paginationProvider.paginateQuery<Bookmark>({
@@ -145,7 +165,7 @@ export class BookmarksService {
 			const bookmarks = await tx
 				.select()
 				.from(schema.bookmarks)
-				.where(eq(schema.bookmarks.ownerId, ownerId))
+				.where(whereClause)
 				.limit(limit)
 				.offset(offset)
 				.orderBy(...orderByClauses)
