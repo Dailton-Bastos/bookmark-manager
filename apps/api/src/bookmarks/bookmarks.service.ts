@@ -6,11 +6,10 @@ import type {
 	CreateBookmark,
 	ListBookmarks,
 	ListBookmarksArchived,
-	ListBookmarksInput,
-	Tag
+	ListBookmarksInput
 } from '@repo/schemas'
 import type { SQL } from 'drizzle-orm'
-import { and, count, desc, eq, inArray, sql } from 'drizzle-orm'
+import { and, count, desc, eq, sql } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { schema } from '../database/schemas'
 import { PaginationProvider } from '../pagination/pagination.provider'
@@ -189,26 +188,8 @@ export class BookmarksService {
 
 			const bookmarkIds = bookmarks.map((bookmark) => bookmark.id)
 
-			const bookmarkTags = await tx
-				.select({
-					bookmarkId: schema.bookmarkTags.bookmarkId,
-					tag: schema.tags
-				})
-				.from(schema.bookmarkTags)
-				.leftJoin(schema.tags, eq(schema.tags.id, schema.bookmarkTags.tagId))
-				.where(inArray(schema.bookmarkTags.bookmarkId, bookmarkIds))
-
-			const tagsByBookmarkId: Record<number, Tag[]> = {}
-
-			for (const { bookmarkId, tag } of bookmarkTags) {
-				if (!tagsByBookmarkId[bookmarkId]) {
-					tagsByBookmarkId[bookmarkId] = []
-				}
-
-				if (!tag) continue
-
-				tagsByBookmarkId[bookmarkId].push(tag)
-			}
+			const tagsByBookmarkId =
+				await this.tagsService.findByBookmarkIds(bookmarkIds)
 
 			return this.paginationProvider.paginateQuery<Bookmark>({
 				paginationQuery: { page, limit },
