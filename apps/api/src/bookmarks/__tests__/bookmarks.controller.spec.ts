@@ -30,7 +30,8 @@ jest.mock('@repo/contract', () => ({
 	contract: {
 		bookmark: {
 			create: 'bookmark.create',
-			list: 'bookmark.list'
+			list: 'bookmark.list',
+			archiveOrUnarchive: 'bookmark.archiveOrUnarchive'
 		}
 	}
 }))
@@ -41,7 +42,11 @@ jest.mock('@thallesp/nestjs-better-auth', () => ({
 
 describe('BookmarksController', () => {
 	let controller: BookmarksController
-	let bookmarksServiceMock: { create: jest.Mock; list: jest.Mock }
+	let bookmarksServiceMock: {
+		create: jest.Mock
+		list: jest.Mock
+		archiveOrUnarchive: jest.Mock
+	}
 
 	beforeEach(async () => {
 		handlerMock.mockReset()
@@ -55,7 +60,8 @@ describe('BookmarksController', () => {
 					provide: BookmarksService,
 					useValue: {
 						create: jest.fn(),
-						list: jest.fn()
+						list: jest.fn(),
+						archiveOrUnarchive: jest.fn()
 					}
 				}
 			]
@@ -86,7 +92,7 @@ describe('BookmarksController', () => {
 		expect(result).toEqual(mockBookmark)
 	})
 
-	it('should throw when service fails to create bookmark', async () => {
+	it('should throw error when service fails to create bookmark', async () => {
 		bookmarksServiceMock.create.mockResolvedValue(null)
 		handlerMock.mockImplementation(async (resolver) =>
 			resolver({ input: mockCreateBookmarkInput })
@@ -121,5 +127,35 @@ describe('BookmarksController', () => {
 			mockUserSession.user.id
 		)
 		expect(result).toEqual(mockListBookmarks)
+	})
+
+	it('should archive/unarchive a bookmark successfully', async () => {
+		bookmarksServiceMock.archiveOrUnarchive.mockResolvedValue(mockBookmark)
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({ input: { id: 1, isArchived: true } })
+		)
+
+		const result = await controller.archiveOrUnarchive(mockUserSession)
+
+		expect(implement).toHaveBeenCalledWith(contract.bookmark.archiveOrUnarchive)
+		expect(bookmarksServiceMock.archiveOrUnarchive).toHaveBeenCalledWith(
+			{ id: 1, isArchived: true },
+			mockUserSession.user.id
+		)
+		expect(result).toEqual(mockBookmark)
+	})
+
+	it('should throw error when service fails to archive/unarchive bookmark', async () => {
+		bookmarksServiceMock.archiveOrUnarchive.mockResolvedValue(null)
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({ input: { id: 1, isArchived: true } })
+		)
+
+		await expect(
+			controller.archiveOrUnarchive(mockUserSession)
+		).rejects.toBeInstanceOf(ORPCError)
+		await expect(
+			controller.archiveOrUnarchive(mockUserSession)
+		).rejects.toHaveProperty('message', 'Failed to archive/unarchive bookmark')
 	})
 })

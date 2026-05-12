@@ -1,6 +1,7 @@
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 import { Inject, Injectable } from '@nestjs/common'
 import type {
+	ArchivedUnarchivedBookmark,
 	Bookmark,
 	CreateBookmark,
 	ListBookmarks,
@@ -240,6 +241,53 @@ export class BookmarksService {
 
 		if (!existingKeys.includes(cacheKey)) {
 			await this.cacheManager.set(registryKey, [...existingKeys, cacheKey])
+		}
+	}
+
+	async findById(id: number, ownerId: string): Promise<Bookmark | null> {
+		const bookmark = await this.db.query.bookmarks.findFirst({
+			where: and(
+				eq(schema.bookmarks.id, id),
+				eq(schema.bookmarks.ownerId, ownerId)
+			)
+		})
+
+		if (!bookmark) return null
+
+		const tags = await this.tagsService.findByBookmarkIds([id])
+
+		return {
+			...bookmark,
+			tags: tags[id] || []
+		}
+	}
+
+	async archiveOrUnarchive(
+		input: ArchivedUnarchivedBookmark,
+		ownerId: string
+	): Promise<Bookmark | null> {
+		const { id, isArchived } = input
+
+		const existingBookmark = await this.findById(id, ownerId)
+
+		if (!existingBookmark) return null
+
+		const updatedBookmark = await this.db
+			.update(schema.bookmarks)
+			.set({ isArchived })
+			.where(
+				and(eq(schema.bookmarks.id, id), eq(schema.bookmarks.ownerId, ownerId))
+			)
+			.returning()
+
+		if (!updatedBookmark?.[0]) return null
+
+		// Invalidate this owner's bookmark list cache entries after archiving/unarchiving a bookmark
+		await this.invalidateOwnerCache(ownerId)
+
+		return {
+			...updatedBookmark[0],
+			tags: existingBookmark.tags
 		}
 	}
 }
