@@ -1,5 +1,6 @@
 import { oc } from '@orpc/contract'
 import {
+	archivedUnarchivedBookmarkSchema,
 	bookmarkSchema,
 	createBookmarkSchema,
 	listBookmarksInputSchema,
@@ -25,3 +26,13 @@ export const listBookmarksContract = oc
 	})
 	.input(listBookmarksInputSchema)
 	.output(listBookmarksSchema)
+
+export const archivedUnarchivedBookmarkContract = oc
+	.route({
+		method: 'PATCH',
+		path: '/bookmarks/:id/archive',
+		summary: 'Archive or unarchive a bookmark',
+		tags: ['Bookmarks']
+	})
+	.input(archivedUnarchivedBookmarkSchema)
+	.output(bookmarkSchema)
