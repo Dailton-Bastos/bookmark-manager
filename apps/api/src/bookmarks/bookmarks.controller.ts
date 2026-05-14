@@ -45,8 +45,8 @@ export class BookmarksController {
 				)
 
 				if (!bookmark) {
-					throw new ORPCError('INTERNAL_SERVER_ERROR', {
-						message: 'Failed to archive/unarchive bookmark'
+					throw new ORPCError('NOT_FOUND', {
+						message: 'Bookmark not found or not accessible'
 					})
 				}
 
