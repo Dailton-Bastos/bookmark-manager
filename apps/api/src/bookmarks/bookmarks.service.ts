@@ -188,8 +188,10 @@ export class BookmarksService {
 
 			const bookmarkIds = bookmarks.map((bookmark) => bookmark.id)
 
-			const tagsByBookmarkId =
-				await this.tagsService.findByBookmarkIds(bookmarkIds)
+			const tagsByBookmarkId = await this.tagsService.findByBookmarkIds(
+				bookmarkIds,
+				tx as unknown as NodePgDatabase<typeof schema>
+			)
 
 			return this.paginationProvider.paginateQuery<Bookmark>({
 				paginationQuery: { page, limit },
@@ -235,7 +237,7 @@ export class BookmarksService {
 
 		if (!bookmark) return null
 
-		const tags = await this.tagsService.findByBookmarkIds([id])
+		const tags = await this.tagsService.findByBookmarkIds([id], this.db)
 
 		return {
 			...bookmark,
