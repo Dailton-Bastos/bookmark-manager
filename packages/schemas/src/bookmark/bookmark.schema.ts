@@ -52,7 +52,7 @@ export const listBookmarksSchema = z.object({
 })
 
 export const archivedUnarchivedBookmarkSchema = z.object({
-	id: z.number(),
+	id: z.coerce.number().int().positive(),
 	isArchived: z.boolean()
 })
 
