@@ -1,5 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
+import { eq, inArray } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import { mockBookmarkTags } from '../../bookmarks/__mocks__/bookmark-tags.mock'
 import { schema } from '../../database/schemas'
 import { DATABASE_CONNECTION } from '../../shared/constants/database'
 import { mockTag } from '../__mocks__/tag.mock'
@@ -13,6 +15,7 @@ describe('TagsService', () => {
 		values: jest.Mock
 		returning: jest.Mock
 		onConflictDoUpdate: jest.Mock
+		select: jest.Mock
 	}
 
 	beforeEach(async () => {
@@ -20,7 +23,8 @@ describe('TagsService', () => {
 			insert: jest.fn().mockReturnThis(),
 			values: jest.fn().mockReturnThis(),
 			returning: jest.fn().mockResolvedValue([mockTag]),
-			onConflictDoUpdate: jest.fn().mockReturnThis()
+			onConflictDoUpdate: jest.fn().mockReturnThis(),
+			select: jest.fn().mockReturnThis()
 		}
 
 		const module: TestingModule = await Test.createTestingModule({
@@ -77,5 +81,41 @@ describe('TagsService', () => {
 		const result = await service.create(createTagInput)
 
 		expect(result).toBeNull()
+	})
+
+	it('should find tags by bookmark IDs', async () => {
+		const bookmarkIds = [1, 2]
+
+		const select = db.select as jest.Mock
+
+		const from = jest.fn().mockReturnThis()
+		const leftJoin = jest.fn().mockReturnThis()
+		const where = jest.fn().mockResolvedValueOnce(mockBookmarkTags)
+
+		select.mockReturnValueOnce({
+			from,
+			leftJoin,
+			where
+		})
+
+		const result = await service.findByBookmarkIds(bookmarkIds)
+
+		expect(select).toHaveBeenCalledWith({
+			bookmarkId: schema.bookmarkTags.bookmarkId,
+			tag: schema.tags
+		})
+		expect(from).toHaveBeenCalledWith(schema.bookmarkTags)
+		expect(leftJoin).toHaveBeenCalledWith(
+			schema.tags,
+			eq(schema.tags.id, schema.bookmarkTags.tagId)
+		)
+		expect(where).toHaveBeenCalledWith(
+			inArray(schema.bookmarkTags.bookmarkId, bookmarkIds)
+		)
+
+		expect(result).toEqual({
+			1: [mockTag],
+			2: [mockTag]
+		})
 	})
 })

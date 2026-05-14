@@ -1,15 +1,15 @@
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 import { Inject, Injectable } from '@nestjs/common'
 import type {
+	ArchivedUnarchivedBookmark,
 	Bookmark,
 	CreateBookmark,
 	ListBookmarks,
 	ListBookmarksArchived,
-	ListBookmarksInput,
-	Tag
+	ListBookmarksInput
 } from '@repo/schemas'
 import type { SQL } from 'drizzle-orm'
-import { and, count, desc, eq, inArray, sql } from 'drizzle-orm'
+import { and, count, desc, eq, sql } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { schema } from '../database/schemas'
 import { PaginationProvider } from '../pagination/pagination.provider'
@@ -188,26 +188,10 @@ export class BookmarksService {
 
 			const bookmarkIds = bookmarks.map((bookmark) => bookmark.id)
 
-			const bookmarkTags = await tx
-				.select({
-					bookmarkId: schema.bookmarkTags.bookmarkId,
-					tag: schema.tags
-				})
-				.from(schema.bookmarkTags)
-				.leftJoin(schema.tags, eq(schema.tags.id, schema.bookmarkTags.tagId))
-				.where(inArray(schema.bookmarkTags.bookmarkId, bookmarkIds))
-
-			const tagsByBookmarkId: Record<number, Tag[]> = {}
-
-			for (const { bookmarkId, tag } of bookmarkTags) {
-				if (!tagsByBookmarkId[bookmarkId]) {
-					tagsByBookmarkId[bookmarkId] = []
-				}
-
-				if (!tag) continue
-
-				tagsByBookmarkId[bookmarkId].push(tag)
-			}
+			const tagsByBookmarkId = await this.tagsService.findByBookmarkIds(
+				bookmarkIds,
+				tx as unknown as NodePgDatabase<typeof schema>
+			)
 
 			return this.paginationProvider.paginateQuery<Bookmark>({
 				paginationQuery: { page, limit },
@@ -240,6 +224,53 @@ export class BookmarksService {
 
 		if (!existingKeys.includes(cacheKey)) {
 			await this.cacheManager.set(registryKey, [...existingKeys, cacheKey])
+		}
+	}
+
+	async findById(id: number, ownerId: string): Promise<Bookmark | null> {
+		const bookmark = await this.db.query.bookmarks.findFirst({
+			where: and(
+				eq(schema.bookmarks.id, id),
+				eq(schema.bookmarks.ownerId, ownerId)
+			)
+		})
+
+		if (!bookmark) return null
+
+		const tags = await this.tagsService.findByBookmarkIds([id], this.db)
+
+		return {
+			...bookmark,
+			tags: tags[id] || []
+		}
+	}
+
+	async archiveOrUnarchive(
+		input: ArchivedUnarchivedBookmark,
+		ownerId: string
+	): Promise<Bookmark | null> {
+		const { id, isArchived } = input
+
+		const existingBookmark = await this.findById(id, ownerId)
+
+		if (!existingBookmark) return null
+
+		const updatedBookmark = await this.db
+			.update(schema.bookmarks)
+			.set({ isArchived })
+			.where(
+				and(eq(schema.bookmarks.id, id), eq(schema.bookmarks.ownerId, ownerId))
+			)
+			.returning()
+
+		if (!updatedBookmark?.[0]) return null
+
+		// Invalidate this owner's bookmark list cache entries after archiving/unarchiving a bookmark
+		await this.invalidateOwnerCache(ownerId)
+
+		return {
+			...updatedBookmark[0],
+			tags: existingBookmark.tags
 		}
 	}
 }

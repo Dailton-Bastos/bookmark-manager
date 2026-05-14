@@ -34,4 +34,24 @@ export class BookmarksController {
 			return bookmarks
 		})
 	}
+
+	@Implement(contract.bookmark.archiveOrUnarchive)
+	archiveOrUnarchive(@Session() session: UserSession) {
+		return implement(contract.bookmark.archiveOrUnarchive).handler(
+			async ({ input }) => {
+				const bookmark = await this.bookmarksService.archiveOrUnarchive(
+					input,
+					session.user.id
+				)
+
+				if (!bookmark) {
+					throw new ORPCError('NOT_FOUND', {
+						message: 'Bookmark not found or not accessible'
+					})
+				}
+
+				return bookmark
+			}
+		)
+	}
 }

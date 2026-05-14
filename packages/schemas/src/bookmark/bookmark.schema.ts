@@ -51,9 +51,17 @@ export const listBookmarksSchema = z.object({
 	meta: paginationMetaSchema
 })
 
+export const archivedUnarchivedBookmarkSchema = z.object({
+	id: z.coerce.number().int().positive(),
+	isArchived: z.boolean()
+})
+
 export type Bookmark = z.infer<typeof bookmarkSchema>
 export type CreateBookmark = z.infer<typeof createBookmarkSchema>
 export type ListBookmarks = z.infer<typeof listBookmarksSchema>
 export type ListBookmarksInput = z.infer<typeof listBookmarksInputSchema>
+export type ArchivedUnarchivedBookmark = z.infer<
+	typeof archivedUnarchivedBookmarkSchema
+>
 export type ListBookmarksOrder = ListBookmarksInput['order']
 export type ListBookmarksArchived = ListBookmarksInput['archived']

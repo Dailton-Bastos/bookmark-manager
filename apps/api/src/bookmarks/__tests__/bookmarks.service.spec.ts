@@ -2,6 +2,7 @@ import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 import { Test, TestingModule } from '@nestjs/testing'
 import type { CreateBookmark } from '@repo/schemas'
 import type { SQL } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { PgDialect } from 'drizzle-orm/pg-core'
 import { schema } from '../../database/schemas'
@@ -31,6 +32,12 @@ describe('BookmarksService', () => {
 		onConflictDoUpdate: jest.Mock
 		transaction: jest.Mock
 		select: jest.Mock
+		update: jest.Mock
+		query: {
+			bookmarks: {
+				findFirst: jest.Mock
+			}
+		}
 	}
 
 	beforeEach(async () => {
@@ -40,7 +47,13 @@ describe('BookmarksService', () => {
 			returning: jest.fn().mockResolvedValue([mockBookmark]),
 			onConflictDoUpdate: jest.fn().mockReturnThis(),
 			transaction: jest.fn(),
-			select: jest.fn().mockReturnThis()
+			select: jest.fn().mockReturnThis(),
+			update: jest.fn().mockReturnThis(),
+			query: {
+				bookmarks: {
+					findFirst: jest.fn()
+				}
+			}
 		}
 		mockDb.transaction.mockImplementation(
 			async (cb: (tx: typeof mockDb) => Promise<unknown>) => cb(mockDb)
@@ -665,6 +678,118 @@ describe('BookmarksService', () => {
 			expect(orderByMock).toHaveBeenCalledTimes(1)
 			const orderByArgs: SQL[] = orderByMock.mock.calls[0]
 			expect(orderByArgs).toHaveLength(2)
+		})
+	})
+
+	describe('findById', () => {
+		it('should return null if the bookmark is not found', async () => {
+			const query = db.query.bookmarks.findFirst as jest.Mock
+			query.mockResolvedValueOnce(undefined)
+
+			const result = await service.findById(1, 'user-123')
+
+			expect(query).toHaveBeenCalledWith({
+				where: and(
+					eq(schema.bookmarks.id, expect.any(Number)),
+					eq(schema.bookmarks.ownerId, expect.any(String))
+				)
+			})
+
+			expect(result).toBeNull()
+		})
+
+		it('should return the bookmark with tags if found', async () => {
+			const query = db.query.bookmarks.findFirst as jest.Mock
+			query.mockResolvedValueOnce(mockBookmark)
+
+			jest.spyOn(tagsService, 'findByBookmarkIds').mockResolvedValueOnce({
+				1: [{ id: 1, name: 'Test Tag' }]
+			})
+
+			const result = await service.findById(1, 'user-123')
+
+			expect(query).toHaveBeenCalledWith({
+				where: and(
+					eq(schema.bookmarks.id, expect.any(Number)),
+					eq(schema.bookmarks.ownerId, expect.any(String))
+				)
+			})
+
+			expect(result).toEqual({
+				...mockBookmark,
+				tags: [{ id: 1, name: 'Test Tag' }]
+			})
+		})
+	})
+
+	describe('archiveOrUnarchive', () => {
+		it('should return null if the bookmark to archive/unarchive is not found', async () => {
+			jest.spyOn(service, 'findById').mockResolvedValueOnce(null)
+
+			const result = await service.archiveOrUnarchive(
+				{ id: 1, isArchived: true },
+				'user-123'
+			)
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(result).toBeNull()
+		})
+
+		it('should return null if the bookmark to archive/unarchive does not belong to the owner', async () => {
+			const existingBookmark = { ...mockBookmark, ownerId: 'other-user' }
+
+			const update = db.update as jest.Mock
+			update.mockReturnValueOnce({
+				where: jest.fn().mockReturnThis(),
+				set: jest.fn().mockReturnThis(),
+				returning: jest.fn().mockResolvedValueOnce([])
+			})
+
+			jest.spyOn(service, 'findById').mockResolvedValueOnce(existingBookmark)
+
+			const result = await service.archiveOrUnarchive(
+				{ id: 1, isArchived: true },
+				'user-123'
+			)
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(result).toBeNull()
+		})
+
+		it('should archive/unarchive a bookmark and invalidate cache', async () => {
+			const update = db.update as jest.Mock
+
+			const existingBookmark = { ...mockBookmark, isArchived: false }
+
+			update.mockReturnValueOnce({
+				where: jest.fn().mockReturnThis(),
+				set: jest.fn().mockReturnThis(),
+				returning: jest
+					.fn()
+					.mockResolvedValueOnce([
+						{ ...existingBookmark, isArchived: true, updatedAt: new Date() }
+					])
+			})
+
+			jest.spyOn(service, 'findById').mockResolvedValueOnce(existingBookmark)
+
+			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(['cache-key']) // Simulate empty cache registry for the owner
+
+			const result = await service.archiveOrUnarchive(
+				{ id: 1, isArchived: true },
+				'user-123'
+			)
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(db.update).toHaveBeenCalledWith(schema.bookmarks)
+			expect(cacheManager.del).toHaveBeenCalledWith(
+				expect.stringContaining('user-123')
+			)
+			expect(result).toEqual({
+				...existingBookmark,
+				isArchived: true,
+				updatedAt: expect.any(Date)
+			})
 		})
 	})
 })

@@ -2,6 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { ZodError } from 'zod'
 import type { ListBookmarks, ListBookmarksInput } from './bookmark.schema'
 import {
+	archivedUnarchivedBookmarkSchema,
 	bookmarkSchema,
 	createBookmarkSchema,
 	listBookmarksInputSchema,
@@ -321,6 +322,44 @@ describe('ListBookmarksSchema', () => {
 		}
 
 		const result = listBookmarksSchema.safeParse(invalidListBookmarks)
+
+		expect(result.success).toBe(false)
+
+		if (!result.success) {
+			expect(result.error).toBeInstanceOf(ZodError)
+			expect(result.error.issues.length).toBeGreaterThan(0)
+		}
+	})
+})
+
+describe('ArchivedUnarchivedBookmarkSchema', () => {
+	it('should be defined', () => {
+		expect(archivedUnarchivedBookmarkSchema).toBeDefined()
+	})
+
+	it('should validate a valid archived/unarchived bookmark object', () => {
+		const validInput = {
+			id: 1,
+			isArchived: true
+		}
+
+		const result = archivedUnarchivedBookmarkSchema.safeParse(validInput)
+
+		expect(result.success).toBe(true)
+
+		if (result.success) {
+			expect(result.data.id).toBe(1)
+			expect(result.data.isArchived).toBe(true)
+		}
+	})
+
+	it('should fail validation for an invalid archived/unarchived bookmark object', () => {
+		const invalidInput = {
+			id: 'not-a-number',
+			isArchived: 'not-a-boolean'
+		}
+
+		const result = archivedUnarchivedBookmarkSchema.safeParse(invalidInput)
 
 		expect(result.success).toBe(false)
 
