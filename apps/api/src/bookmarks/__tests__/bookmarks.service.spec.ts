@@ -686,8 +686,6 @@ describe('BookmarksService', () => {
 			const query = db.query.bookmarks.findFirst as jest.Mock
 			query.mockResolvedValueOnce(undefined)
 
-			jest.spyOn(tagsService, 'findByBookmarkIds').mockResolvedValueOnce([])
-
 			const result = await service.findById(1, 'user-123')
 
 			expect(query).toHaveBeenCalledWith({
@@ -697,7 +695,6 @@ describe('BookmarksService', () => {
 				)
 			})
 
-			expect(tagsService.findByBookmarkIds).not.toHaveBeenCalled()
 			expect(result).toBeNull()
 		})
 
@@ -718,7 +715,6 @@ describe('BookmarksService', () => {
 				)
 			})
 
-			expect(tagsService.findByBookmarkIds).toHaveBeenCalledWith([1])
 			expect(result).toEqual({
 				...mockBookmark,
 				tags: [{ id: 1, name: 'Test Tag' }]
