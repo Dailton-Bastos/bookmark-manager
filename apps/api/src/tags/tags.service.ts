@@ -33,9 +33,10 @@ export class TagsService {
 	}
 
 	async findByBookmarkIds(
-		bookmarkIds: number[]
+		bookmarkIds: number[],
+		db: NodePgDatabase<typeof schema> = this.db
 	): Promise<{ [bookmarkId: number]: Tag[] }> {
-		const bookmarkTags = await this.db
+		const bookmarkTags = await db
 			.select({
 				bookmarkId: schema.bookmarkTags.bookmarkId,
 				tag: schema.tags
