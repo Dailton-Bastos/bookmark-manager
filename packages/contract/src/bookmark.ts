@@ -30,7 +30,7 @@ export const listBookmarksContract = oc
 export const archivedUnarchivedBookmarkContract = oc
 	.route({
 		method: 'PATCH',
-		path: '/bookmarks/:id/archive',
+		path: '/bookmarks/archive',
 		summary: 'Archive or unarchive a bookmark',
 		tags: ['Bookmarks']
 	})
