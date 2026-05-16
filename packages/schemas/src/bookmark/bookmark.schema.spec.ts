@@ -6,7 +6,8 @@ import {
 	bookmarkSchema,
 	createBookmarkSchema,
 	listBookmarksInputSchema,
-	listBookmarksSchema
+	listBookmarksSchema,
+	pinUnpinBookmarkSchema
 } from './bookmark.schema'
 
 describe('BookmarkSchema', () => {
@@ -360,6 +361,44 @@ describe('ArchivedUnarchivedBookmarkSchema', () => {
 		}
 
 		const result = archivedUnarchivedBookmarkSchema.safeParse(invalidInput)
+
+		expect(result.success).toBe(false)
+
+		if (!result.success) {
+			expect(result.error).toBeInstanceOf(ZodError)
+			expect(result.error.issues.length).toBeGreaterThan(0)
+		}
+	})
+})
+
+describe('PinUnpinBookmarkSchema', () => {
+	it('should be defined', () => {
+		expect(pinUnpinBookmarkSchema).toBeDefined()
+	})
+
+	it('should validate a valid pin/unpin bookmark object', () => {
+		const validInput = {
+			id: 1,
+			pinned: true
+		}
+
+		const result = pinUnpinBookmarkSchema.safeParse(validInput)
+
+		expect(result.success).toBe(true)
+
+		if (result.success) {
+			expect(result.data.id).toBe(1)
+			expect(result.data.pinned).toBe(true)
+		}
+	})
+
+	it('should fail validation for an invalid pin/unpin bookmark object', () => {
+		const invalidInput = {
+			id: 'not-a-number',
+			pinned: 'not-a-boolean'
+		}
+
+		const result = pinUnpinBookmarkSchema.safeParse(invalidInput)
 
 		expect(result.success).toBe(false)
 
