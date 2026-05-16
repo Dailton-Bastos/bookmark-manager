@@ -151,8 +151,7 @@ export const Dashboard = () => {
 				queryClient.invalidateQueries({
 					queryKey: orpcClient.bookmark.list.key()
 				})
-			},
-			retry: 3
+			}
 		})
 	)
 
