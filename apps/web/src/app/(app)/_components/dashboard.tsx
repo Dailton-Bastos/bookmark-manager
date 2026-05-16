@@ -145,6 +145,24 @@ export const Dashboard = () => {
 		)
 	}
 
+	const visitedBookmarkMutation = useMutation(
+		orpcClient.bookmark.visited.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: orpcClient.bookmark.list.key()
+				})
+			},
+			retry: 3
+		})
+	)
+
+	const handleVisitedBookmark = async (bookmarkId: number) => {
+		await visitedBookmarkMutation.mutateAsync({
+			id: bookmarkId,
+			lastVisited: new Date()
+		})
+	}
+
 	useEffect(() => {
 		if (inView && hasNextPage && !isFetchingNextPage) {
 			fetchNextPage()
@@ -224,6 +242,7 @@ export const Dashboard = () => {
 											key={bookmark.id}
 											bookmark={bookmark}
 											handlePinUnpinBookmark={handlePinUnpinBookmark}
+											handleVisitedBookmark={handleVisitedBookmark}
 										/>
 									))}
 								</React.Fragment>
