@@ -62,16 +62,14 @@ export const Dashboard = () => {
 		return data.pages.map((page) => {
 			return {
 				...page,
-				data: page.data
-					.map((bookmark) => ({
-						...bookmark,
-						createdAt: new Date(bookmark.createdAt),
-						updatedAt: new Date(bookmark.updatedAt),
-						lastVisited: bookmark.lastVisited
-							? new Date(bookmark.lastVisited)
-							: null
-					}))
-					.sort((a, b) => (a.pinned === b.pinned ? 0 : a.pinned ? -1 : 1)) // Sort pinned bookmarks first
+				data: page.data.map((bookmark) => ({
+					...bookmark,
+					createdAt: new Date(bookmark.createdAt),
+					updatedAt: new Date(bookmark.updatedAt),
+					lastVisited: bookmark.lastVisited
+						? new Date(bookmark.lastVisited)
+						: null
+				}))
 			}
 		})
 	}, [data])
@@ -134,6 +132,8 @@ export const Dashboard = () => {
 				pinned: !pinned
 			}),
 			{
+				loading: `${pinned ? 'Unpinning' : 'Pinning'} bookmark...`,
+				success: `Bookmark ${pinned ? 'unpinned' : 'pinned'} successfully!`,
 				error: (err) => {
 					if (err instanceof Error) return err.message
 
