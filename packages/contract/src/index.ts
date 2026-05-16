@@ -4,7 +4,8 @@ import {
 	archivedUnarchivedBookmarkContract,
 	createBookmarkContract,
 	listBookmarksContract,
-	pinUnpinBookmarkContract
+	pinUnpinBookmarkContract,
+	visitedBookmarkContract
 } from './bookmark'
 
 export const contract = populateContractRouterPaths({
@@ -12,6 +13,7 @@ export const contract = populateContractRouterPaths({
 		create: createBookmarkContract,
 		list: listBookmarksContract,
 		archiveOrUnarchive: archivedUnarchivedBookmarkContract,
-		pinOrUnpin: pinUnpinBookmarkContract
+		pinOrUnpin: pinUnpinBookmarkContract,
+		visited: visitedBookmarkContract
 	}
 })
