@@ -61,7 +61,7 @@ export const ArchiveUnarchiveBookmarkModal = ({
 					</DialogClose>
 
 					<ConfirmButton
-						type="submit"
+						type="button"
 						title={type === 'archive' ? 'Archive' : 'Unarchive'}
 						className="w-23.5"
 						disabled={isPending}
