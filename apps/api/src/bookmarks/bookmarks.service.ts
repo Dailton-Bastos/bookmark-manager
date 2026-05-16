@@ -177,7 +177,15 @@ export class BookmarksService {
 				.where(whereClause)
 				.limit(limit)
 				.offset(offset)
-				.orderBy(...orderByClauses)
+				.orderBy(
+					// For non-archived view, sort pinned bookmarks first; for archived-only view, sort by updatedAt to show most recently archived first
+					desc(
+						archived === 'exclude'
+							? schema.bookmarks.pinned
+							: schema.bookmarks.updatedAt
+					),
+					...orderByClauses
+				)
 
 			if (bookmarks.length === 0) {
 				return this.paginationProvider.paginateQuery<Bookmark>({

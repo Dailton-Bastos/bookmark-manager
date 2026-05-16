@@ -633,10 +633,10 @@ describe('BookmarksService', () => {
 
 			expect(orderByMock).toHaveBeenCalledTimes(1)
 			const orderByArgs: SQL[] = orderByMock.mock.calls[0]
-			expect(orderByArgs).toHaveLength(2)
-			// Verify the first clause is a raw SQL template containing NULLS LAST
+			expect(orderByArgs).toHaveLength(3)
+			// Verify the second clause is a raw SQL template containing NULLS LAST
 			const queryChunks = (
-				orderByArgs[0] as unknown as {
+				orderByArgs[1] as unknown as {
 					queryChunks: Array<{ value?: string[] }>
 				}
 			).queryChunks
@@ -677,7 +677,7 @@ describe('BookmarksService', () => {
 
 			expect(orderByMock).toHaveBeenCalledTimes(1)
 			const orderByArgs: SQL[] = orderByMock.mock.calls[0]
-			expect(orderByArgs).toHaveLength(2)
+			expect(orderByArgs).toHaveLength(3)
 		})
 	})
 
