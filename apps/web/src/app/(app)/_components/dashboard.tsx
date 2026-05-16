@@ -28,7 +28,7 @@ export const Dashboard = () => {
 	const { start, complete } = useLoadingBar()
 
 	const { limit, order, setOrder } = useBookmarks()
-	const { bookmarkId, onClose } = useArchiveUnarchiveBookmarkModal()
+	const { bookmarkId, onClose, type } = useArchiveUnarchiveBookmarkModal()
 
 	const { ref, inView } = useInView()
 
@@ -87,10 +87,18 @@ export const Dashboard = () => {
 	)
 
 	const handleArchiveBookmark = async () => {
+		if (bookmarkId === null) {
+			toast.error('No bookmark selected for archiving.')
+
+			onClose()
+
+			return
+		}
+
 		toast.promise(
 			archiveBookmarkMutation.mutateAsync({
 				id: bookmarkId,
-				isArchived: true
+				isArchived: type === 'archive'
 			}),
 			{
 				loading: 'Archiving bookmark...',
