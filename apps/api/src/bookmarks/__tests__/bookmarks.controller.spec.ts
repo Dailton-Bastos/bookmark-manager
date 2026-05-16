@@ -31,7 +31,8 @@ jest.mock('@repo/contract', () => ({
 		bookmark: {
 			create: 'bookmark.create',
 			list: 'bookmark.list',
-			archiveOrUnarchive: 'bookmark.archiveOrUnarchive'
+			archiveOrUnarchive: 'bookmark.archiveOrUnarchive',
+			pinOrUnpin: 'bookmark.pinOrUnpin'
 		}
 	}
 }))
@@ -46,6 +47,7 @@ describe('BookmarksController', () => {
 		create: jest.Mock
 		list: jest.Mock
 		archiveOrUnarchive: jest.Mock
+		pinOrUnpin: jest.Mock
 	}
 
 	beforeEach(async () => {
@@ -61,7 +63,8 @@ describe('BookmarksController', () => {
 					useValue: {
 						create: jest.fn(),
 						list: jest.fn(),
-						archiveOrUnarchive: jest.fn()
+						archiveOrUnarchive: jest.fn(),
+						pinOrUnpin: jest.fn()
 					}
 				}
 			]
@@ -156,6 +159,37 @@ describe('BookmarksController', () => {
 		).rejects.toBeInstanceOf(ORPCError)
 		await expect(
 			controller.archiveOrUnarchive(mockUserSession)
-		).rejects.toHaveProperty('message', 'Failed to archive/unarchive bookmark')
+		).rejects.toHaveProperty('message', 'Bookmark not found or not accessible')
+	})
+
+	it('should pin/unpin a bookmark successfully', async () => {
+		bookmarksServiceMock.pinOrUnpin.mockResolvedValue(mockBookmark)
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({ input: { id: 1, pinned: true } })
+		)
+
+		const result = await controller.pinOrUnpin(mockUserSession)
+
+		expect(implement).toHaveBeenCalledWith(contract.bookmark.pinOrUnpin)
+		expect(bookmarksServiceMock.pinOrUnpin).toHaveBeenCalledWith(
+			{ id: 1, pinned: true },
+			mockUserSession.user.id
+		)
+		expect(result).toEqual(mockBookmark)
+	})
+
+	it('should throw error when service fails to pin/unpin bookmark', async () => {
+		bookmarksServiceMock.pinOrUnpin.mockResolvedValue(null)
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({ input: { id: 1, pinned: true } })
+		)
+
+		await expect(controller.pinOrUnpin(mockUserSession)).rejects.toBeInstanceOf(
+			ORPCError
+		)
+		await expect(controller.pinOrUnpin(mockUserSession)).rejects.toHaveProperty(
+			'message',
+			'Bookmark not found or not accessible'
+		)
 	})
 })

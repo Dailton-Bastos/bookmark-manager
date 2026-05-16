@@ -792,4 +792,70 @@ describe('BookmarksService', () => {
 			})
 		})
 	})
+
+	describe('pinOrUnpin', () => {
+		it('should return null if the bookmark to pin/unpin is not found', async () => {
+			jest.spyOn(service, 'findById').mockResolvedValueOnce(null)
+
+			const result = await service.pinOrUnpin(
+				{ id: 1, pinned: true },
+				'user-123'
+			)
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(result).toBeNull()
+		})
+
+		it('should return null if the bookmark to pin/unpin does not belong to the owner', async () => {
+			const existingBookmark = { ...mockBookmark, ownerId: 'other-user' }
+
+			const update = db.update as jest.Mock
+			update.mockReturnValueOnce({
+				where: jest.fn().mockReturnThis(),
+				set: jest.fn().mockReturnThis(),
+				returning: jest.fn().mockResolvedValueOnce([])
+			})
+
+			jest.spyOn(service, 'findById').mockResolvedValueOnce(existingBookmark)
+
+			const result = await service.pinOrUnpin(
+				{ id: 1, pinned: true },
+				'user-123'
+			)
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(result).toBeNull()
+		})
+
+		it('should pin/unpin a bookmark', async () => {
+			const update = db.update as jest.Mock
+
+			const existingBookmark = { ...mockBookmark, pinned: false }
+
+			update.mockReturnValueOnce({
+				where: jest.fn().mockReturnThis(),
+				set: jest.fn().mockReturnThis(),
+				returning: jest
+					.fn()
+					.mockResolvedValueOnce([
+						{ ...existingBookmark, pinned: true, updatedAt: new Date() }
+					])
+			})
+
+			jest.spyOn(service, 'findById').mockResolvedValueOnce(existingBookmark)
+
+			const result = await service.pinOrUnpin(
+				{ id: 1, pinned: true },
+				'user-123'
+			)
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(db.update).toHaveBeenCalledWith(schema.bookmarks)
+			expect(result).toEqual({
+				...existingBookmark,
+				pinned: true,
+				updatedAt: expect.any(Date)
+			})
+		})
+	})
 })
