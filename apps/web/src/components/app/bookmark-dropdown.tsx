@@ -1,5 +1,6 @@
 'use client'
 
+import type { Bookmark } from '@repo/schemas'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
 import {
@@ -21,20 +22,20 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from 'ui/components/shadcn/ui/dropdown-menu'
+import { useArchiveUnarchiveBookmarkModal } from '@/hooks/useBookmarkModal'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 
 interface BookmarkDropdownProps {
-	pinned: boolean
-	isArchived: boolean
-	url: string
+	bookmark: Bookmark
 }
 
-export const BookmarkDropdown = ({
-	pinned,
-	isArchived,
-	url
-}: BookmarkDropdownProps) => {
+export const BookmarkDropdown = ({ bookmark }: BookmarkDropdownProps) => {
 	const [copyToClipboard, copyResult] = useCopyToClipboard()
+
+	const { id, url, pinned, isArchived } = bookmark
+
+	const { onOpen: openArchiveUnarchiveModal } =
+		useArchiveUnarchiveBookmarkModal()
 
 	useEffect(() => {
 		if (copyResult) {
@@ -112,7 +113,10 @@ export const BookmarkDropdown = ({
 								<SquarePen className="text-muted-foreground" />
 								Edit
 							</DropdownMenuItem>
-							<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
+							<DropdownMenuItem
+								className="focus:bg-sidebar-accent p-2 mb-1"
+								onSelect={() => openArchiveUnarchiveModal('archive', id)}
+							>
 								<Archive className="text-muted-foreground" />
 								Archive
 							</DropdownMenuItem>
@@ -121,7 +125,10 @@ export const BookmarkDropdown = ({
 
 					{isArchived && (
 						<>
-							<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
+							<DropdownMenuItem
+								className="focus:bg-sidebar-accent p-2 mb-1"
+								onSelect={() => openArchiveUnarchiveModal('unarchive', id)}
+							>
 								<RotateCcw className="text-muted-foreground" />
 								Unarchive
 							</DropdownMenuItem>

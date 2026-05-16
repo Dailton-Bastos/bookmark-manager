@@ -14,17 +14,23 @@ import { Separator } from 'ui/components/shadcn/ui/separator'
 import { formatDate } from '@/utils/format-date'
 import { BookmarkDropdown } from '../app/bookmark-dropdown'
 
-export const Bookmark = ({
-	title,
-	url,
-	description,
-	tags,
-	pinned,
-	isArchived,
-	visitCount,
-	createdAt,
-	lastVisited
-}: BookmarkProps) => {
+interface Props {
+	bookmark: BookmarkProps
+}
+
+export const Bookmark = ({ bookmark }: Props) => {
+	const {
+		title,
+		url,
+		description,
+		tags,
+		pinned,
+		isArchived,
+		visitCount,
+		createdAt,
+		lastVisited
+	} = bookmark
+
 	return (
 		<Card className="@container/card p-4 pb-3 gap-3 min-h-68">
 			<CardHeader className="p-0 pb-1 gap-0">
@@ -42,7 +48,7 @@ export const Bookmark = ({
 				</div>
 
 				<CardAction className="mt-1 ml-3">
-					<BookmarkDropdown pinned={pinned} isArchived={isArchived} url={url} />
+					<BookmarkDropdown bookmark={bookmark} />
 				</CardAction>
 			</CardHeader>
 

@@ -1,7 +1,10 @@
 'use client'
 
-import type { Bookmark as BookmarkData } from '@repo/schemas'
-import { useInfiniteQuery } from '@tanstack/react-query'
+import {
+	useInfiniteQuery,
+	useMutation,
+	useQueryClient
+} from '@tanstack/react-query'
 import React, { useEffect, useMemo } from 'react'
 import { useInView } from 'react-intersection-observer'
 import { useLoadingBar } from 'react-top-loading-bar'
@@ -9,10 +12,14 @@ import { toast } from 'sonner'
 import { LoaderCircle, Plus } from 'ui/components/icons'
 import { Button } from 'ui/components/shadcn/ui/button'
 import { SortByDropdown } from '@/components/app/sort-by-dropdown'
+import { ArchiveUnarchiveBookmarkModal } from '@/components/bookmark/archive-unarchive-bookmark-modal'
 import { Bookmark } from '@/components/shared/bookmark'
 import { CardsSkeleton } from '@/components/shared/cards-skeleton'
 import { PrimaryButton as AddBookmarkButton } from '@/components/shared/primary-button'
-import { useAddBookmarkModal } from '@/hooks/useBookmarkModal'
+import {
+	useAddBookmarkModal,
+	useArchiveUnarchiveBookmarkModal
+} from '@/hooks/useBookmarkModal'
 import { useBookmarks } from '@/hooks/useBookmarks'
 import { orpcClient } from '@/lib/orpc-client'
 
@@ -21,8 +28,11 @@ export const Dashboard = () => {
 	const { start, complete } = useLoadingBar()
 
 	const { limit, order, setOrder } = useBookmarks()
+	const { bookmarkId, onClose, type } = useArchiveUnarchiveBookmarkModal()
 
 	const { ref, inView } = useInView()
+
+	const queryClient = useQueryClient()
 
 	const {
 		data,
@@ -37,7 +47,8 @@ export const Dashboard = () => {
 			input: (pageParam: number | undefined) => ({
 				limit,
 				order,
-				page: pageParam ?? 1
+				page: pageParam ?? 1,
+				archived: 'exclude'
 			}),
 			initialPageParam: 1,
 			getNextPageParam: ({ meta }) =>
@@ -62,6 +73,44 @@ export const Dashboard = () => {
 			}
 		})
 	}, [data])
+
+	const archiveBookmarkMutation = useMutation(
+		orpcClient.bookmark.archiveOrUnarchive.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: orpcClient.bookmark.list.key()
+				})
+
+				onClose()
+			}
+		})
+	)
+
+	const handleArchiveBookmark = async () => {
+		if (bookmarkId === null) {
+			toast.error('No bookmark selected for archiving.')
+
+			onClose()
+
+			return
+		}
+
+		toast.promise(
+			archiveBookmarkMutation.mutateAsync({
+				id: bookmarkId,
+				isArchived: type === 'archive'
+			}),
+			{
+				loading: 'Archiving bookmark...',
+				success: 'Bookmark archived successfully!',
+				error: (err) => {
+					if (err instanceof Error) return err.message
+
+					return 'An error occurred while archiving the bookmark.'
+				}
+			}
+		)
+	}
 
 	useEffect(() => {
 		if (inView && hasNextPage && !isFetchingNextPage) {
@@ -137,8 +186,8 @@ export const Dashboard = () => {
 						<div className="grid grid-cols-1 gap-3 *:data-[slot=card]:shadow-md @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
 							{bookmarks.map((page) => (
 								<React.Fragment key={page.meta.currentPage}>
-									{page.data.map((bookmark: BookmarkData) => (
-										<Bookmark key={bookmark.id} {...bookmark} />
+									{page.data.map((bookmark) => (
+										<Bookmark key={bookmark.id} bookmark={bookmark} />
 									))}
 								</React.Fragment>
 							))}
@@ -167,6 +216,11 @@ export const Dashboard = () => {
 					</div>
 				</div>
 			</div>
+
+			<ArchiveUnarchiveBookmarkModal
+				isPending={archiveBookmarkMutation.isPending}
+				handleArchiveUnarchive={handleArchiveBookmark}
+			/>
 		</div>
 	)
 }
