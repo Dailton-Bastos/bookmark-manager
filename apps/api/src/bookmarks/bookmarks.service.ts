@@ -7,7 +7,8 @@ import type {
 	ListBookmarks,
 	ListBookmarksArchived,
 	ListBookmarksInput,
-	PinUnpinBookmark
+	PinUnpinBookmark,
+	VisitedBookmark
 } from '@repo/schemas'
 import type { SQL } from 'drizzle-orm'
 import { and, count, desc, eq, sql } from 'drizzle-orm'
@@ -304,6 +305,48 @@ export class BookmarksService {
 		if (!updatedBookmark?.[0]) return null
 
 		// Invalidate this owner's bookmark list cache entries after pinning/unpinning a bookmark
+		await this.invalidateOwnerCache(ownerId)
+
+		return {
+			...updatedBookmark[0],
+			tags: existingBookmark.tags
+		}
+	}
+
+	async visited(
+		input: VisitedBookmark,
+		ownerId: string
+	): Promise<Bookmark | null> {
+		const { id, lastVisited } = input
+
+		const existingBookmark = await this.findById(id, ownerId)
+
+		if (!existingBookmark) return null
+
+		const isValidDate =
+			lastVisited instanceof Date && !Number.isNaN(lastVisited.getTime())
+
+		// If lastVisited is invalid, skip updating and just return the existing bookmark
+		if (!isValidDate) return existingBookmark
+
+		const now = new Date()
+
+		// Prevent setting a future date as lastVisited
+		const visitDate = lastVisited > now ? now : lastVisited
+
+		const updatedBookmark = await this.db
+			.update(schema.bookmarks)
+			.set({
+				lastVisited: visitDate,
+				visitCount: existingBookmark.visitCount + 1
+			})
+			.where(
+				and(eq(schema.bookmarks.id, id), eq(schema.bookmarks.ownerId, ownerId))
+			)
+			.returning()
+
+		if (!updatedBookmark?.[0]) return null
+
 		await this.invalidateOwnerCache(ownerId)
 
 		return {
