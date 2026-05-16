@@ -157,10 +157,15 @@ export const Dashboard = () => {
 	)
 
 	const handleVisitedBookmark = async (bookmarkId: number) => {
-		await visitedBookmarkMutation.mutateAsync({
-			id: bookmarkId,
-			lastVisited: new Date()
-		})
+		try {
+			await visitedBookmarkMutation.mutateAsync({ id: bookmarkId })
+		} catch (err) {
+			if (err instanceof Error) {
+				toast.error(err.message)
+			} else {
+				toast.error('An error occurred while updating the bookmark.')
+			}
+		}
 	}
 
 	useEffect(() => {
