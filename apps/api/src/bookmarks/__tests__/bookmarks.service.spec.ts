@@ -929,33 +929,10 @@ describe('BookmarksService', () => {
 		it('should return null if the bookmark to update visit is not found', async () => {
 			jest.spyOn(service, 'findById').mockResolvedValueOnce(null)
 
-			const result = await service.visited(
-				{ id: 1, lastVisited: new Date('2026-01-01T10:00:00.000Z') },
-				'user-123'
-			)
+			const result = await service.visited({ id: 1 }, 'user-123')
 
 			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
 			expect(result).toBeNull()
-		})
-
-		it('should return existing bookmark without updating when lastVisited is invalid', async () => {
-			const existingBookmark = {
-				...mockBookmark,
-				visitCount: 3,
-				lastVisited: new Date('2026-01-01T10:00:00.000Z')
-			}
-
-			jest.spyOn(service, 'findById').mockResolvedValueOnce(existingBookmark)
-
-			const result = await service.visited(
-				{ id: 1, lastVisited: new Date('invalid-date') },
-				'user-123'
-			)
-
-			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
-			expect(db.update).not.toHaveBeenCalled()
-			expect(cacheManager.get).not.toHaveBeenCalled()
-			expect(result).toEqual(existingBookmark)
 		})
 
 		it('should update lastVisited, increment visitCount and invalidate cache', async () => {
@@ -983,10 +960,7 @@ describe('BookmarksService', () => {
 			jest.spyOn(service, 'findById').mockResolvedValueOnce(existingBookmark)
 			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(['cache-key'])
 
-			const result = await service.visited(
-				{ id: 1, lastVisited: newVisitDate },
-				'user-123'
-			)
+			const result = await service.visited({ id: 1 }, 'user-123')
 
 			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
 			expect(db.update).toHaveBeenCalledWith(schema.bookmarks)
@@ -997,52 +971,6 @@ describe('BookmarksService', () => {
 				lastVisited: newVisitDate,
 				updatedAt: expect.any(Date)
 			})
-		})
-
-		it('should clamp future lastVisited date to now before persisting', async () => {
-			const update = db.update as jest.Mock
-			const existingBookmark = {
-				...mockBookmark,
-				visitCount: 2,
-				lastVisited: new Date('2026-01-01T10:00:00.000Z')
-			}
-			const futureVisitDate = new Date(Date.now() + 60_000)
-			let persistedPayload:
-				| { lastVisited: Date; visitCount: number }
-				| undefined
-
-			const setMock = jest
-				.fn()
-				.mockImplementation(
-					(payload: { lastVisited: Date; visitCount: number }) => {
-						persistedPayload = payload
-						return {
-							where: jest.fn().mockReturnThis(),
-							returning: jest.fn().mockResolvedValueOnce([
-								{
-									...existingBookmark,
-									visitCount: existingBookmark.visitCount + 1,
-									lastVisited: payload.lastVisited,
-									updatedAt: new Date()
-								}
-							])
-						}
-					}
-				)
-
-			update.mockReturnValueOnce({ set: setMock })
-
-			jest.spyOn(service, 'findById').mockResolvedValueOnce(existingBookmark)
-			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(['cache-key'])
-
-			await service.visited({ id: 1, lastVisited: futureVisitDate }, 'user-123')
-
-			expect(setMock).toHaveBeenCalledTimes(1)
-			expect(persistedPayload).toBeDefined()
-			expect(persistedPayload?.visitCount).toBe(existingBookmark.visitCount + 1)
-			expect(persistedPayload?.lastVisited.getTime()).toBeLessThanOrEqual(
-				Date.now()
-			)
 		})
 	})
 })

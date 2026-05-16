@@ -417,8 +417,7 @@ describe('VisitedBookmarkSchema', () => {
 
 	it('should validate a valid visited bookmark object', () => {
 		const validInput = {
-			id: 1,
-			lastVisited: new Date('2024-06-01T10:00:00.000Z')
+			id: 1
 		}
 
 		const result = visitedBookmarkSchema.safeParse(validInput)
@@ -427,14 +426,12 @@ describe('VisitedBookmarkSchema', () => {
 
 		if (result.success) {
 			expect(result.data.id).toBe(1)
-			expect(result.data.lastVisited).toBeInstanceOf(Date)
 		}
 	})
 
 	it('should fail validation for an invalid visited bookmark object', () => {
 		const invalidInput = {
-			id: 'not-a-number',
-			lastVisited: 'invalid-date'
+			id: 'not-a-number'
 		}
 
 		const result = visitedBookmarkSchema.safeParse(invalidInput)

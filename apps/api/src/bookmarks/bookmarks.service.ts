@@ -317,28 +317,17 @@ export class BookmarksService {
 		input: VisitedBookmark,
 		ownerId: string
 	): Promise<Bookmark | null> {
-		const { id, lastVisited } = input
+		const { id } = input
 
 		const existingBookmark = await this.findById(id, ownerId)
 
 		if (!existingBookmark) return null
 
-		const isValidDate =
-			lastVisited instanceof Date && !Number.isNaN(lastVisited.getTime())
-
-		// If lastVisited is invalid, skip updating and just return the existing bookmark
-		if (!isValidDate) return existingBookmark
-
-		const now = new Date()
-
-		// Prevent setting a future date as lastVisited
-		const visitDate = lastVisited > now ? now : lastVisited
-
 		const updatedBookmark = await this.db
 			.update(schema.bookmarks)
 			.set({
-				lastVisited: visitDate,
-				visitCount: existingBookmark.visitCount + 1
+				lastVisited: new Date(),
+				visitCount: sql`${schema.bookmarks.visitCount} + 1`
 			})
 			.where(
 				and(eq(schema.bookmarks.id, id), eq(schema.bookmarks.ownerId, ownerId))

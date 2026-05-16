@@ -197,18 +197,16 @@ describe('BookmarksController', () => {
 	})
 
 	it('should mark a bookmark as visited successfully', async () => {
-		const mockDate = new Date('2026-01-01T10:00:00.000Z')
-
 		bookmarksServiceMock.visited.mockResolvedValue(mockBookmark)
 		handlerMock.mockImplementation(async (resolver) =>
-			resolver({ input: { id: 1, lastVisited: mockDate } })
+			resolver({ input: { id: 1 } })
 		)
 
 		const result = await controller.visited(mockUserSession)
 
 		expect(implement).toHaveBeenCalledWith(contract.bookmark.visited)
 		expect(bookmarksServiceMock.visited).toHaveBeenCalledWith(
-			{ id: 1, lastVisited: mockDate },
+			{ id: 1 },
 			mockUserSession.user.id
 		)
 		expect(result).toEqual(mockBookmark)
@@ -217,7 +215,7 @@ describe('BookmarksController', () => {
 	it('should throw error when service fails to mark bookmark as visited', async () => {
 		bookmarksServiceMock.visited.mockResolvedValue(null)
 		handlerMock.mockImplementation(async (resolver) =>
-			resolver({ input: { id: 1, lastVisited: new Date() } })
+			resolver({ input: { id: 1 } })
 		)
 
 		await expect(controller.visited(mockUserSession)).rejects.toBeInstanceOf(

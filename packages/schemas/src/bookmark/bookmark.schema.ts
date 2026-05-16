@@ -62,8 +62,7 @@ export const pinUnpinBookmarkSchema = z.object({
 })
 
 export const visitedBookmarkSchema = z.object({
-	id: z.coerce.number().int().positive(),
-	lastVisited: z.coerce.date()
+	id: z.coerce.number().int().positive()
 })
 
 export type Bookmark = z.infer<typeof bookmarkSchema>
