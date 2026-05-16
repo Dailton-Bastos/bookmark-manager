@@ -62,14 +62,16 @@ export const Dashboard = () => {
 		return data.pages.map((page) => {
 			return {
 				...page,
-				data: page.data.map((bookmark) => ({
-					...bookmark,
-					createdAt: new Date(bookmark.createdAt),
-					updatedAt: new Date(bookmark.updatedAt),
-					lastVisited: bookmark.lastVisited
-						? new Date(bookmark.lastVisited)
-						: null
-				}))
+				data: page.data
+					.map((bookmark) => ({
+						...bookmark,
+						createdAt: new Date(bookmark.createdAt),
+						updatedAt: new Date(bookmark.updatedAt),
+						lastVisited: bookmark.lastVisited
+							? new Date(bookmark.lastVisited)
+							: null
+					}))
+					.sort((a, b) => (a.pinned === b.pinned ? 0 : a.pinned ? -1 : 1)) // Sort pinned bookmarks first
 			}
 		})
 	}, [data])
@@ -107,6 +109,37 @@ export const Dashboard = () => {
 					if (err instanceof Error) return err.message
 
 					return 'An error occurred while archiving the bookmark.'
+				}
+			}
+		)
+	}
+
+	const pinOrUnpinBookmarkMutation = useMutation(
+		orpcClient.bookmark.pinOrUnpin.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: orpcClient.bookmark.list.key()
+				})
+			}
+		})
+	)
+
+	const handlePinUnpinBookmark = async (
+		bookmarkId: number,
+		pinned: boolean
+	) => {
+		toast.promise(
+			pinOrUnpinBookmarkMutation.mutateAsync({
+				id: bookmarkId,
+				pinned: !pinned
+			}),
+			{
+				error: (err) => {
+					if (err instanceof Error) return err.message
+
+					return `An error occurred while ${
+						pinned ? 'unpinning' : 'pinning'
+					} the bookmark.`
 				}
 			}
 		)
@@ -187,7 +220,11 @@ export const Dashboard = () => {
 							{bookmarks.map((page) => (
 								<React.Fragment key={page.meta.currentPage}>
 									{page.data.map((bookmark) => (
-										<Bookmark key={bookmark.id} bookmark={bookmark} />
+										<Bookmark
+											key={bookmark.id}
+											bookmark={bookmark}
+											handlePinUnpinBookmark={handlePinUnpinBookmark}
+										/>
 									))}
 								</React.Fragment>
 							))}

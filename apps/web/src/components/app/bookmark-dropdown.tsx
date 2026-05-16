@@ -27,9 +27,13 @@ import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 
 interface BookmarkDropdownProps {
 	bookmark: Bookmark
+	handlePinUnpinBookmark: (id: number, pinned: boolean) => Promise<void>
 }
 
-export const BookmarkDropdown = ({ bookmark }: BookmarkDropdownProps) => {
+export const BookmarkDropdown = ({
+	bookmark,
+	handlePinUnpinBookmark
+}: BookmarkDropdownProps) => {
 	const [copyToClipboard, copyResult] = useCopyToClipboard()
 
 	const { id, url, pinned, isArchived } = bookmark
@@ -98,17 +102,23 @@ export const BookmarkDropdown = ({ bookmark }: BookmarkDropdownProps) => {
 
 					{!isArchived && (
 						<>
-							{pinned ? (
-								<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
-									<PinIcon className="text-muted-foreground rotate-45" />
-									Unpin
-								</DropdownMenuItem>
-							) : (
-								<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
-									<PinIcon className="text-muted-foreground" />
-									Pin
-								</DropdownMenuItem>
-							)}
+							<DropdownMenuItem
+								className="focus:bg-sidebar-accent p-2 mb-1"
+								onSelect={() => handlePinUnpinBookmark(id, pinned)}
+							>
+								{pinned ? (
+									<>
+										<PinIcon className="text-muted-foreground rotate-45" />
+										Unpin
+									</>
+								) : (
+									<>
+										<PinIcon className="text-muted-foreground" />
+										Pin
+									</>
+								)}
+							</DropdownMenuItem>
+
 							<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
 								<SquarePen className="text-muted-foreground" />
 								Edit
