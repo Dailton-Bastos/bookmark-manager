@@ -178,9 +178,9 @@ export class BookmarksService {
 				.limit(limit)
 				.offset(offset)
 				.orderBy(
-					// For non-archived view, sort pinned bookmarks first; for archived-only view, sort by updatedAt to show most recently archived first
+					// When non-archived bookmarks may appear in the result, sort pinned bookmarks first; for archived-only view, sort by updatedAt to show most recently archived first
 					desc(
-						archived === 'exclude'
+						archived !== 'only'
 							? schema.bookmarks.pinned
 							: schema.bookmarks.updatedAt
 					),

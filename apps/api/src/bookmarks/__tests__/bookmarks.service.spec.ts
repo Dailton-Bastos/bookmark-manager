@@ -602,6 +602,71 @@ describe('BookmarksService', () => {
 			expect(cacheManager.set).toHaveBeenCalledWith(registryKey, [cacheKey])
 		})
 
+		it.each([
+			{
+				name: 'include',
+				query: {
+					limit: 10,
+					page: 1,
+					order: 'desc' as const,
+					archived: 'include' as const
+				},
+				expectedSql: '"bookmarks"."pinned" desc'
+			},
+			{
+				name: 'exclude',
+				query: {
+					limit: 10,
+					page: 1,
+					order: 'desc' as const,
+					archived: 'exclude' as const
+				},
+				expectedSql: '"bookmarks"."pinned" desc'
+			},
+			{
+				name: 'only',
+				query: {
+					limit: 10,
+					page: 1,
+					order: 'desc' as const,
+					archived: 'only' as const
+				},
+				expectedSql: '"bookmarks"."updated_at" desc'
+			}
+		])('should use the correct leading order clause for archived $name', async ({
+			query,
+			expectedSql
+		}) => {
+			const select = db.select as jest.Mock
+
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				groupBy: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+			})
+
+			const orderByMock = jest.fn().mockResolvedValueOnce([mockBookmark])
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				limit: jest.fn().mockReturnThis(),
+				offset: jest.fn().mockReturnThis(),
+				orderBy: orderByMock
+			})
+
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				leftJoin: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([])
+			})
+
+			await service.list(query, 'user-123')
+
+			expect(orderByMock).toHaveBeenCalledTimes(1)
+			const orderByArgs: SQL[] = orderByMock.mock.calls[0]
+			expect(pgDialect.sqlToQuery(orderByArgs[0]!).sql).toBe(expectedSql)
+		})
+
 		it('should sort by lastVisited DESC NULLS LAST when order is recently_visited', async () => {
 			const select = db.select as jest.Mock
 
