@@ -6,7 +6,8 @@ import type {
 	CreateBookmark,
 	ListBookmarks,
 	ListBookmarksArchived,
-	ListBookmarksInput
+	ListBookmarksInput,
+	PinUnpinBookmark
 } from '@repo/schemas'
 import type { SQL } from 'drizzle-orm'
 import { and, count, desc, eq, sql } from 'drizzle-orm'
@@ -176,7 +177,15 @@ export class BookmarksService {
 				.where(whereClause)
 				.limit(limit)
 				.offset(offset)
-				.orderBy(...orderByClauses)
+				.orderBy(
+					// When non-archived bookmarks may appear in the result, sort pinned bookmarks first; for archived-only view, sort by updatedAt to show most recently archived first
+					desc(
+						archived !== 'only'
+							? schema.bookmarks.pinned
+							: schema.bookmarks.updatedAt
+					),
+					...orderByClauses
+				)
 
 			if (bookmarks.length === 0) {
 				return this.paginationProvider.paginateQuery<Bookmark>({
@@ -266,6 +275,35 @@ export class BookmarksService {
 		if (!updatedBookmark?.[0]) return null
 
 		// Invalidate this owner's bookmark list cache entries after archiving/unarchiving a bookmark
+		await this.invalidateOwnerCache(ownerId)
+
+		return {
+			...updatedBookmark[0],
+			tags: existingBookmark.tags
+		}
+	}
+
+	async pinOrUnpin(
+		input: PinUnpinBookmark,
+		ownerId: string
+	): Promise<Bookmark | null> {
+		const { id, pinned } = input
+
+		const existingBookmark = await this.findById(id, ownerId)
+
+		if (!existingBookmark) return null
+
+		const updatedBookmark = await this.db
+			.update(schema.bookmarks)
+			.set({ pinned })
+			.where(
+				and(eq(schema.bookmarks.id, id), eq(schema.bookmarks.ownerId, ownerId))
+			)
+			.returning()
+
+		if (!updatedBookmark?.[0]) return null
+
+		// Invalidate this owner's bookmark list cache entries after pinning/unpinning a bookmark
 		await this.invalidateOwnerCache(ownerId)
 
 		return {

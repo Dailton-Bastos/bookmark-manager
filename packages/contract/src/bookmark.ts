@@ -4,7 +4,8 @@ import {
 	bookmarkSchema,
 	createBookmarkSchema,
 	listBookmarksInputSchema,
-	listBookmarksSchema
+	listBookmarksSchema,
+	pinUnpinBookmarkSchema
 } from '@repo/schemas'
 
 export const createBookmarkContract = oc
@@ -35,4 +36,14 @@ export const archivedUnarchivedBookmarkContract = oc
 		tags: ['Bookmarks']
 	})
 	.input(archivedUnarchivedBookmarkSchema)
+	.output(bookmarkSchema)
+
+export const pinUnpinBookmarkContract = oc
+	.route({
+		method: 'PATCH',
+		path: '/bookmarks/pin',
+		summary: 'Pin or unpin a bookmark',
+		tags: ['Bookmarks']
+	})
+	.input(pinUnpinBookmarkSchema)
 	.output(bookmarkSchema)

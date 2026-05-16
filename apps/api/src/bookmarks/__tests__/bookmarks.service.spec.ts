@@ -602,6 +602,71 @@ describe('BookmarksService', () => {
 			expect(cacheManager.set).toHaveBeenCalledWith(registryKey, [cacheKey])
 		})
 
+		it.each([
+			{
+				name: 'include',
+				query: {
+					limit: 10,
+					page: 1,
+					order: 'desc' as const,
+					archived: 'include' as const
+				},
+				expectedSql: '"bookmarks"."pinned" desc'
+			},
+			{
+				name: 'exclude',
+				query: {
+					limit: 10,
+					page: 1,
+					order: 'desc' as const,
+					archived: 'exclude' as const
+				},
+				expectedSql: '"bookmarks"."pinned" desc'
+			},
+			{
+				name: 'only',
+				query: {
+					limit: 10,
+					page: 1,
+					order: 'desc' as const,
+					archived: 'only' as const
+				},
+				expectedSql: '"bookmarks"."updated_at" desc'
+			}
+		])('should use the correct leading order clause for archived $name', async ({
+			query,
+			expectedSql
+		}) => {
+			const select = db.select as jest.Mock
+
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				groupBy: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+			})
+
+			const orderByMock = jest.fn().mockResolvedValueOnce([mockBookmark])
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				limit: jest.fn().mockReturnThis(),
+				offset: jest.fn().mockReturnThis(),
+				orderBy: orderByMock
+			})
+
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				leftJoin: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([])
+			})
+
+			await service.list(query, 'user-123')
+
+			expect(orderByMock).toHaveBeenCalledTimes(1)
+			const orderByArgs: SQL[] = orderByMock.mock.calls[0]
+			expect(pgDialect.sqlToQuery(orderByArgs[0]!).sql).toBe(expectedSql)
+		})
+
 		it('should sort by lastVisited DESC NULLS LAST when order is recently_visited', async () => {
 			const select = db.select as jest.Mock
 
@@ -633,10 +698,10 @@ describe('BookmarksService', () => {
 
 			expect(orderByMock).toHaveBeenCalledTimes(1)
 			const orderByArgs: SQL[] = orderByMock.mock.calls[0]
-			expect(orderByArgs).toHaveLength(2)
-			// Verify the first clause is a raw SQL template containing NULLS LAST
+			expect(orderByArgs).toHaveLength(3)
+			// Verify the second clause is a raw SQL template containing NULLS LAST
 			const queryChunks = (
-				orderByArgs[0] as unknown as {
+				orderByArgs[1] as unknown as {
 					queryChunks: Array<{ value?: string[] }>
 				}
 			).queryChunks
@@ -677,7 +742,7 @@ describe('BookmarksService', () => {
 
 			expect(orderByMock).toHaveBeenCalledTimes(1)
 			const orderByArgs: SQL[] = orderByMock.mock.calls[0]
-			expect(orderByArgs).toHaveLength(2)
+			expect(orderByArgs).toHaveLength(3)
 		})
 	})
 
@@ -788,6 +853,72 @@ describe('BookmarksService', () => {
 			expect(result).toEqual({
 				...existingBookmark,
 				isArchived: true,
+				updatedAt: expect.any(Date)
+			})
+		})
+	})
+
+	describe('pinOrUnpin', () => {
+		it('should return null if the bookmark to pin/unpin is not found', async () => {
+			jest.spyOn(service, 'findById').mockResolvedValueOnce(null)
+
+			const result = await service.pinOrUnpin(
+				{ id: 1, pinned: true },
+				'user-123'
+			)
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(result).toBeNull()
+		})
+
+		it('should return null if the bookmark to pin/unpin does not belong to the owner', async () => {
+			const existingBookmark = { ...mockBookmark, ownerId: 'other-user' }
+
+			const update = db.update as jest.Mock
+			update.mockReturnValueOnce({
+				where: jest.fn().mockReturnThis(),
+				set: jest.fn().mockReturnThis(),
+				returning: jest.fn().mockResolvedValueOnce([])
+			})
+
+			jest.spyOn(service, 'findById').mockResolvedValueOnce(existingBookmark)
+
+			const result = await service.pinOrUnpin(
+				{ id: 1, pinned: true },
+				'user-123'
+			)
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(result).toBeNull()
+		})
+
+		it('should pin/unpin a bookmark', async () => {
+			const update = db.update as jest.Mock
+
+			const existingBookmark = { ...mockBookmark, pinned: false }
+
+			update.mockReturnValueOnce({
+				where: jest.fn().mockReturnThis(),
+				set: jest.fn().mockReturnThis(),
+				returning: jest
+					.fn()
+					.mockResolvedValueOnce([
+						{ ...existingBookmark, pinned: true, updatedAt: new Date() }
+					])
+			})
+
+			jest.spyOn(service, 'findById').mockResolvedValueOnce(existingBookmark)
+
+			const result = await service.pinOrUnpin(
+				{ id: 1, pinned: true },
+				'user-123'
+			)
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(db.update).toHaveBeenCalledWith(schema.bookmarks)
+			expect(result).toEqual({
+				...existingBookmark,
+				pinned: true,
 				updatedAt: expect.any(Date)
 			})
 		})

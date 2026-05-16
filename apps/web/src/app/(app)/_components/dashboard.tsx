@@ -112,6 +112,39 @@ export const Dashboard = () => {
 		)
 	}
 
+	const pinOrUnpinBookmarkMutation = useMutation(
+		orpcClient.bookmark.pinOrUnpin.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: orpcClient.bookmark.list.key()
+				})
+			}
+		})
+	)
+
+	const handlePinUnpinBookmark = async (
+		bookmarkId: number,
+		pinned: boolean
+	) => {
+		toast.promise(
+			pinOrUnpinBookmarkMutation.mutateAsync({
+				id: bookmarkId,
+				pinned: !pinned
+			}),
+			{
+				loading: `${pinned ? 'Unpinning' : 'Pinning'} bookmark...`,
+				success: `Bookmark ${pinned ? 'unpinned' : 'pinned'} successfully!`,
+				error: (err) => {
+					if (err instanceof Error) return err.message
+
+					return `An error occurred while ${
+						pinned ? 'unpinning' : 'pinning'
+					} the bookmark.`
+				}
+			}
+		)
+	}
+
 	useEffect(() => {
 		if (inView && hasNextPage && !isFetchingNextPage) {
 			fetchNextPage()
@@ -187,7 +220,11 @@ export const Dashboard = () => {
 							{bookmarks.map((page) => (
 								<React.Fragment key={page.meta.currentPage}>
 									{page.data.map((bookmark) => (
-										<Bookmark key={bookmark.id} bookmark={bookmark} />
+										<Bookmark
+											key={bookmark.id}
+											bookmark={bookmark}
+											handlePinUnpinBookmark={handlePinUnpinBookmark}
+										/>
 									))}
 								</React.Fragment>
 							))}
