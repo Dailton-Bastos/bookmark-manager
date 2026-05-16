@@ -145,6 +145,28 @@ export const Dashboard = () => {
 		)
 	}
 
+	const visitedBookmarkMutation = useMutation(
+		orpcClient.bookmark.visited.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: orpcClient.bookmark.list.key()
+				})
+			}
+		})
+	)
+
+	const handleVisitedBookmark = async (bookmarkId: number) => {
+		try {
+			await visitedBookmarkMutation.mutateAsync({ id: bookmarkId })
+		} catch (err) {
+			if (err instanceof Error) {
+				toast.error(err.message)
+			} else {
+				toast.error('An error occurred while updating the bookmark.')
+			}
+		}
+	}
+
 	useEffect(() => {
 		if (inView && hasNextPage && !isFetchingNextPage) {
 			fetchNextPage()
@@ -224,6 +246,7 @@ export const Dashboard = () => {
 											key={bookmark.id}
 											bookmark={bookmark}
 											handlePinUnpinBookmark={handlePinUnpinBookmark}
+											handleVisitedBookmark={handleVisitedBookmark}
 										/>
 									))}
 								</React.Fragment>

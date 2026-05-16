@@ -32,7 +32,8 @@ jest.mock('@repo/contract', () => ({
 			create: 'bookmark.create',
 			list: 'bookmark.list',
 			archiveOrUnarchive: 'bookmark.archiveOrUnarchive',
-			pinOrUnpin: 'bookmark.pinOrUnpin'
+			pinOrUnpin: 'bookmark.pinOrUnpin',
+			visited: 'bookmark.visited'
 		}
 	}
 }))
@@ -48,6 +49,7 @@ describe('BookmarksController', () => {
 		list: jest.Mock
 		archiveOrUnarchive: jest.Mock
 		pinOrUnpin: jest.Mock
+		visited: jest.Mock
 	}
 
 	beforeEach(async () => {
@@ -64,7 +66,8 @@ describe('BookmarksController', () => {
 						create: jest.fn(),
 						list: jest.fn(),
 						archiveOrUnarchive: jest.fn(),
-						pinOrUnpin: jest.fn()
+						pinOrUnpin: jest.fn(),
+						visited: jest.fn()
 					}
 				}
 			]
@@ -188,6 +191,37 @@ describe('BookmarksController', () => {
 			ORPCError
 		)
 		await expect(controller.pinOrUnpin(mockUserSession)).rejects.toHaveProperty(
+			'message',
+			'Bookmark not found or not accessible'
+		)
+	})
+
+	it('should mark a bookmark as visited successfully', async () => {
+		bookmarksServiceMock.visited.mockResolvedValue(mockBookmark)
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({ input: { id: 1 } })
+		)
+
+		const result = await controller.visited(mockUserSession)
+
+		expect(implement).toHaveBeenCalledWith(contract.bookmark.visited)
+		expect(bookmarksServiceMock.visited).toHaveBeenCalledWith(
+			{ id: 1 },
+			mockUserSession.user.id
+		)
+		expect(result).toEqual(mockBookmark)
+	})
+
+	it('should throw error when service fails to mark bookmark as visited', async () => {
+		bookmarksServiceMock.visited.mockResolvedValue(null)
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({ input: { id: 1 } })
+		)
+
+		await expect(controller.visited(mockUserSession)).rejects.toBeInstanceOf(
+			ORPCError
+		)
+		await expect(controller.visited(mockUserSession)).rejects.toHaveProperty(
 			'message',
 			'Bookmark not found or not accessible'
 		)

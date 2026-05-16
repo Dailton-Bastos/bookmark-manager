@@ -664,6 +664,7 @@ describe('BookmarksService', () => {
 
 			expect(orderByMock).toHaveBeenCalledTimes(1)
 			const orderByArgs: SQL[] = orderByMock.mock.calls[0]
+			// biome-ignore lint/style/noNonNullAssertion: <Only for test readability>
 			expect(pgDialect.sqlToQuery(orderByArgs[0]!).sql).toBe(expectedSql)
 		})
 
@@ -919,6 +920,55 @@ describe('BookmarksService', () => {
 			expect(result).toEqual({
 				...existingBookmark,
 				pinned: true,
+				updatedAt: expect.any(Date)
+			})
+		})
+	})
+
+	describe('visited', () => {
+		it('should return null if the bookmark to update visit is not found', async () => {
+			jest.spyOn(service, 'findById').mockResolvedValueOnce(null)
+
+			const result = await service.visited({ id: 1 }, 'user-123')
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(result).toBeNull()
+		})
+
+		it('should update lastVisited, increment visitCount and invalidate cache', async () => {
+			const update = db.update as jest.Mock
+			const existingBookmark = {
+				...mockBookmark,
+				visitCount: 5,
+				lastVisited: new Date('2026-01-01T10:00:00.000Z')
+			}
+			const newVisitDate = new Date('2026-01-02T12:00:00.000Z')
+
+			update.mockReturnValueOnce({
+				set: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				returning: jest.fn().mockResolvedValueOnce([
+					{
+						...existingBookmark,
+						visitCount: existingBookmark.visitCount + 1,
+						lastVisited: newVisitDate,
+						updatedAt: new Date()
+					}
+				])
+			})
+
+			jest.spyOn(service, 'findById').mockResolvedValueOnce(existingBookmark)
+			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(['cache-key'])
+
+			const result = await service.visited({ id: 1 }, 'user-123')
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(db.update).toHaveBeenCalledWith(schema.bookmarks)
+			expect(cacheManager.del).toHaveBeenCalledWith('cache-key')
+			expect(result).toEqual({
+				...existingBookmark,
+				visitCount: 6,
+				lastVisited: newVisitDate,
 				updatedAt: expect.any(Date)
 			})
 		})

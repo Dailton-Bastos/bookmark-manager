@@ -28,11 +28,13 @@ import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 interface BookmarkDropdownProps {
 	bookmark: Bookmark
 	handlePinUnpinBookmark: (id: number, pinned: boolean) => Promise<void>
+	handleVisitedBookmark: (id: number) => Promise<void>
 }
 
 export const BookmarkDropdown = ({
 	bookmark,
-	handlePinUnpinBookmark
+	handlePinUnpinBookmark,
+	handleVisitedBookmark
 }: BookmarkDropdownProps) => {
 	const [copyToClipboard, copyResult] = useCopyToClipboard()
 
@@ -79,7 +81,7 @@ export const BookmarkDropdown = ({
 					<DropdownMenuItem
 						className="focus:bg-sidebar-accent p-2 mb-1"
 						asChild
-						onSelect={(e) => e.preventDefault()}
+						onSelect={() => handleVisitedBookmark(id)}
 					>
 						<a
 							href={url}

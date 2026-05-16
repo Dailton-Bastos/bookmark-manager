@@ -61,6 +61,10 @@ export const pinUnpinBookmarkSchema = z.object({
 	pinned: z.boolean()
 })
 
+export const visitedBookmarkSchema = z.object({
+	id: z.coerce.number().int().positive()
+})
+
 export type Bookmark = z.infer<typeof bookmarkSchema>
 export type CreateBookmark = z.infer<typeof createBookmarkSchema>
 export type ListBookmarks = z.infer<typeof listBookmarksSchema>
@@ -69,5 +73,6 @@ export type ArchivedUnarchivedBookmark = z.infer<
 	typeof archivedUnarchivedBookmarkSchema
 >
 export type PinUnpinBookmark = z.infer<typeof pinUnpinBookmarkSchema>
+export type VisitedBookmark = z.infer<typeof visitedBookmarkSchema>
 export type ListBookmarksOrder = ListBookmarksInput['order']
 export type ListBookmarksArchived = ListBookmarksInput['archived']

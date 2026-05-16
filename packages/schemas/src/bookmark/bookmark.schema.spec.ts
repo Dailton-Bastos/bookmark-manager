@@ -7,7 +7,8 @@ import {
 	createBookmarkSchema,
 	listBookmarksInputSchema,
 	listBookmarksSchema,
-	pinUnpinBookmarkSchema
+	pinUnpinBookmarkSchema,
+	visitedBookmarkSchema
 } from './bookmark.schema'
 
 describe('BookmarkSchema', () => {
@@ -399,6 +400,41 @@ describe('PinUnpinBookmarkSchema', () => {
 		}
 
 		const result = pinUnpinBookmarkSchema.safeParse(invalidInput)
+
+		expect(result.success).toBe(false)
+
+		if (!result.success) {
+			expect(result.error).toBeInstanceOf(ZodError)
+			expect(result.error.issues.length).toBeGreaterThan(0)
+		}
+	})
+})
+
+describe('VisitedBookmarkSchema', () => {
+	it('should be defined', () => {
+		expect(visitedBookmarkSchema).toBeDefined()
+	})
+
+	it('should validate a valid visited bookmark object', () => {
+		const validInput = {
+			id: 1
+		}
+
+		const result = visitedBookmarkSchema.safeParse(validInput)
+
+		expect(result.success).toBe(true)
+
+		if (result.success) {
+			expect(result.data.id).toBe(1)
+		}
+	})
+
+	it('should fail validation for an invalid visited bookmark object', () => {
+		const invalidInput = {
+			id: 'not-a-number'
+		}
+
+		const result = visitedBookmarkSchema.safeParse(invalidInput)
 
 		expect(result.success).toBe(false)
 
