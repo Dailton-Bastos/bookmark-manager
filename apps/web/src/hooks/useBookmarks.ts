@@ -58,7 +58,7 @@ export const useBookmarksInfiniteQuery = ({
 	)
 
 	const bookmarks = useMemo(() => {
-		if (!data) return []
+		if (!data) return undefined
 
 		return data.pages.map((page) => {
 			return {

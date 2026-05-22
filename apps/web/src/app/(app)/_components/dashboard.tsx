@@ -44,7 +44,7 @@ export const Dashboard = () => {
 		)
 	}
 
-	if (!isPending && bookmarks[0]?.data.length === 0) {
+	if (!isPending && !error && bookmarks?.[0]?.data.length === 0) {
 		return (
 			<section className="flex flex-col pt-28 items-center justify-center gap-4 w-full p-4">
 				<p className="text-muted-foreground font-medium text-sm">
@@ -80,7 +80,7 @@ export const Dashboard = () => {
 				<div className="@container/main flex flex-1 flex-col gap-2">
 					<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
 						<div className="grid grid-cols-1 gap-3 *:data-[slot=card]:shadow-md @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
-							{bookmarks.map((page) => (
+							{(bookmarks ?? []).map((page) => (
 								<React.Fragment key={page.meta.currentPage}>
 									{page.data.map((bookmark) => (
 										<Bookmark key={bookmark.id} bookmark={bookmark} />
