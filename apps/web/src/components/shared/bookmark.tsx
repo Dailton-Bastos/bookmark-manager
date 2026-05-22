@@ -16,15 +16,9 @@ import { BookmarkDropdown } from '../app/bookmark-dropdown'
 
 interface Props {
 	bookmark: BookmarkProps
-	handlePinUnpinBookmark: (id: number, pinned: boolean) => Promise<void>
-	handleVisitedBookmark: (id: number) => Promise<void>
 }
 
-export const Bookmark = ({
-	bookmark,
-	handlePinUnpinBookmark,
-	handleVisitedBookmark
-}: Props) => {
+export const Bookmark = ({ bookmark }: Props) => {
 	const {
 		title,
 		url,
@@ -54,11 +48,7 @@ export const Bookmark = ({
 				</div>
 
 				<CardAction className="mt-1 ml-3">
-					<BookmarkDropdown
-						bookmark={bookmark}
-						handlePinUnpinBookmark={handlePinUnpinBookmark}
-						handleVisitedBookmark={handleVisitedBookmark}
-					/>
+					<BookmarkDropdown bookmark={bookmark} />
 				</CardAction>
 			</CardHeader>
 

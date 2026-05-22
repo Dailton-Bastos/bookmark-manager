@@ -10,18 +10,18 @@ import {
 	DialogTitle
 } from 'ui/components/shadcn/ui/dialog'
 import { PrimaryButton as ConfirmButton } from '@/components/shared/primary-button'
+import { useArchiveOrUnarchiveBookmarkMutation } from '@/hooks/useArchiveOrUnarchiveBookmarkMutation'
 import { useArchiveUnarchiveBookmarkModal } from '@/hooks/useBookmarkModal'
 
-interface Props {
-	isPending: boolean
-	handleArchiveUnarchive: () => Promise<void>
-}
-
-export const ArchiveUnarchiveBookmarkModal = ({
-	isPending,
-	handleArchiveUnarchive
-}: Props) => {
+export const ArchiveUnarchiveBookmarkModal = () => {
 	const { isOpen, onClose, type } = useArchiveUnarchiveBookmarkModal()
+
+	const {
+		handleArchiveOrUnarchiveBookmark,
+		archiveOrUnarchiveBookmarkMutation
+	} = useArchiveOrUnarchiveBookmarkMutation()
+
+	const { isPending } = archiveOrUnarchiveBookmarkMutation
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
@@ -65,7 +65,7 @@ export const ArchiveUnarchiveBookmarkModal = ({
 						title={type === 'archive' ? 'Archive' : 'Unarchive'}
 						className="w-23.5"
 						disabled={isPending}
-						onClick={handleArchiveUnarchive}
+						onClick={handleArchiveOrUnarchiveBookmark}
 					/>
 				</DialogFooter>
 			</DialogContent>
