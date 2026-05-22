@@ -27,8 +27,8 @@ import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 
 interface BookmarkDropdownProps {
 	bookmark: Bookmark
-	handlePinUnpinBookmark: (id: number, pinned: boolean) => Promise<void>
-	handleVisitedBookmark: (id: number) => Promise<void>
+	handlePinUnpinBookmark: (bookmarkId: number, pinned: boolean) => Promise<void>
+	handleVisitedBookmark: (bookmarkId: number) => Promise<void>
 }
 
 export const BookmarkDropdown = ({
