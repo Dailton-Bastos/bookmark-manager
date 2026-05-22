@@ -10,11 +10,15 @@ import { CardsSkeleton } from '@/components/shared/cards-skeleton'
 import { PrimaryButton as AddBookmarkButton } from '@/components/shared/primary-button'
 import { useAddBookmarkModal } from '@/hooks/useBookmarkModal'
 import { useBookmarks, useBookmarksInfiniteQuery } from '@/hooks/useBookmarks'
+import { usePinOrUnpinBookmarkMutation } from '@/hooks/usePinOrUnpinBookmarkMutation'
+import { useVisitedBookmarkMutation } from '@/hooks/useVisitedBookmarkMutation'
 
 export const Dashboard = () => {
 	const { onOpen } = useAddBookmarkModal()
 
 	const { limit, order, setOrder } = useBookmarks()
+	const { handlePinUnpinBookmark } = usePinOrUnpinBookmarkMutation()
+	const { handleVisitedBookmark } = useVisitedBookmarkMutation()
 
 	const { ref, inView } = useInView()
 
@@ -83,7 +87,12 @@ export const Dashboard = () => {
 							{(bookmarks ?? []).map((page) => (
 								<React.Fragment key={page.meta.currentPage}>
 									{page.data.map((bookmark) => (
-										<Bookmark key={bookmark.id} bookmark={bookmark} />
+										<Bookmark
+											key={bookmark.id}
+											bookmark={bookmark}
+											handlePinUnpinBookmark={handlePinUnpinBookmark}
+											handleVisitedBookmark={handleVisitedBookmark}
+										/>
 									))}
 								</React.Fragment>
 							))}

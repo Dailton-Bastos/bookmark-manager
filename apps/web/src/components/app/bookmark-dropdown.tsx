@@ -24,23 +24,24 @@ import {
 } from 'ui/components/shadcn/ui/dropdown-menu'
 import { useArchiveUnarchiveBookmarkModal } from '@/hooks/useBookmarkModal'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
-import { usePinOrUnpinBookmarkMutation } from '@/hooks/usePinOrUnpinBookmarkMutation'
-import { useVisitedBookmarkMutation } from '@/hooks/useVisitedBookmarkMutation'
 
 interface BookmarkDropdownProps {
 	bookmark: Bookmark
+	handlePinUnpinBookmark: (bookmarkId: number, pinned: boolean) => Promise<void>
+	handleVisitedBookmark: (bookmarkId: number) => Promise<void>
 }
 
-export const BookmarkDropdown = ({ bookmark }: BookmarkDropdownProps) => {
+export const BookmarkDropdown = ({
+	bookmark,
+	handlePinUnpinBookmark,
+	handleVisitedBookmark
+}: BookmarkDropdownProps) => {
 	const [copyToClipboard, copyResult] = useCopyToClipboard()
 
 	const { id, url, pinned, isArchived } = bookmark
 
 	const { onOpen: openArchiveUnarchiveModal } =
 		useArchiveUnarchiveBookmarkModal()
-
-	const { handlePinUnpinBookmark } = usePinOrUnpinBookmarkMutation()
-	const { handleVisitedBookmark } = useVisitedBookmarkMutation()
 
 	useEffect(() => {
 		if (copyResult) {
