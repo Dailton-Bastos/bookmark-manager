@@ -76,7 +76,8 @@ export const useBookmarksInfiniteQuery = ({
 					updatedAt: new Date(bookmark.updatedAt),
 					lastVisited: bookmark.lastVisited
 						? new Date(bookmark.lastVisited)
-						: null
+						: null,
+					archivedAt: bookmark.archivedAt ? new Date(bookmark.archivedAt) : null
 				}))
 			}
 		})
