@@ -50,6 +50,13 @@
 			"when": 1746489561000,
 			"tag": "20260506000000_add_bookmark_sort_indexes",
 			"breakpoints": true
+		},
+		{
+			"idx": 7,
+			"version": "7",
+			"when": 1779498451054,
+			"tag": "20260523010731_add_archivedAt_bookmark",
+			"breakpoints": true
 		}
 	]
 }
