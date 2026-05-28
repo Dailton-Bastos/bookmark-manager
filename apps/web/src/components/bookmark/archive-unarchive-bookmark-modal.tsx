@@ -36,7 +36,7 @@ export const ArchiveUnarchiveBookmarkModal = () => {
 					<DialogDescription className="font-medium text-sm text-muted-foreground">
 						{type === 'archive'
 							? 'Are you sure you want to archive this bookmark?'
-							: 'Are you sure you want to unarchive this bookmark?'}
+							: 'Move this bookmark back to your active list?'}
 					</DialogDescription>
 					<DialogClose asChild>
 						<Button
@@ -63,7 +63,7 @@ export const ArchiveUnarchiveBookmarkModal = () => {
 					<ConfirmButton
 						type="button"
 						title={type === 'archive' ? 'Archive' : 'Unarchive'}
-						className="w-23.5"
+						className="w-fit"
 						disabled={isPending}
 						onClick={handleArchiveOrUnarchiveBookmark}
 					/>

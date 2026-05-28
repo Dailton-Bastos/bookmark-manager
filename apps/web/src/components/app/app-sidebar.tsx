@@ -16,13 +16,13 @@ const dataMock = {
 	navMain: [
 		{
 			title: 'Home',
-			url: '#',
+			url: '/',
 			icon: Home,
 			isActive: true
 		},
 		{
 			title: 'Archived',
-			url: '#',
+			url: '/archived',
 			icon: Archive
 		}
 	],

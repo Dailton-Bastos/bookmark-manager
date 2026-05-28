@@ -28,6 +28,13 @@ export const useBookmarks = create<BookmarksStore>((set) => ({
 	setLimit: (limit) => set({ limit })
 }))
 
+export const useArchivedBookmarks = create<BookmarksStore>((set) => ({
+	order: 'desc',
+	limit: 12,
+	setOrder: (order) => set({ order }),
+	setLimit: (limit) => set({ limit })
+}))
+
 export const useBookmarksInfiniteQuery = ({
 	limit,
 	order,
@@ -69,7 +76,8 @@ export const useBookmarksInfiniteQuery = ({
 					updatedAt: new Date(bookmark.updatedAt),
 					lastVisited: bookmark.lastVisited
 						? new Date(bookmark.lastVisited)
-						: null
+						: null,
+					archivedAt: bookmark.archivedAt ? new Date(bookmark.archivedAt) : null
 				}))
 			}
 		})
