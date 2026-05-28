@@ -23,6 +23,7 @@ export const bookmarks = pgTable(
 		isArchived: boolean('is_archived').notNull().default(false),
 		visitCount: integer('visit_count').notNull().default(0),
 		lastVisited: timestamp('last_visited'),
+		archivedAt: timestamp('archived_at'),
 		ownerId: text('owner_id')
 			.notNull()
 			.references(() => users.id, { onDelete: 'cascade' }),

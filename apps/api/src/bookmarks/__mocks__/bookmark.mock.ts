@@ -12,6 +12,7 @@ export const mockBookmark: Bookmark = {
 	createdAt: new Date(),
 	updatedAt: new Date(),
 	lastVisited: null,
+	archivedAt: null,
 	ownerId: 'user-123',
 	tags: []
 }

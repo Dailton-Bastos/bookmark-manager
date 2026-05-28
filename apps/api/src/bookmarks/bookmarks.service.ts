@@ -167,10 +167,18 @@ export class BookmarksService {
 					break
 				default:
 					orderByClauses = [
-						desc(schema.bookmarks.createdAt),
+						archived === 'only'
+							? sql`${schema.bookmarks.archivedAt} DESC NULLS LAST`
+							: sql`${schema.bookmarks.createdAt} DESC NULLS LAST`,
 						desc(schema.bookmarks.id)
 					]
 			}
+
+			// When non-archived bookmarks may appear in the result, sort pinned bookmarks first
+			const orderBy =
+				archived === 'only'
+					? orderByClauses
+					: [sql`${schema.bookmarks.pinned} DESC`, ...orderByClauses]
 
 			const bookmarks = await tx
 				.select()
@@ -178,15 +186,7 @@ export class BookmarksService {
 				.where(whereClause)
 				.limit(limit)
 				.offset(offset)
-				.orderBy(
-					// When non-archived bookmarks may appear in the result, sort pinned bookmarks first; for archived-only view, sort by updatedAt to show most recently archived first
-					desc(
-						archived !== 'only'
-							? schema.bookmarks.pinned
-							: schema.bookmarks.updatedAt
-					),
-					...orderByClauses
-				)
+				.orderBy(...orderBy)
 
 			if (bookmarks.length === 0) {
 				return this.paginationProvider.paginateQuery<Bookmark>({
@@ -267,7 +267,7 @@ export class BookmarksService {
 
 		const updatedBookmark = await this.db
 			.update(schema.bookmarks)
-			.set({ isArchived })
+			.set({ isArchived, archivedAt: isArchived ? new Date() : null })
 			.where(
 				and(eq(schema.bookmarks.id, id), eq(schema.bookmarks.ownerId, ownerId))
 			)

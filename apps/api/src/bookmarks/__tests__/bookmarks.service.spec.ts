@@ -611,7 +611,7 @@ describe('BookmarksService', () => {
 					order: 'desc' as const,
 					archived: 'include' as const
 				},
-				expectedSql: '"bookmarks"."pinned" desc'
+				expectedSql: '"bookmarks"."pinned" DESC'
 			},
 			{
 				name: 'exclude',
@@ -621,7 +621,7 @@ describe('BookmarksService', () => {
 					order: 'desc' as const,
 					archived: 'exclude' as const
 				},
-				expectedSql: '"bookmarks"."pinned" desc'
+				expectedSql: '"bookmarks"."pinned" DESC'
 			},
 			{
 				name: 'only',
@@ -631,7 +631,7 @@ describe('BookmarksService', () => {
 					order: 'desc' as const,
 					archived: 'only' as const
 				},
-				expectedSql: '"bookmarks"."updated_at" desc'
+				expectedSql: '"bookmarks"."archived_at" DESC NULLS LAST'
 			}
 		])('should use the correct leading order clause for archived $name', async ({
 			query,
