@@ -28,6 +28,7 @@ describe('BookmarkSchema', () => {
 			createdAt: new Date('2024-06-01T10:00:00.000Z'),
 			updatedAt: new Date('2020-01-01T06:15:00.123Z'),
 			lastVisited: null,
+			archivedAt: null,
 			ownerId: 'user-123',
 			tags: [
 				{ id: 1, name: 'example' },
@@ -66,6 +67,7 @@ describe('BookmarkSchema', () => {
 			createdAt: new Date('2024-06-01T10:00:00.000Z'),
 			updatedAt: new Date('2024-06-01T10:00:00.000Z'),
 			lastVisited: null,
+			archivedAt: null,
 			ownerId: 'user-123'
 		}
 
@@ -90,6 +92,7 @@ describe('BookmarkSchema', () => {
 			createdAt: new Date('2024-06-01T10:00:00.000Z'),
 			updatedAt: new Date('2024-06-01T10:00:00.000Z'),
 			lastVisited: null,
+			archivedAt: null,
 			ownerId: 'user-123',
 			tags: null
 		}
@@ -271,6 +274,7 @@ describe('ListBookmarksSchema', () => {
 					createdAt: new Date('2024-06-01T10:00:00.000Z'),
 					updatedAt: new Date('2024-06-01T10:00:00.000Z'),
 					lastVisited: null,
+					archivedAt: null,
 					ownerId: 'user-123',
 					tags: [
 						{ id: 1, name: 'example' },

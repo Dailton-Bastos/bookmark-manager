@@ -16,6 +16,7 @@ export const bookmarkSchema = z.object({
 	createdAt: z.coerce.date(),
 	updatedAt: z.coerce.date(),
 	lastVisited: z.coerce.date().nullable(),
+	archivedAt: z.coerce.date().nullable(),
 	ownerId: z.string(),
 	tags: z.array(tagSchema).nullish().default([])
 })
