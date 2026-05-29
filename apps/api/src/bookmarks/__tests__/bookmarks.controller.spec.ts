@@ -33,7 +33,8 @@ jest.mock('@repo/contract', () => ({
 			list: 'bookmark.list',
 			archiveOrUnarchive: 'bookmark.archiveOrUnarchive',
 			pinOrUnpin: 'bookmark.pinOrUnpin',
-			visited: 'bookmark.visited'
+			visited: 'bookmark.visited',
+			delete: 'bookmark.delete'
 		}
 	}
 }))
@@ -50,6 +51,7 @@ describe('BookmarksController', () => {
 		archiveOrUnarchive: jest.Mock
 		pinOrUnpin: jest.Mock
 		visited: jest.Mock
+		delete: jest.Mock
 	}
 
 	beforeEach(async () => {
@@ -67,7 +69,8 @@ describe('BookmarksController', () => {
 						list: jest.fn(),
 						archiveOrUnarchive: jest.fn(),
 						pinOrUnpin: jest.fn(),
-						visited: jest.fn()
+						visited: jest.fn(),
+						delete: jest.fn()
 					}
 				}
 			]
@@ -222,6 +225,37 @@ describe('BookmarksController', () => {
 			ORPCError
 		)
 		await expect(controller.visited(mockUserSession)).rejects.toHaveProperty(
+			'message',
+			'Bookmark not found or not accessible'
+		)
+	})
+
+	it('should delete a bookmark successfully', async () => {
+		bookmarksServiceMock.delete.mockResolvedValue({ success: true })
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({ input: { id: 1 } })
+		)
+
+		const result = await controller.delete(mockUserSession)
+
+		expect(implement).toHaveBeenCalledWith(contract.bookmark.delete)
+		expect(bookmarksServiceMock.delete).toHaveBeenCalledWith(
+			1,
+			mockUserSession.user.id
+		)
+		expect(result).toEqual({ success: true })
+	})
+
+	it('should throw error when service fails to delete bookmark', async () => {
+		bookmarksServiceMock.delete.mockResolvedValue(null)
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({ input: { id: 1 } })
+		)
+
+		await expect(controller.delete(mockUserSession)).rejects.toBeInstanceOf(
+			ORPCError
+		)
+		await expect(controller.delete(mockUserSession)).rejects.toHaveProperty(
 			'message',
 			'Bookmark not found or not accessible'
 		)

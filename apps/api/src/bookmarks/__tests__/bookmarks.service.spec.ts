@@ -33,6 +33,7 @@ describe('BookmarksService', () => {
 		transaction: jest.Mock
 		select: jest.Mock
 		update: jest.Mock
+		delete: jest.Mock
 		query: {
 			bookmarks: {
 				findFirst: jest.Mock
@@ -49,6 +50,7 @@ describe('BookmarksService', () => {
 			transaction: jest.fn(),
 			select: jest.fn().mockReturnThis(),
 			update: jest.fn().mockReturnThis(),
+			delete: jest.fn().mockReturnThis(),
 			query: {
 				bookmarks: {
 					findFirst: jest.fn()
@@ -971,6 +973,46 @@ describe('BookmarksService', () => {
 				lastVisited: newVisitDate,
 				updatedAt: expect.any(Date)
 			})
+		})
+	})
+
+	describe('delete', () => {
+		it('should return null if the bookmark to delete is not found', async () => {
+			jest.spyOn(service, 'findById').mockResolvedValueOnce(null)
+
+			const result = await service.delete(1, 'user-123')
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(result).toBeNull()
+			expect(db.delete).not.toHaveBeenCalled()
+		})
+
+		it('should delete a bookmark and invalidate cache', async () => {
+			const deleteMock = db.delete as jest.Mock
+			const whereMock = jest.fn().mockResolvedValueOnce(undefined)
+
+			deleteMock.mockReturnValueOnce({
+				where: whereMock
+			})
+
+			jest.spyOn(service, 'findById').mockResolvedValueOnce(mockBookmark)
+			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(['cache-key'])
+
+			const result = await service.delete(1, 'user-123')
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(db.delete).toHaveBeenCalledWith(schema.bookmarks)
+			expect(whereMock).toHaveBeenCalledWith(
+				and(
+					eq(schema.bookmarks.id, expect.any(Number)),
+					eq(schema.bookmarks.ownerId, expect.any(String))
+				)
+			)
+			expect(cacheManager.del).toHaveBeenCalledWith('cache-key')
+			expect(cacheManager.del).toHaveBeenCalledWith(
+				expect.stringContaining('user-123')
+			)
+			expect(result).toBeUndefined()
 		})
 	})
 })

@@ -66,6 +66,10 @@ export const visitedBookmarkSchema = z.object({
 	id: z.coerce.number().int().positive()
 })
 
+export const deleteBookmarkOutputSchema = z.object({
+	success: z.boolean()
+})
+
 export type Bookmark = z.infer<typeof bookmarkSchema>
 export type CreateBookmark = z.infer<typeof createBookmarkSchema>
 export type ListBookmarks = z.infer<typeof listBookmarksSchema>

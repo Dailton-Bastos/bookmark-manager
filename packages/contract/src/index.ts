@@ -3,6 +3,7 @@ import { populateContractRouterPaths } from '@orpc/contract'
 import {
 	archivedUnarchivedBookmarkContract,
 	createBookmarkContract,
+	deleteBookmarkContract,
 	listBookmarksContract,
 	pinUnpinBookmarkContract,
 	visitedBookmarkContract
@@ -14,6 +15,7 @@ export const contract = populateContractRouterPaths({
 		list: listBookmarksContract,
 		archiveOrUnarchive: archivedUnarchivedBookmarkContract,
 		pinOrUnpin: pinUnpinBookmarkContract,
-		visited: visitedBookmarkContract
+		visited: visitedBookmarkContract,
+		delete: deleteBookmarkContract
 	}
 })

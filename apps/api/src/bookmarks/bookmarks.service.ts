@@ -343,4 +343,18 @@ export class BookmarksService {
 			tags: existingBookmark.tags
 		}
 	}
+
+	async delete(id: number, ownerId: string): Promise<undefined | null> {
+		const existingBookmark = await this.findById(id, ownerId)
+
+		if (!existingBookmark) return null
+
+		await this.db
+			.delete(schema.bookmarks)
+			.where(
+				and(eq(schema.bookmarks.id, id), eq(schema.bookmarks.ownerId, ownerId))
+			)
+
+		await this.invalidateOwnerCache(ownerId)
+	}
 }
