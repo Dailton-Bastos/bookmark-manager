@@ -96,10 +96,7 @@ export class BookmarksController {
 	@Implement(contract.bookmark.delete)
 	delete(@Session() session: UserSession) {
 		return implement(contract.bookmark.delete).handler(async ({ input }) => {
-			const result = await this.bookmarksService.delete(
-				input.id,
-				session.user.id
-			)
+			const result = await this.bookmarksService.delete(input, session.user.id)
 
 			if (result === null) {
 				throw new ORPCError('NOT_FOUND', {

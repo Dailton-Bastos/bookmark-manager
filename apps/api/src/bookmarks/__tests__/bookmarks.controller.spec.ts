@@ -231,7 +231,7 @@ describe('BookmarksController', () => {
 	})
 
 	it('should delete a bookmark successfully', async () => {
-		bookmarksServiceMock.delete.mockResolvedValue({ success: true })
+		bookmarksServiceMock.delete.mockResolvedValue(undefined)
 		handlerMock.mockImplementation(async (resolver) =>
 			resolver({ input: { id: 1 } })
 		)
@@ -240,7 +240,7 @@ describe('BookmarksController', () => {
 
 		expect(implement).toHaveBeenCalledWith(contract.bookmark.delete)
 		expect(bookmarksServiceMock.delete).toHaveBeenCalledWith(
-			1,
+			{ id: 1 },
 			mockUserSession.user.id
 		)
 		expect(result).toEqual({ success: true })

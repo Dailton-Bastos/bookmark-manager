@@ -3,7 +3,10 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { LucideIcon } from 'ui/components/icons'
-import { SidebarMenuButton } from 'ui/components/shadcn/ui/sidebar'
+import {
+	SidebarMenuButton,
+	SidebarMenuItem
+} from 'ui/components/shadcn/ui/sidebar'
 import { cn } from 'ui/lib/utils'
 
 interface NavLinkProps {
@@ -26,20 +29,22 @@ export const NavLink = ({
 	const isActive = exact ? pathname === href : pathname?.startsWith(href)
 
 	return (
-		<SidebarMenuButton
-			asChild
-			isActive={isActive}
-			className={cn(
-				'font-semibold text-base text-muted-foreground h-9.5 p-3 [&>svg]:size-5',
-				'data-[active=true]:font-semibold',
-				'data-[active=true]:text-foreground',
-				className
-			)}
-		>
-			<Link href={href}>
-				{Icon && <Icon />}
-				<span>{children}</span>
-			</Link>
-		</SidebarMenuButton>
+		<SidebarMenuItem>
+			<SidebarMenuButton
+				asChild
+				isActive={isActive}
+				className={cn(
+					'font-semibold text-base text-muted-foreground h-9.5 p-3 [&>svg]:size-5',
+					'data-[active=true]:font-semibold',
+					'data-[active=true]:text-foreground',
+					className
+				)}
+			>
+				<Link href={href}>
+					{Icon && <Icon />}
+					<span>{children}</span>
+				</Link>
+			</SidebarMenuButton>
+		</SidebarMenuItem>
 	)
 }

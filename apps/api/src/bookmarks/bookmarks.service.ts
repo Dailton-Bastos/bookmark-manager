@@ -4,6 +4,7 @@ import type {
 	ArchivedUnarchivedBookmark,
 	Bookmark,
 	CreateBookmark,
+	DeleteBookmark,
 	ListBookmarks,
 	ListBookmarksArchived,
 	ListBookmarksInput,
@@ -344,7 +345,11 @@ export class BookmarksService {
 		}
 	}
 
-	async delete(id: number, ownerId: string): Promise<undefined | null> {
+	async delete(
+		input: DeleteBookmark,
+		ownerId: string
+	): Promise<undefined | null> {
+		const { id } = input
 		const existingBookmark = await this.findById(id, ownerId)
 
 		if (!existingBookmark) return null

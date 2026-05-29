@@ -980,7 +980,7 @@ describe('BookmarksService', () => {
 		it('should return null if the bookmark to delete is not found', async () => {
 			jest.spyOn(service, 'findById').mockResolvedValueOnce(null)
 
-			const result = await service.delete(1, 'user-123')
+			const result = await service.delete({ id: 1 }, 'user-123')
 
 			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
 			expect(result).toBeNull()
@@ -998,7 +998,7 @@ describe('BookmarksService', () => {
 			jest.spyOn(service, 'findById').mockResolvedValueOnce(mockBookmark)
 			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(['cache-key'])
 
-			const result = await service.delete(1, 'user-123')
+			const result = await service.delete({ id: 1 }, 'user-123')
 
 			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
 			expect(db.delete).toHaveBeenCalledWith(schema.bookmarks)

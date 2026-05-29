@@ -4,6 +4,7 @@ import {
 	bookmarkSchema,
 	createBookmarkSchema,
 	deleteBookmarkOutputSchema,
+	deleteBookmarkSchema,
 	listBookmarksInputSchema,
 	listBookmarksSchema,
 	pinUnpinBookmarkSchema,
@@ -67,5 +68,5 @@ export const deleteBookmarkContract = oc
 		summary: 'Delete a bookmark',
 		tags: ['Bookmarks']
 	})
-	.input(bookmarkSchema.pick({ id: true }))
+	.input(deleteBookmarkSchema)
 	.output(deleteBookmarkOutputSchema)
