@@ -5,6 +5,7 @@ import {
 	archivedUnarchivedBookmarkSchema,
 	bookmarkSchema,
 	createBookmarkSchema,
+	deleteBookmarkOutputSchema,
 	listBookmarksInputSchema,
 	listBookmarksSchema,
 	pinUnpinBookmarkSchema,
@@ -439,6 +440,37 @@ describe('VisitedBookmarkSchema', () => {
 		}
 
 		const result = visitedBookmarkSchema.safeParse(invalidInput)
+
+		expect(result.success).toBe(false)
+
+		if (!result.success) {
+			expect(result.error).toBeInstanceOf(ZodError)
+			expect(result.error.issues.length).toBeGreaterThan(0)
+		}
+	})
+})
+
+describe('DeleteBookmarkOutputSchema', () => {
+	it('should be defined', () => {
+		expect(deleteBookmarkOutputSchema).toBeDefined()
+	})
+
+	it('should validate a valid delete bookmark output object', () => {
+		const validOutput = {
+			success: true
+		}
+
+		const result = deleteBookmarkOutputSchema.safeParse(validOutput)
+
+		expect(result.success).toBe(true)
+	})
+
+	it('should fail validation for an invalid delete bookmark output object', () => {
+		const invalidOutput = {
+			success: 'not-a-boolean'
+		}
+
+		const result = deleteBookmarkOutputSchema.safeParse(invalidOutput)
 
 		expect(result.success).toBe(false)
 

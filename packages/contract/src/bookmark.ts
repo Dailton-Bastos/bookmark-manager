@@ -3,6 +3,8 @@ import {
 	archivedUnarchivedBookmarkSchema,
 	bookmarkSchema,
 	createBookmarkSchema,
+	deleteBookmarkOutputSchema,
+	deleteBookmarkSchema,
 	listBookmarksInputSchema,
 	listBookmarksSchema,
 	pinUnpinBookmarkSchema,
@@ -58,3 +60,13 @@ export const visitedBookmarkContract = oc
 	})
 	.input(visitedBookmarkSchema)
 	.output(bookmarkSchema)
+
+export const deleteBookmarkContract = oc
+	.route({
+		method: 'DELETE',
+		path: '/bookmarks',
+		summary: 'Delete a bookmark',
+		tags: ['Bookmarks']
+	})
+	.input(deleteBookmarkSchema)
+	.output(deleteBookmarkOutputSchema)

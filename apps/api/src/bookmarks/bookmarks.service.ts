@@ -4,6 +4,7 @@ import type {
 	ArchivedUnarchivedBookmark,
 	Bookmark,
 	CreateBookmark,
+	DeleteBookmark,
 	ListBookmarks,
 	ListBookmarksArchived,
 	ListBookmarksInput,
@@ -342,5 +343,23 @@ export class BookmarksService {
 			...updatedBookmark[0],
 			tags: existingBookmark.tags
 		}
+	}
+
+	async delete(
+		input: DeleteBookmark,
+		ownerId: string
+	): Promise<undefined | null> {
+		const { id } = input
+		const existingBookmark = await this.findById(id, ownerId)
+
+		if (!existingBookmark) return null
+
+		await this.db
+			.delete(schema.bookmarks)
+			.where(
+				and(eq(schema.bookmarks.id, id), eq(schema.bookmarks.ownerId, ownerId))
+			)
+
+		await this.invalidateOwnerCache(ownerId)
 	}
 }
