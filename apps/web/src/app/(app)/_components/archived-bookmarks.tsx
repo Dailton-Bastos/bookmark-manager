@@ -69,7 +69,7 @@ export const ArchivedBookmarks = () => {
 					)}
 				</div>
 				<div className="ml-auto flex items-center gap-4">
-					<SortByDropdown order={order} setOrder={setOrder} />
+					<SortByDropdown order={order} setOrder={setOrder} isArchivedPage />
 				</div>
 			</div>
 

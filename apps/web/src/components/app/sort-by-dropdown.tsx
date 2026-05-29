@@ -14,9 +14,14 @@ import {
 interface SortByDropdownProps {
 	order: ListBookmarksOrder
 	setOrder: (order: ListBookmarksOrder) => void
+	isArchivedPage?: boolean
 }
 
-export const SortByDropdown = ({ order, setOrder }: SortByDropdownProps) => {
+export const SortByDropdown = ({
+	order,
+	setOrder,
+	isArchivedPage = false
+}: SortByDropdownProps) => {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -42,7 +47,7 @@ export const SortByDropdown = ({ order, setOrder }: SortByDropdownProps) => {
 						className="focus:bg-sidebar-accent px-2 py-3"
 						value="desc"
 					>
-						Recently added
+						{isArchivedPage ? 'Recently archived' : 'Recently added'}
 					</DropdownMenuRadioItem>
 
 					<DropdownMenuRadioItem

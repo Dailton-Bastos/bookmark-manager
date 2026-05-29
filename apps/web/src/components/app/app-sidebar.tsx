@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { Archive, Home } from 'ui/components/icons'
 import {
 	Sidebar,
 	SidebarContent,
@@ -13,19 +12,6 @@ import { NavMain } from './nav-main'
 import { NavTags } from './nav-tags'
 
 const dataMock = {
-	navMain: [
-		{
-			title: 'Home',
-			url: '/',
-			icon: Home,
-			isActive: true
-		},
-		{
-			title: 'Archived',
-			url: '/archived',
-			icon: Archive
-		}
-	],
 	tags: [
 		{
 			name: 'AI',
@@ -86,7 +72,7 @@ export const AppSidebar = ({
 					</SidebarMenuItem>
 				</SidebarMenu>
 
-				<NavMain items={dataMock.navMain} />
+				<NavMain />
 			</SidebarHeader>
 
 			<SidebarContent className="px-4">
