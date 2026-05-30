@@ -34,7 +34,8 @@ jest.mock('@repo/contract', () => ({
 			archiveOrUnarchive: 'bookmark.archiveOrUnarchive',
 			pinOrUnpin: 'bookmark.pinOrUnpin',
 			visited: 'bookmark.visited',
-			delete: 'bookmark.delete'
+			delete: 'bookmark.delete',
+			update: 'bookmark.update'
 		}
 	}
 }))
@@ -52,6 +53,7 @@ describe('BookmarksController', () => {
 		pinOrUnpin: jest.Mock
 		visited: jest.Mock
 		delete: jest.Mock
+		update: jest.Mock
 	}
 
 	beforeEach(async () => {
@@ -70,7 +72,8 @@ describe('BookmarksController', () => {
 						archiveOrUnarchive: jest.fn(),
 						pinOrUnpin: jest.fn(),
 						visited: jest.fn(),
-						delete: jest.fn()
+						delete: jest.fn(),
+						update: jest.fn()
 					}
 				}
 			]
@@ -256,6 +259,59 @@ describe('BookmarksController', () => {
 			ORPCError
 		)
 		await expect(controller.delete(mockUserSession)).rejects.toHaveProperty(
+			'message',
+			'Bookmark not found or not accessible'
+		)
+	})
+
+	it('should update a bookmark successfully', async () => {
+		const updateInput = {
+			id: 1,
+			title: 'Updated Bookmark',
+			description: 'Updated description',
+			url: 'https://updated-example.com',
+			tags: ['TypeScript']
+		}
+		const updatedBookmark = {
+			...mockBookmark,
+			title: 'Updated Bookmark',
+			description: 'Updated description',
+			url: 'https://updated-example.com',
+			tags: [{ id: 1, name: 'TypeScript' }]
+		}
+
+		bookmarksServiceMock.update.mockResolvedValue(updatedBookmark)
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({ input: updateInput })
+		)
+
+		const result = await controller.update(mockUserSession)
+
+		expect(implement).toHaveBeenCalledWith(contract.bookmark.update)
+		expect(bookmarksServiceMock.update).toHaveBeenCalledWith(
+			updateInput,
+			mockUserSession.user.id
+		)
+		expect(result).toEqual(updatedBookmark)
+	})
+
+	it('should throw error when service fails to update bookmark', async () => {
+		bookmarksServiceMock.update.mockResolvedValue(null)
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({
+				input: {
+					id: 1,
+					title: 'Updated Bookmark',
+					description: 'Updated description',
+					url: 'https://updated-example.com'
+				}
+			})
+		)
+
+		await expect(controller.update(mockUserSession)).rejects.toBeInstanceOf(
+			ORPCError
+		)
+		await expect(controller.update(mockUserSession)).rejects.toHaveProperty(
 			'message',
 			'Bookmark not found or not accessible'
 		)

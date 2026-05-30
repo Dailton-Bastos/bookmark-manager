@@ -976,6 +976,150 @@ describe('BookmarksService', () => {
 		})
 	})
 
+	describe('update', () => {
+		it('should return null if id is invalid', async () => {
+			const findByIdSpy = jest.spyOn(service, 'findById')
+
+			const result = await service.update(
+				{
+					id: 0,
+					title: 'Updated title',
+					description: 'Updated description',
+					url: 'https://updated-example.com'
+				},
+				'user-123'
+			)
+
+			expect(result).toBeNull()
+			expect(findByIdSpy).not.toHaveBeenCalled()
+			expect(db.transaction).not.toHaveBeenCalled()
+		})
+
+		it('should return null if the bookmark to update is not found', async () => {
+			jest.spyOn(service, 'findById').mockResolvedValueOnce(null)
+
+			const result = await service.update(
+				{
+					id: 1,
+					title: 'Updated title',
+					description: 'Updated description',
+					url: 'https://updated-example.com'
+				},
+				'user-123'
+			)
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(result).toBeNull()
+			expect(db.transaction).not.toHaveBeenCalled()
+		})
+
+		it('should update a bookmark without changing tags when tags are not provided', async () => {
+			const existingBookmark = {
+				...mockBookmark,
+				tags: [{ id: 1, name: 'Old Tag' }]
+			}
+			const updateMock = db.update as jest.Mock
+
+			updateMock.mockReturnValueOnce({
+				set: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				returning: jest.fn().mockResolvedValueOnce([
+					{
+						...mockBookmark,
+						title: 'Updated title',
+						description: 'Updated description',
+						url: 'https://updated-example.com',
+						updatedAt: new Date()
+					}
+				])
+			})
+
+			jest.spyOn(service, 'findById').mockResolvedValueOnce(existingBookmark)
+			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(['cache-key'])
+
+			const result = await service.update(
+				{
+					id: 1,
+					title: 'Updated title',
+					description: 'Updated description',
+					url: 'https://updated-example.com'
+				},
+				'user-123'
+			)
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(db.update).toHaveBeenCalledWith(schema.bookmarks)
+			expect(db.delete).not.toHaveBeenCalledWith(schema.bookmarkTags)
+			expect(cacheManager.del).toHaveBeenCalledWith('cache-key')
+			expect(result).toMatchObject({
+				title: 'Updated title',
+				description: 'Updated description',
+				url: 'https://updated-example.com',
+				tags: [{ id: 1, name: 'Old Tag' }]
+			})
+		})
+
+		it('should update bookmark tags with unique valid tags and invalidate cache', async () => {
+			const updateMock = db.update as jest.Mock
+			const deleteMock = db.delete as jest.Mock
+			const insertMock = db.insert as jest.Mock
+			const deleteWhereMock = jest.fn().mockResolvedValueOnce(undefined)
+			const insertValuesMock = jest.fn().mockResolvedValueOnce(undefined)
+
+			updateMock.mockReturnValueOnce({
+				set: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				returning: jest.fn().mockResolvedValueOnce([
+					{
+						...mockBookmark,
+						title: 'Updated title',
+						updatedAt: new Date()
+					}
+				])
+			})
+
+			deleteMock.mockReturnValueOnce({ where: deleteWhereMock })
+			insertMock.mockReturnValueOnce({ values: insertValuesMock })
+
+			jest
+				.spyOn(service, 'findById')
+				.mockResolvedValueOnce(mockBookmarkWithTags)
+			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(['cache-key'])
+			jest
+				.spyOn(tagsService, 'create')
+				.mockResolvedValueOnce({ id: 2, name: 'TypeScript' })
+				.mockResolvedValueOnce(null)
+
+			const result = await service.update(
+				{
+					id: 1,
+					title: 'Updated title',
+					description: 'Updated description',
+					url: 'https://updated-example.com',
+					tags: ['TypeScript', 'TypeScript', 'Invalid']
+				},
+				'user-123'
+			)
+
+			expect(service.findById).toHaveBeenCalledWith(1, 'user-123')
+			expect(db.update).toHaveBeenCalledWith(schema.bookmarks)
+			expect(db.delete).toHaveBeenCalledWith(schema.bookmarkTags)
+			expect(deleteWhereMock).toHaveBeenCalledWith(
+				eq(schema.bookmarkTags.bookmarkId, 1)
+			)
+			expect(tagsService.create).toHaveBeenCalledTimes(2)
+			expect(db.insert).toHaveBeenCalledWith(schema.bookmarkTags)
+			expect(insertValuesMock).toHaveBeenCalledWith([
+				{ bookmarkId: 1, tagId: 2 }
+			])
+			expect(cacheManager.del).toHaveBeenCalledWith('cache-key')
+			expect(result).toMatchObject({
+				title: 'Updated title',
+				tags: [{ id: 2, name: 'TypeScript' }]
+			})
+		})
+	})
+
 	describe('delete', () => {
 		it('should return null if the bookmark to delete is not found', async () => {
 			jest.spyOn(service, 'findById').mockResolvedValueOnce(null)

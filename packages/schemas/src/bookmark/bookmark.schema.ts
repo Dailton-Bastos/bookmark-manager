@@ -42,6 +42,10 @@ export const createBookmarkSchema = z.object({
 		.nullish()
 })
 
+export const updateBookmarkSchema = createBookmarkSchema.partial().extend({
+	id: z.coerce.number().int().positive()
+})
+
 export const listBookmarksInputSchema = paginationQuerySchema.extend({
 	order: z.enum(['desc', 'recently_visited', 'most_visited']).default('desc'),
 	archived: z.enum(['include', 'exclude', 'only']).default('include')
@@ -76,6 +80,7 @@ export const deleteBookmarkOutputSchema = z.object({
 
 export type Bookmark = z.infer<typeof bookmarkSchema>
 export type CreateBookmark = z.infer<typeof createBookmarkSchema>
+export type UpdateBookmark = z.infer<typeof updateBookmarkSchema>
 export type ListBookmarks = z.infer<typeof listBookmarksSchema>
 export type ListBookmarksInput = z.infer<typeof listBookmarksInputSchema>
 export type ArchivedUnarchivedBookmark = z.infer<
