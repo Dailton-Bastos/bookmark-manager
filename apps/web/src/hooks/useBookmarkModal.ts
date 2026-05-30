@@ -14,6 +14,13 @@ interface ArchiveUnarchiveBookmarkModalStore {
 	onClose: () => void
 }
 
+interface DeleteBookmarkModalStore {
+	bookmarkId: number | null
+	isOpen: boolean
+	onOpen: (bookmarkId: number) => void
+	onClose: () => void
+}
+
 export const useAddBookmarkModal = create<BookmarkModalStore>((set) => ({
 	isOpen: false,
 	onOpen: () => set({ isOpen: true }),
@@ -29,3 +36,12 @@ export const useArchiveUnarchiveBookmarkModal =
 			set({ isOpen: true, type, bookmarkId }),
 		onClose: () => set({ isOpen: false, bookmarkId: null })
 	}))
+
+export const useDeleteBookmarkModal = create<DeleteBookmarkModalStore>(
+	(set) => ({
+		bookmarkId: null,
+		isOpen: false,
+		onOpen: (bookmarkId: number) => set({ isOpen: true, bookmarkId }),
+		onClose: () => set({ isOpen: false, bookmarkId: null })
+	})
+)
