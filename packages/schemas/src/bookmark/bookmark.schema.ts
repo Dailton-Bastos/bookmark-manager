@@ -42,11 +42,9 @@ export const createBookmarkSchema = z.object({
 		.nullish()
 })
 
-export const updateBookmarkSchema = createBookmarkSchema
-	.extend({
-		id: z.coerce.number().int().positive()
-	})
-	.partial()
+export const updateBookmarkSchema = createBookmarkSchema.partial().extend({
+	id: z.coerce.number().int().positive()
+})
 
 export const listBookmarksInputSchema = paginationQuerySchema.extend({
 	order: z.enum(['desc', 'recently_visited', 'most_visited']).default('desc'),

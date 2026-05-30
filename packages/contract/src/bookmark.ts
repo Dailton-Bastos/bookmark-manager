@@ -74,8 +74,8 @@ export const deleteBookmarkContract = oc
 
 export const updateBookmarkContract = oc
 	.route({
-		method: 'PUT',
-		path: '/bookmarks',
+		method: 'PATCH',
+		path: '/bookmarks/update',
 		summary: 'Update a bookmark',
 		tags: ['Bookmarks']
 	})

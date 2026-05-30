@@ -390,7 +390,7 @@ export class BookmarksService {
 
 			if (!updatedBookmark?.[0]) return null
 
-			if (tags) {
+			if (tags !== undefined) {
 				await tx
 					.delete(schema.bookmarkTags)
 					.where(eq(schema.bookmarkTags.bookmarkId, id))
