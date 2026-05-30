@@ -22,7 +22,10 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from 'ui/components/shadcn/ui/dropdown-menu'
-import { useArchiveUnarchiveBookmarkModal } from '@/hooks/useBookmarkModal'
+import {
+	useArchiveUnarchiveBookmarkModal,
+	useDeleteBookmarkModal
+} from '@/hooks/useBookmarkModal'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 
 interface BookmarkDropdownProps {
@@ -42,6 +45,8 @@ export const BookmarkDropdown = ({
 
 	const { onOpen: openArchiveUnarchiveModal } =
 		useArchiveUnarchiveBookmarkModal()
+
+	const { onOpen: openDeleteBookmarkModal } = useDeleteBookmarkModal()
 
 	useEffect(() => {
 		if (copyResult) {
@@ -145,7 +150,10 @@ export const BookmarkDropdown = ({
 								Unarchive
 							</DropdownMenuItem>
 
-							<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
+							<DropdownMenuItem
+								className="focus:bg-sidebar-accent p-2 mb-1"
+								onSelect={() => openDeleteBookmarkModal(id)}
+							>
 								<Trash2 className="text-muted-foreground" />
 								Delete Permanently
 							</DropdownMenuItem>
