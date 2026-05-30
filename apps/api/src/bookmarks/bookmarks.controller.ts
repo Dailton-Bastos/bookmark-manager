@@ -107,4 +107,22 @@ export class BookmarksController {
 			return { success: true }
 		})
 	}
+
+	@Implement(contract.bookmark.update)
+	update(@Session() session: UserSession) {
+		return implement(contract.bookmark.update).handler(async ({ input }) => {
+			const bookmark = await this.bookmarksService.update(
+				input,
+				session.user.id
+			)
+
+			if (!bookmark) {
+				throw new ORPCError('NOT_FOUND', {
+					message: 'Bookmark not found or not accessible'
+				})
+			}
+
+			return bookmark
+		})
+	}
 }

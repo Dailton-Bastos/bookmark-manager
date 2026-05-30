@@ -8,6 +8,7 @@ import {
 	listBookmarksInputSchema,
 	listBookmarksSchema,
 	pinUnpinBookmarkSchema,
+	updateBookmarkSchema,
 	visitedBookmarkSchema
 } from '@repo/schemas'
 
@@ -70,3 +71,13 @@ export const deleteBookmarkContract = oc
 	})
 	.input(deleteBookmarkSchema)
 	.output(deleteBookmarkOutputSchema)
+
+export const updateBookmarkContract = oc
+	.route({
+		method: 'PUT',
+		path: '/bookmarks',
+		summary: 'Update a bookmark',
+		tags: ['Bookmarks']
+	})
+	.input(updateBookmarkSchema)
+	.output(bookmarkSchema)

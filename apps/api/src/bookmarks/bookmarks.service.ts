@@ -9,6 +9,7 @@ import type {
 	ListBookmarksArchived,
 	ListBookmarksInput,
 	PinUnpinBookmark,
+	UpdateBookmark,
 	VisitedBookmark
 } from '@repo/schemas'
 import type { SQL } from 'drizzle-orm'
@@ -361,5 +362,68 @@ export class BookmarksService {
 			)
 
 		await this.invalidateOwnerCache(ownerId)
+	}
+
+	async update(
+		input: UpdateBookmark,
+		ownerId: string
+	): Promise<Bookmark | null> {
+		const { id, title, description, url, tags } = input
+
+		if (!id) return null
+
+		const existingBookmark = await this.findById(id, ownerId)
+
+		if (!existingBookmark) return null
+
+		const result = await this.db.transaction(async (tx) => {
+			const updatedBookmark = await tx
+				.update(schema.bookmarks)
+				.set({ title, description, url })
+				.where(
+					and(
+						eq(schema.bookmarks.id, id),
+						eq(schema.bookmarks.ownerId, ownerId)
+					)
+				)
+				.returning()
+
+			if (!updatedBookmark?.[0]) return null
+
+			if (tags) {
+				await tx
+					.delete(schema.bookmarkTags)
+					.where(eq(schema.bookmarkTags.bookmarkId, id))
+
+				const uniqueTags = [...new Set(tags)]
+
+				const createdTags = await Promise.all(
+					uniqueTags.map((tag) =>
+						this.tagsService.create(
+							{ name: tag },
+							tx as unknown as NodePgDatabase<typeof schema>
+						)
+					)
+				)
+
+				const validTags = createdTags.filter(
+					(tag): tag is NonNullable<typeof tag> => tag !== null
+				)
+
+				if (validTags.length > 0) {
+					await tx
+						.insert(schema.bookmarkTags)
+						.values(validTags.map((tag) => ({ bookmarkId: id, tagId: tag.id })))
+				}
+
+				return { ...updatedBookmark[0], tags: validTags }
+			}
+
+			return { ...updatedBookmark[0], tags: existingBookmark.tags }
+		})
+
+		await this.invalidateOwnerCache(ownerId)
+
+		return result
 	}
 }
