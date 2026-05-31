@@ -16,7 +16,7 @@ export const UpdateBookmarkModal = () => {
 
 	const queryClient = useQueryClient()
 
-	const form = useForm({
+	const form = useForm<UpdateBookmark>({
 		resolver: zodResolver(updateBookmarkSchema)
 	})
 
@@ -60,23 +60,19 @@ export const UpdateBookmarkModal = () => {
 
 	useEffect(() => {
 		if (bookmark) {
+			const initialTags = bookmark.tags?.map((tag) => tag.name) || []
+
 			form.reset({
 				id: bookmark.id,
 				url: bookmark.url,
 				title: bookmark.title,
 				description: bookmark.description || '',
-				tags: bookmark.tags?.map((tag) => tag.name) || []
+				tags: initialTags
 			})
-		}
-	}, [bookmark, form])
-
-	useEffect(() => {
-		if (bookmark) {
-			const initialTags = bookmark.tags?.map((tag) => tag.name) || []
 
 			setTags(initialTags)
 		}
-	}, [setTags, bookmark])
+	}, [bookmark, form, setTags])
 
 	return (
 		<ModalWrapper

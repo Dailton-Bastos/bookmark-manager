@@ -43,7 +43,7 @@ export const createBookmarkSchema = z.object({
 })
 
 export const updateBookmarkSchema = createBookmarkSchema.partial().extend({
-	id: z.coerce.number().int().positive()
+	id: z.coerce.number<number>().int().positive()
 })
 
 export const listBookmarksInputSchema = paginationQuerySchema.extend({
