@@ -78,6 +78,11 @@ export const deleteBookmarkOutputSchema = z.object({
 	success: z.boolean()
 })
 
+export const searchBookmarksInputSchema = paginationQuerySchema.extend({
+	query: z.string().min(1, 'Search query cannot be empty'),
+	order: z.enum(['desc', 'recently_visited', 'most_visited']).default('desc')
+})
+
 export type Bookmark = z.infer<typeof bookmarkSchema>
 export type CreateBookmark = z.infer<typeof createBookmarkSchema>
 export type UpdateBookmark = z.infer<typeof updateBookmarkSchema>
@@ -94,3 +99,4 @@ export type ListBookmarksArchived = ListBookmarksInput['archived']
 export type BookmarkFormData = Omit<CreateBookmark, 'tags'> & {
 	tags: string[]
 }
+export type SearchBookmarks = z.infer<typeof searchBookmarksInputSchema>

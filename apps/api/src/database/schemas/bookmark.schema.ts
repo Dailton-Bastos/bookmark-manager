@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
 	boolean,
 	index,
@@ -33,7 +33,14 @@ export const bookmarks = pgTable(
 		index('title_idx').on(table.title),
 		index('ownerId_idx').on(table.ownerId),
 		index('lastVisited_idx').on(table.lastVisited),
-		index('visitCount_idx').on(table.visitCount)
+		index('visitCount_idx').on(table.visitCount),
+		index('search_index').using(
+			'gin',
+			sql`(
+          setweight(to_tsvector('english', ${table.title}), 'A') ||
+          setweight(to_tsvector('english', ${table.description}), 'B')
+      )`
+		)
 	]
 )
 

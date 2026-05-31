@@ -9,6 +9,7 @@ import type {
 	ListBookmarksArchived,
 	ListBookmarksInput,
 	PinUnpinBookmark,
+	SearchBookmarks,
 	UpdateBookmark,
 	VisitedBookmark
 } from '@repo/schemas'
@@ -197,6 +198,100 @@ export class BookmarksService {
 					totalCount: 0
 				})
 			}
+
+			const bookmarkIds = bookmarks.map((bookmark) => bookmark.id)
+
+			const tagsByBookmarkId = await this.tagsService.findByBookmarkIds(
+				bookmarkIds,
+				tx as unknown as NodePgDatabase<typeof schema>
+			)
+
+			return this.paginationProvider.paginateQuery<Bookmark>({
+				paginationQuery: { page, limit },
+				data: bookmarks.map((bookmark) => ({
+					...bookmark,
+					tags: tagsByBookmarkId[bookmark.id] || []
+				})),
+				totalCount: bookmarksCount
+			})
+		})
+
+		await this.registerAndCacheResult(cacheKey, ownerId, result)
+
+		return result
+	}
+
+	async search(
+		{ query, limit, page, order }: SearchBookmarks,
+		ownerId: string
+	): Promise<ListBookmarks> {
+		const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${limit}_${page}_${order}_search_${query}`
+
+		const cachedResult = await this.cacheManager.get<ListBookmarks>(cacheKey)
+
+		if (cachedResult) return cachedResult
+
+		/*
+			To match the full-text search query against both title and description (multiple keywords), we concatenate them with a space in between and create a tsvector for that.
+			We also use plainto_tsquery to parse the search query, which will handle things like stemming and ignoring stop words.
+		*/
+		const result = await this.db.transaction(async (tx) => {
+			const bookmarksTotalCount = await tx
+				.select({ bookmarksCount: count() })
+				.from(schema.bookmarks)
+				.where(
+					and(
+						eq(schema.bookmarks.ownerId, ownerId),
+						sql`to_tsvector('english', coalesce(${schema.bookmarks.title}, '') || ' ' || coalesce(${schema.bookmarks.description}, '')) @@ plainto_tsquery('english', ${query})`
+					)
+				)
+
+			if (!bookmarksTotalCount || bookmarksTotalCount.length === 0) {
+				return this.paginationProvider.paginateQuery<Bookmark>({
+					paginationQuery: { page, limit },
+					data: [],
+					totalCount: 0
+				})
+			}
+
+			const { bookmarksCount } = bookmarksTotalCount[0] || { bookmarksCount: 0 }
+
+			const offset = (page - 1) * limit
+
+			let orderByClauses: SQL[]
+
+			switch (order) {
+				case 'recently_visited':
+					orderByClauses = [
+						sql`${schema.bookmarks.lastVisited} DESC NULLS LAST`,
+						desc(schema.bookmarks.id)
+					]
+					break
+				case 'most_visited':
+					orderByClauses = [
+						desc(schema.bookmarks.visitCount),
+						desc(schema.bookmarks.id)
+					]
+					break
+				default:
+					orderByClauses = [
+						desc(schema.bookmarks.createdAt),
+						desc(schema.bookmarks.id)
+					]
+			}
+
+			const bookmarks = await tx
+				.select()
+				.from(schema.bookmarks)
+				.where(
+					and(
+						eq(schema.bookmarks.ownerId, ownerId),
+						sql`to_tsvector('english', coalesce(${schema.bookmarks.title}, '') || ' ' || coalesce(${schema.bookmarks.description}, '')) @@ plainto_tsquery('english', ${query})`
+					)
+				)
+				.orderBy(...orderByClauses)
+				.limit(limit)
+				.offset(offset)
 
 			const bookmarkIds = bookmarks.map((bookmark) => bookmark.id)
 

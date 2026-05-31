@@ -125,4 +125,16 @@ export class BookmarksController {
 			return bookmark
 		})
 	}
+
+	@Implement(contract.bookmark.search)
+	search(@Session() session: UserSession) {
+		return implement(contract.bookmark.search).handler(async ({ input }) => {
+			const bookmarks = await this.bookmarksService.search(
+				input,
+				session.user.id
+			)
+
+			return bookmarks
+		})
+	}
 }
