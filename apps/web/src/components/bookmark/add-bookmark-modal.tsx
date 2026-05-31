@@ -7,11 +7,14 @@ import { toast } from 'sonner'
 import { BookmarkForm } from '@/components/bookmark/bookmark-form'
 import { ModalWrapper } from '@/components/bookmark/modal-wrapper'
 import { useAddBookmarkModal } from '@/hooks/useBookmarkModal'
-import { useBookmarkTags } from '@/hooks/useBookmarkTags'
+import {
+	BookmarkTagsProvider,
+	useBookmarkTags
+} from '@/hooks/useBookmarkTags'
 import { orpcClient } from '@/lib/orpc-client'
 import { normalizeFormData } from '@/utils/normalize-form-data'
 
-export const AddBookmarkModal = () => {
+const AddBookmarkModalContent = () => {
 	const { isOpen, onClose } = useAddBookmarkModal()
 
 	const queryClient = useQueryClient()
@@ -78,5 +81,13 @@ export const AddBookmarkModal = () => {
 				/>
 			</FormProvider>
 		</ModalWrapper>
+	)
+}
+
+export const AddBookmarkModal = () => {
+	return (
+		<BookmarkTagsProvider>
+			<AddBookmarkModalContent />
+		</BookmarkTagsProvider>
 	)
 }
