@@ -7,11 +7,9 @@ import { toast } from 'sonner'
 import { BookmarkForm } from '@/components/bookmark/bookmark-form'
 import { ModalWrapper } from '@/components/bookmark/modal-wrapper'
 import { useUpdateBookmarkModal } from '@/hooks/useBookmarkModal'
-import {
-	BookmarkTagsProvider,
-	useBookmarkTags
-} from '@/hooks/useBookmarkTags'
+import { useBookmarkTags } from '@/hooks/useBookmarkTags'
 import { orpcClient } from '@/lib/orpc-client'
+import { BookmarkTagsProvider } from '@/providers/bookmark-tags-provider'
 import { normalizeFormData } from '@/utils/normalize-form-data'
 
 const UpdateBookmarkModalContent = () => {
@@ -22,6 +20,8 @@ const UpdateBookmarkModalContent = () => {
 	const form = useForm<UpdateBookmark>({
 		resolver: zodResolver(updateBookmarkSchema)
 	})
+
+	const { reset } = form
 
 	const { tags, setTags, resetTags } = useBookmarkTags()
 
@@ -62,20 +62,30 @@ const UpdateBookmarkModalContent = () => {
 	}, [form, resetTags, onClose])
 
 	useEffect(() => {
-		if (bookmark) {
-			const initialTags = bookmark.tags?.map((tag) => tag.name) || []
+		if (!isOpen || !bookmark) return
 
-			form.reset({
-				id: bookmark.id,
-				url: bookmark.url,
-				title: bookmark.title,
-				description: bookmark.description || '',
-				tags: initialTags
-			})
+		const initialTags = bookmark.tags?.map((tag) => tag.name) || []
 
-			setTags(initialTags)
-		}
-	}, [bookmark, form, setTags])
+		reset({
+			id: bookmark.id,
+			url: bookmark.url,
+			title: bookmark.title,
+			description: bookmark.description || '',
+			tags: initialTags
+		})
+
+		setTags(initialTags)
+	}, [
+		isOpen,
+		bookmark?.id,
+		bookmark?.url,
+		bookmark?.title,
+		bookmark?.description,
+		bookmark?.tags,
+		bookmark,
+		reset,
+		setTags
+	])
 
 	return (
 		<ModalWrapper

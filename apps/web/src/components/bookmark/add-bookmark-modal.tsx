@@ -7,11 +7,9 @@ import { toast } from 'sonner'
 import { BookmarkForm } from '@/components/bookmark/bookmark-form'
 import { ModalWrapper } from '@/components/bookmark/modal-wrapper'
 import { useAddBookmarkModal } from '@/hooks/useBookmarkModal'
-import {
-	BookmarkTagsProvider,
-	useBookmarkTags
-} from '@/hooks/useBookmarkTags'
+import { useBookmarkTags } from '@/hooks/useBookmarkTags'
 import { orpcClient } from '@/lib/orpc-client'
+import { BookmarkTagsProvider } from '@/providers/bookmark-tags-provider'
 import { normalizeFormData } from '@/utils/normalize-form-data'
 
 const AddBookmarkModalContent = () => {
