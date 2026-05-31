@@ -24,7 +24,8 @@ import {
 } from 'ui/components/shadcn/ui/dropdown-menu'
 import {
 	useArchiveUnarchiveBookmarkModal,
-	useDeleteBookmarkModal
+	useDeleteBookmarkModal,
+	useUpdateBookmarkModal
 } from '@/hooks/useBookmarkModal'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 
@@ -47,6 +48,8 @@ export const BookmarkDropdown = ({
 		useArchiveUnarchiveBookmarkModal()
 
 	const { onOpen: openDeleteBookmarkModal } = useDeleteBookmarkModal()
+
+	const { onOpen: openUpdateBookmarkModal } = useUpdateBookmarkModal()
 
 	useEffect(() => {
 		if (copyResult) {
@@ -126,7 +129,10 @@ export const BookmarkDropdown = ({
 								)}
 							</DropdownMenuItem>
 
-							<DropdownMenuItem className="focus:bg-sidebar-accent p-2 mb-1">
+							<DropdownMenuItem
+								className="focus:bg-sidebar-accent p-2 mb-1"
+								onSelect={() => openUpdateBookmarkModal(bookmark)}
+							>
 								<SquarePen className="text-muted-foreground" />
 								Edit
 							</DropdownMenuItem>

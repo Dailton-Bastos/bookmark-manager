@@ -1,3 +1,4 @@
+import type { Bookmark } from '@repo/schemas'
 import { create } from 'zustand'
 
 interface BookmarkModalStore {
@@ -18,6 +19,13 @@ interface DeleteBookmarkModalStore {
 	bookmarkId: number | null
 	isOpen: boolean
 	onOpen: (bookmarkId: number) => void
+	onClose: () => void
+}
+
+interface UpdateBookmarkModalStore {
+	bookmark: Bookmark | null
+	isOpen: boolean
+	onOpen: (bookmark: Bookmark) => void
 	onClose: () => void
 }
 
@@ -43,5 +51,14 @@ export const useDeleteBookmarkModal = create<DeleteBookmarkModalStore>(
 		isOpen: false,
 		onOpen: (bookmarkId: number) => set({ isOpen: true, bookmarkId }),
 		onClose: () => set({ isOpen: false, bookmarkId: null })
+	})
+)
+
+export const useUpdateBookmarkModal = create<UpdateBookmarkModalStore>(
+	(set) => ({
+		bookmark: null,
+		isOpen: false,
+		onOpen: (bookmark: Bookmark) => set({ isOpen: true, bookmark }),
+		onClose: () => set({ isOpen: false, bookmark: null })
 	})
 )

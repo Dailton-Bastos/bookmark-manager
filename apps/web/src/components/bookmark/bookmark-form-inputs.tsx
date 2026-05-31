@@ -1,4 +1,4 @@
-import type { CreateBookmark } from '@repo/schemas'
+import type { BookmarkFormData } from '@repo/schemas'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { X } from 'ui/components/icons'
@@ -14,29 +14,23 @@ import {
 } from 'ui/components/shadcn/ui/field'
 import { Input } from 'ui/components/shadcn/ui/input'
 import { Textarea } from 'ui/components/shadcn/ui/textarea'
-import { useTagInput } from '@/hooks/useTagInput'
+import { useBookmarkTags } from '@/hooks/useBookmarkTags'
+import { MAX_BOOKMARK_TAGS } from '@/utils/constants'
 
-const MAX_TAGS = 10
-
-export const AddBookmarkForm = () => {
+export const BookmarkFormInputs = () => {
 	const {
 		register,
-		setValue,
 		watch,
 		formState: { errors }
-	} = useFormContext<CreateBookmark>()
+	} = useFormContext<BookmarkFormData>()
 
-	const { tags, addTag, removeTag } = useTagInput({ maxTags: MAX_TAGS })
+	const { tags, addTag, removeTag } = useBookmarkTags()
 
 	const description = watch('description')
 
 	useEffect(() => {
 		register('tags')
 	}, [register])
-
-	useEffect(() => {
-		setValue('tags', tags)
-	}, [tags, setValue])
 
 	return (
 		<FieldGroup className="gap-4">
@@ -107,7 +101,7 @@ export const AddBookmarkForm = () => {
 						aria-invalid={errors.tags ? 'true' : 'false'}
 						id="tags"
 						placeholder='e.g. "work", "personal", "react"'
-						disabled={tags.length >= MAX_TAGS}
+						disabled={tags.length >= MAX_BOOKMARK_TAGS}
 					/>
 					{errors.tags && (
 						<FieldError
@@ -116,7 +110,8 @@ export const AddBookmarkForm = () => {
 						/>
 					)}
 					<FieldDescription className="text-xs text-muted-foreground pt-2">
-						Press "Enter" or "Space" to add a tag (Up to {MAX_TAGS} tags).
+						Press "Enter" or "Space" to add a tag (Up to {MAX_BOOKMARK_TAGS}{' '}
+						tags).
 					</FieldDescription>
 				</div>
 

@@ -1,35 +1,32 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { type CreateBookmark, createBookmarkSchema } from '@repo/schemas'
+import { type UpdateBookmark, updateBookmarkSchema } from '@repo/schemas'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { BookmarkForm } from '@/components/bookmark/bookmark-form'
 import { ModalWrapper } from '@/components/bookmark/modal-wrapper'
-import { useAddBookmarkModal } from '@/hooks/useBookmarkModal'
+import { useUpdateBookmarkModal } from '@/hooks/useBookmarkModal'
 import { useBookmarkTags } from '@/hooks/useBookmarkTags'
 import { orpcClient } from '@/lib/orpc-client'
 import { BookmarkTagsProvider } from '@/providers/bookmark-tags-provider'
 import { normalizeFormData } from '@/utils/normalize-form-data'
 
-const AddBookmarkModalContent = () => {
-	const { isOpen, onClose } = useAddBookmarkModal()
+const UpdateBookmarkModalContent = () => {
+	const { isOpen, onClose, bookmark } = useUpdateBookmarkModal()
 
 	const queryClient = useQueryClient()
 
-	const { tags, resetTags } = useBookmarkTags()
-
-	const form = useForm<CreateBookmark>({
-		resolver: zodResolver(createBookmarkSchema),
-		defaultValues: {
-			url: '',
-			title: '',
-			tags: []
-		}
+	const form = useForm<UpdateBookmark>({
+		resolver: zodResolver(updateBookmarkSchema)
 	})
 
+	const { reset } = form
+
+	const { tags, setTags, resetTags } = useBookmarkTags()
+
 	const { mutateAsync, isPending } = useMutation(
-		orpcClient.bookmark.create.mutationOptions({
+		orpcClient.bookmark.update.mutationOptions({
 			onSuccess: () => {
 				queryClient.invalidateQueries({
 					queryKey: orpcClient.bookmark.list.key()
@@ -41,19 +38,19 @@ const AddBookmarkModalContent = () => {
 		})
 	)
 
-	const onSubmit = async (data: CreateBookmark) => {
-		const normalizedData = normalizeFormData<CreateBookmark>({
+	const onSubmit = async (data: UpdateBookmark) => {
+		const normalizedData = normalizeFormData<UpdateBookmark>({
 			...data,
 			tags
 		})
 
 		toast.promise(mutateAsync(normalizedData), {
-			loading: 'Saving bookmark...',
-			success: 'Bookmark added successfully!',
+			loading: 'Updating bookmark...',
+			success: 'Bookmark updated successfully!',
 			error: (err) => {
 				if (err instanceof Error) return err.message
 
-				return 'An error occurred while adding the bookmark.'
+				return 'An error occurred while updating the bookmark.'
 			}
 		})
 	}
@@ -64,28 +61,53 @@ const AddBookmarkModalContent = () => {
 		onClose()
 	}, [form, resetTags, onClose])
 
+	useEffect(() => {
+		if (!isOpen || !bookmark) return
+
+		const initialTags = bookmark.tags?.map((tag) => tag.name) || []
+
+		reset({
+			id: bookmark.id,
+			url: bookmark.url,
+			title: bookmark.title,
+			description: bookmark.description || '',
+			tags: initialTags
+		})
+
+		setTags(initialTags)
+	}, [
+		isOpen,
+		bookmark?.id,
+		bookmark?.url,
+		bookmark?.title,
+		bookmark?.description,
+		bookmark?.tags,
+		bookmark,
+		reset,
+		setTags
+	])
+
 	return (
 		<ModalWrapper
 			isOpen={isOpen}
 			onClose={handleClose}
-			title="Add a Bookmark"
-			description="Save a link with details to keep your collection organized. We extract the favicon automatically from the URL."
+			title="Edit Bookmark"
+			description="Update your saved link details — change the title, description, URL, or tags anytime."
 		>
 			<FormProvider {...form}>
 				<BookmarkForm
 					onSubmit={form.handleSubmit(onSubmit)}
 					isPending={isPending}
-					submitButtonTitle="Add Bookmark"
 				/>
 			</FormProvider>
 		</ModalWrapper>
 	)
 }
 
-export const AddBookmarkModal = () => {
+export const UpdateBookmarkModal = () => {
 	return (
 		<BookmarkTagsProvider>
-			<AddBookmarkModalContent />
+			<UpdateBookmarkModalContent />
 		</BookmarkTagsProvider>
 	)
 }

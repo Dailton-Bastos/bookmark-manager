@@ -43,7 +43,7 @@ export const createBookmarkSchema = z.object({
 })
 
 export const updateBookmarkSchema = createBookmarkSchema.partial().extend({
-	id: z.coerce.number().int().positive()
+	id: z.coerce.number<number>().int().positive()
 })
 
 export const listBookmarksInputSchema = paginationQuerySchema.extend({
@@ -91,3 +91,6 @@ export type VisitedBookmark = z.infer<typeof visitedBookmarkSchema>
 export type DeleteBookmark = z.infer<typeof deleteBookmarkSchema>
 export type ListBookmarksOrder = ListBookmarksInput['order']
 export type ListBookmarksArchived = ListBookmarksInput['archived']
+export type BookmarkFormData = Omit<CreateBookmark, 'tags'> & {
+	tags: string[]
+}
