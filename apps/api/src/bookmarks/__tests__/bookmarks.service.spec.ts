@@ -763,7 +763,7 @@ describe('BookmarksService', () => {
 				data: [mockBookmarkWithTags],
 				meta: { ...mockMetaPagination, totalItems: 1, totalPages: 1 }
 			}
-			const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${query.limit}_${query.page}_${query.order}_search_${query.query}`
+			const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${query.page}_${query.limit}_${query.order}_search_${query.query}`
 
 			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(cachedSearchResult)
 
@@ -781,12 +781,13 @@ describe('BookmarksService', () => {
 			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined)
 			select.mockReturnValueOnce({
 				from: jest.fn().mockReturnThis(),
-				where: jest.fn().mockResolvedValueOnce([])
+				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 0 }])
 			})
 
 			const result = await service.search(query, ownerId)
 
 			expect(select).toHaveBeenCalledWith({ bookmarksCount: expect.anything() })
+			expect(select).toHaveBeenCalledTimes(1)
 			expect(result).toEqual({
 				data: [],
 				meta: { ...mockMetaPagination, totalItems: 0, totalPages: 0 }
@@ -795,7 +796,7 @@ describe('BookmarksService', () => {
 
 		it('should return paginated search result with tags and cache it', async () => {
 			const select = db.select as jest.Mock
-			const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${query.limit}_${query.page}_${query.order}_search_${query.query}`
+			const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${query.page}_${query.limit}_${query.order}_search_${query.query}`
 			const registryKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
 
 			jest

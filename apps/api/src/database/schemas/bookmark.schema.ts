@@ -37,9 +37,9 @@ export const bookmarks = pgTable(
 		index('search_index').using(
 			'gin',
 			sql`(
-          setweight(to_tsvector('english', ${table.title}), 'A') ||
-          setweight(to_tsvector('english', ${table.description}), 'B')
-      )`
+				setweight(to_tsvector('english', coalesce(${table.title}, '')), 'A') ||
+				setweight(to_tsvector('english', coalesce(${table.description}, '')), 'B')
+			)`
 		)
 	]
 )

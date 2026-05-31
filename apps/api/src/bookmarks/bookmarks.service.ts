@@ -225,7 +225,7 @@ export class BookmarksService {
 		{ query, limit, page, order }: SearchBookmarks,
 		ownerId: string
 	): Promise<ListBookmarks> {
-		const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${limit}_${page}_${order}_search_${query}`
+		const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${page}_${limit}_${order}_search_${query}`
 
 		const cachedResult = await this.cacheManager.get<ListBookmarks>(cacheKey)
 
@@ -236,25 +236,27 @@ export class BookmarksService {
 			We also use plainto_tsquery to parse the search query, which will handle things like stemming and ignoring stop words.
 		*/
 		const result = await this.db.transaction(async (tx) => {
+			const searchVector = sql`setweight(to_tsvector('english', coalesce(${schema.bookmarks.title}, '')), 'A') || setweight(to_tsvector('english', coalesce(${schema.bookmarks.description}, '')), 'B')`
+
 			const bookmarksTotalCount = await tx
 				.select({ bookmarksCount: count() })
 				.from(schema.bookmarks)
 				.where(
 					and(
 						eq(schema.bookmarks.ownerId, ownerId),
-						sql`to_tsvector('english', coalesce(${schema.bookmarks.title}, '') || ' ' || coalesce(${schema.bookmarks.description}, '')) @@ plainto_tsquery('english', ${query})`
+						sql`${searchVector} @@ plainto_tsquery('english', ${query})`
 					)
 				)
 
-			if (!bookmarksTotalCount || bookmarksTotalCount.length === 0) {
+			const bookmarksCount = bookmarksTotalCount[0]?.bookmarksCount ?? 0
+
+			if (bookmarksCount === 0) {
 				return this.paginationProvider.paginateQuery<Bookmark>({
 					paginationQuery: { page, limit },
 					data: [],
 					totalCount: 0
 				})
 			}
-
-			const { bookmarksCount } = bookmarksTotalCount[0] || { bookmarksCount: 0 }
 
 			const offset = (page - 1) * limit
 
@@ -286,7 +288,7 @@ export class BookmarksService {
 				.where(
 					and(
 						eq(schema.bookmarks.ownerId, ownerId),
-						sql`to_tsvector('english', coalesce(${schema.bookmarks.title}, '') || ' ' || coalesce(${schema.bookmarks.description}, '')) @@ plainto_tsquery('english', ${query})`
+						sql`${searchVector} @@ plainto_tsquery('english', ${query})`
 					)
 				)
 				.orderBy(...orderByClauses)
