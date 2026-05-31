@@ -91,3 +91,6 @@ export type VisitedBookmark = z.infer<typeof visitedBookmarkSchema>
 export type DeleteBookmark = z.infer<typeof deleteBookmarkSchema>
 export type ListBookmarksOrder = ListBookmarksInput['order']
 export type ListBookmarksArchived = ListBookmarksInput['archived']
+export type BookmarkFormData = Omit<CreateBookmark, 'tags'> & {
+	tags: string[]
+}
