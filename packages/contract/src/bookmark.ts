@@ -8,6 +8,7 @@ import {
 	listBookmarksInputSchema,
 	listBookmarksSchema,
 	pinUnpinBookmarkSchema,
+	searchBookmarksInputSchema,
 	updateBookmarkSchema,
 	visitedBookmarkSchema
 } from '@repo/schemas'
@@ -81,3 +82,13 @@ export const updateBookmarkContract = oc
 	})
 	.input(updateBookmarkSchema)
 	.output(bookmarkSchema)
+
+export const searchBookmarksContract = oc
+	.route({
+		method: 'GET',
+		path: '/bookmarks/search',
+		summary: 'Search bookmarks',
+		tags: ['Bookmarks']
+	})
+	.input(searchBookmarksInputSchema)
+	.output(listBookmarksSchema)

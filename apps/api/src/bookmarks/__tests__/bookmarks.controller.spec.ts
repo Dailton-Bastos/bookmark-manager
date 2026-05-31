@@ -35,7 +35,8 @@ jest.mock('@repo/contract', () => ({
 			pinOrUnpin: 'bookmark.pinOrUnpin',
 			visited: 'bookmark.visited',
 			delete: 'bookmark.delete',
-			update: 'bookmark.update'
+			update: 'bookmark.update',
+			search: 'bookmark.search'
 		}
 	}
 }))
@@ -54,6 +55,7 @@ describe('BookmarksController', () => {
 		visited: jest.Mock
 		delete: jest.Mock
 		update: jest.Mock
+		search: jest.Mock
 	}
 
 	beforeEach(async () => {
@@ -73,7 +75,8 @@ describe('BookmarksController', () => {
 						pinOrUnpin: jest.fn(),
 						visited: jest.fn(),
 						delete: jest.fn(),
-						update: jest.fn()
+						update: jest.fn(),
+						search: jest.fn()
 					}
 				}
 			]
@@ -314,6 +317,54 @@ describe('BookmarksController', () => {
 		await expect(controller.update(mockUserSession)).rejects.toHaveProperty(
 			'message',
 			'Bookmark not found or not accessible'
+		)
+	})
+
+	it('should return searched bookmarks successfully', async () => {
+		const searchInput = {
+			query: 'test',
+			limit: 10,
+			page: 1,
+			order: 'desc' as const
+		}
+		const mockSearchResult: ListBookmarks = {
+			data: [mockBookmark],
+			meta: {
+				...mockMetaPagination
+			}
+		}
+
+		bookmarksServiceMock.search.mockResolvedValue(mockSearchResult)
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({ input: searchInput })
+		)
+
+		const result = await controller.search(mockUserSession)
+
+		expect(implement).toHaveBeenCalledWith(contract.bookmark.search)
+		expect(bookmarksServiceMock.search).toHaveBeenCalledWith(
+			searchInput,
+			mockUserSession.user.id
+		)
+		expect(result).toEqual(mockSearchResult)
+	})
+
+	it('should throw error when service search fails', async () => {
+		const error = new Error('Search failed')
+		bookmarksServiceMock.search.mockRejectedValue(error)
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({
+				input: {
+					query: 'test',
+					limit: 10,
+					page: 1,
+					order: 'desc'
+				}
+			})
+		)
+
+		await expect(controller.search(mockUserSession)).rejects.toThrow(
+			'Search failed'
 		)
 	})
 })

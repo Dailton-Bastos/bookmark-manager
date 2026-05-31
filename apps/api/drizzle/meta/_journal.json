@@ -64,6 +64,13 @@
 			"when": 1779933272792,
 			"tag": "20260528015432_backfilling_archived_at_column",
 			"breakpoints": true
+		},
+		{
+			"idx": 9,
+			"version": "7",
+			"when": 1780249900590,
+			"tag": "20260531175140_add_search_bookmarks_index",
+			"breakpoints": true
 		}
 	]
 }

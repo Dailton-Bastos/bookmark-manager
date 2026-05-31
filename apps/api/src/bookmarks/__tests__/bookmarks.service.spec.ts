@@ -749,6 +749,164 @@ describe('BookmarksService', () => {
 		})
 	})
 
+	describe('search', () => {
+		const query = {
+			query: 'typescript',
+			limit: 10,
+			page: 1,
+			order: 'desc' as const
+		}
+		const ownerId = 'user-123'
+
+		it('should return cached search result if available', async () => {
+			const cachedSearchResult = {
+				data: [mockBookmarkWithTags],
+				meta: { ...mockMetaPagination, totalItems: 1, totalPages: 1 }
+			}
+			const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${query.page}_${query.limit}_${query.order}_search_${query.query}`
+
+			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(cachedSearchResult)
+
+			const result = await service.search(query, ownerId)
+
+			expect(cacheManager.get).toHaveBeenCalledWith(cacheKey)
+			expect(result).toEqual(cachedSearchResult)
+			expect(db.transaction).not.toHaveBeenCalled()
+			expect(cacheManager.set).not.toHaveBeenCalled()
+		})
+
+		it('should return empty paginated result when no search matches are found', async () => {
+			const select = db.select as jest.Mock
+
+			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined)
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 0 }])
+			})
+
+			const result = await service.search(query, ownerId)
+
+			expect(select).toHaveBeenCalledWith({ bookmarksCount: expect.anything() })
+			expect(select).toHaveBeenCalledTimes(1)
+			expect(result).toEqual({
+				data: [],
+				meta: { ...mockMetaPagination, totalItems: 0, totalPages: 0 }
+			})
+		})
+
+		it('should return paginated search result with tags and cache it', async () => {
+			const select = db.select as jest.Mock
+			const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${query.page}_${query.limit}_${query.order}_search_${query.query}`
+			const registryKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
+
+			jest
+				.spyOn(cacheManager, 'get')
+				.mockResolvedValueOnce(undefined)
+				.mockResolvedValueOnce(undefined)
+
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+			})
+
+			const orderByMock = jest.fn().mockReturnThis()
+			const limitMock = jest.fn().mockReturnThis()
+			const offsetMock = jest.fn().mockResolvedValueOnce([mockBookmark])
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				orderBy: orderByMock,
+				limit: limitMock,
+				offset: offsetMock
+			})
+
+			jest.spyOn(tagsService, 'findByBookmarkIds').mockResolvedValueOnce({
+				1: [{ id: 1, name: 'Test Tag' }]
+			})
+
+			const result = await service.search(query, ownerId)
+
+			expect(tagsService.findByBookmarkIds).toHaveBeenCalledWith(
+				[1],
+				expect.anything()
+			)
+			expect(cacheManager.set).toHaveBeenCalledWith(cacheKey, result)
+			expect(cacheManager.get).toHaveBeenCalledWith(registryKey)
+			expect(cacheManager.set).toHaveBeenCalledWith(registryKey, [cacheKey])
+			expect(result).toEqual({
+				data: [mockBookmarkWithTags],
+				meta: { ...mockMetaPagination, totalItems: 1, totalPages: 1 }
+			})
+		})
+
+		it('should sort search results by lastVisited when order is recently_visited', async () => {
+			const select = db.select as jest.Mock
+
+			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined)
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+			})
+
+			const orderByMock = jest.fn().mockReturnThis()
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				orderBy: orderByMock,
+				limit: jest.fn().mockReturnThis(),
+				offset: jest.fn().mockResolvedValueOnce([mockBookmark])
+			})
+
+			jest
+				.spyOn(tagsService, 'findByBookmarkIds')
+				.mockResolvedValueOnce({ 1: [] })
+
+			await service.search({ ...query, order: 'recently_visited' }, ownerId)
+
+			expect(orderByMock).toHaveBeenCalledTimes(1)
+			const orderByArgs: SQL[] = orderByMock.mock.calls[0]
+			expect(orderByArgs).toHaveLength(2)
+			const queryChunks = (
+				orderByArgs[0] as unknown as {
+					queryChunks: Array<{ value?: string[] }>
+				}
+			).queryChunks
+			const hasNullsLast = queryChunks.some((chunk) =>
+				chunk.value?.includes(' DESC NULLS LAST')
+			)
+			expect(hasNullsLast).toBe(true)
+		})
+
+		it('should sort search results by visitCount when order is most_visited', async () => {
+			const select = db.select as jest.Mock
+
+			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined)
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockResolvedValueOnce([{ bookmarksCount: 1 }])
+			})
+
+			const orderByMock = jest.fn().mockReturnThis()
+			select.mockReturnValueOnce({
+				from: jest.fn().mockReturnThis(),
+				where: jest.fn().mockReturnThis(),
+				orderBy: orderByMock,
+				limit: jest.fn().mockReturnThis(),
+				offset: jest.fn().mockResolvedValueOnce([mockBookmark])
+			})
+
+			jest
+				.spyOn(tagsService, 'findByBookmarkIds')
+				.mockResolvedValueOnce({ 1: [] })
+
+			await service.search({ ...query, order: 'most_visited' }, ownerId)
+
+			expect(orderByMock).toHaveBeenCalledTimes(1)
+			const orderByArgs: SQL[] = orderByMock.mock.calls[0]
+			expect(orderByArgs).toHaveLength(2)
+		})
+	})
+
 	describe('findById', () => {
 		it('should return null if the bookmark is not found', async () => {
 			const query = db.query.bookmarks.findFirst as jest.Mock
