@@ -496,7 +496,7 @@
 					"name": "search_index",
 					"columns": [
 						{
-							"expression": "(\n          setweight(to_tsvector('english', \"title\"), 'A') ||\n          setweight(to_tsvector('english', \"description\"), 'B')\n      )",
+							"expression": "(\n          setweight(to_tsvector('english', coalesce(\"title\", '')), 'A') ||\n          setweight(to_tsvector('english', coalesce(\"description\", '')), 'B')\n      )",
 							"asc": true,
 							"isExpression": true,
 							"nulls": "last"
