@@ -134,20 +134,21 @@ export const SearchResults = ({ params }: Props) => {
 						</div>
 
 						<div className="w-full flex items-center justify-center mt-8">
-							<Button
-								ref={ref}
-								type="button"
-								variant="ghost"
-								onClick={() => fetchNextPage()}
-								disabled={!hasNextPage || isFetchingNextPage}
-								className="cursor-pointer"
-							>
-								{isFetchingNextPage
-									? 'Loading more...'
-									: hasNextPage
-										? 'Load More'
-										: 'Nothing more to load'}
-							</Button>
+							<span ref={ref} className="inline-block">
+								<Button
+									type="button"
+									variant="ghost"
+									onClick={() => fetchNextPage()}
+									disabled={!hasNextPage || isFetchingNextPage}
+									className="cursor-pointer"
+								>
+									{isFetchingNextPage
+										? 'Loading more...'
+										: hasNextPage
+											? 'Load More'
+											: 'Nothing more to load'}
+								</Button>
+							</span>
 						</div>
 					</div>
 				</div>

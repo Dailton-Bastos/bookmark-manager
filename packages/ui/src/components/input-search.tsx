@@ -28,7 +28,7 @@ export const InputSearch = ({ ...props }: React.ComponentProps<"input">) => {
 				{...props}
 			/>
 			<InputGroupAddon align="inline-start">
-				<Button variant="ghost" size="icon" type="submit">
+				<Button aria-label="Search" variant="ghost" size="icon" type="submit">
 					<SearchIcon className="text-muted-foreground size-5" />
 				</Button>
 			</InputGroupAddon>

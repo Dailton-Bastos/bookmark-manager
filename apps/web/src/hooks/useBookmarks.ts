@@ -141,6 +141,8 @@ export const useSearchBookmarksInfiniteQuery = ({
 }) => {
 	const { start, complete } = useLoadingBar()
 
+	const isQueryValid = query.trim().length > 0
+
 	const {
 		data,
 		error,
@@ -159,7 +161,8 @@ export const useSearchBookmarksInfiniteQuery = ({
 			}),
 			initialPageParam: 1,
 			getNextPageParam: ({ meta }) =>
-				meta.hasNextPage ? meta.currentPage + 1 : undefined
+				meta.hasNextPage ? meta.currentPage + 1 : undefined,
+			enabled: isQueryValid
 		})
 	)
 
