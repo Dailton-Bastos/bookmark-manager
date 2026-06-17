@@ -12,10 +12,16 @@ export const useDeleteBookmarkMutation = () => {
 
 	const deleteBookmarkMutation = useMutation(
 		orpcClient.bookmark.delete.mutationOptions({
-			onSuccess: () => {
-				queryClient.invalidateQueries({
-					queryKey: orpcClient.bookmark.list.key()
-				})
+			onSuccess: async () => {
+				await Promise.all([
+					queryClient.invalidateQueries({
+						queryKey: orpcClient.bookmark.list.key()
+					}),
+
+					queryClient.invalidateQueries({
+						queryKey: orpcClient.bookmark.search.key()
+					})
+				])
 
 				onClose()
 			}

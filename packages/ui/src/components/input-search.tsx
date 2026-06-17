@@ -1,6 +1,7 @@
 "use client";
 
 import type * as React from "react";
+import { Button } from "../components/shadcn/ui/button";
 import {
 	InputGroup,
 	InputGroupAddon,
@@ -27,7 +28,9 @@ export const InputSearch = ({ ...props }: React.ComponentProps<"input">) => {
 				{...props}
 			/>
 			<InputGroupAddon align="inline-start">
-				<SearchIcon className="text-muted-foreground size-5" />
+				<Button aria-label="Search" variant="ghost" size="icon" type="submit">
+					<SearchIcon className="text-muted-foreground size-5" />
+				</Button>
 			</InputGroupAddon>
 		</InputGroup>
 	);

@@ -21,6 +21,15 @@ interface UseBookmarksInfiniteQueryParams {
 	archived?: 'include' | 'exclude' | 'only'
 }
 
+interface SearchBookmarksStore {
+	searchTerm: string
+	setSearchTerm: (searchTerm: string) => void
+	query: string
+	order: ListBookmarksOrder
+	setQuery: (query: string) => void
+	setOrder: (order: ListBookmarksOrder) => void
+}
+
 export const useBookmarks = create<BookmarksStore>((set) => ({
 	order: 'desc',
 	limit: 12,
@@ -99,6 +108,99 @@ export const useBookmarksInfiniteQuery = ({
 		if (error) {
 			toast.error(
 				'There was a problem fetching your bookmarks. Please try again.'
+			)
+		}
+	}, [error])
+
+	return {
+		bookmarks,
+		error,
+		isFetching,
+		isFetchingNextPage,
+		fetchNextPage,
+		hasNextPage,
+		isPending
+	}
+}
+
+export const useSearchBookmarksStore = create<SearchBookmarksStore>((set) => ({
+	searchTerm: '',
+	query: '',
+	order: 'desc',
+	setSearchTerm: (searchTerm) => set({ searchTerm }),
+	setQuery: (query) => set({ query }),
+	setOrder: (order) => set({ order })
+}))
+
+export const useSearchBookmarksInfiniteQuery = ({
+	query,
+	order
+}: {
+	query: string
+	order: ListBookmarksOrder
+}) => {
+	const { start, complete } = useLoadingBar()
+
+	const isQueryValid = query.trim().length > 0
+
+	const {
+		data,
+		error,
+		isFetching,
+		isFetchingNextPage,
+		fetchNextPage,
+		hasNextPage,
+		isPending
+	} = useInfiniteQuery(
+		orpcClient.bookmark.search.infiniteOptions({
+			input: (pageParam: number | undefined) => ({
+				query,
+				order,
+				page: pageParam ?? 1,
+				limit: 12
+			}),
+			initialPageParam: 1,
+			getNextPageParam: ({ meta }) =>
+				meta.hasNextPage ? meta.currentPage + 1 : undefined,
+			enabled: isQueryValid
+		})
+	)
+
+	const bookmarks = useMemo(() => {
+		if (!data) return undefined
+
+		return data.pages.map((page) => {
+			return {
+				...page,
+				data: page.data.map((bookmark) => ({
+					...bookmark,
+					createdAt: new Date(bookmark.createdAt),
+					updatedAt: new Date(bookmark.updatedAt),
+					lastVisited: bookmark.lastVisited
+						? new Date(bookmark.lastVisited)
+						: null,
+					archivedAt: bookmark.archivedAt ? new Date(bookmark.archivedAt) : null
+				}))
+			}
+		})
+	}, [data])
+
+	useEffect(() => {
+		if (isPending) {
+			start()
+
+			return
+		}
+
+		complete()
+
+		return () => complete()
+	}, [isPending, start, complete])
+
+	useEffect(() => {
+		if (error) {
+			toast.error(
+				'There was a problem searching your bookmarks. Please try again.'
 			)
 		}
 	}, [error])

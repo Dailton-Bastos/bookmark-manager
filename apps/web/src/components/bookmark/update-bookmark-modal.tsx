@@ -27,10 +27,16 @@ const UpdateBookmarkModalContent = () => {
 
 	const { mutateAsync, isPending } = useMutation(
 		orpcClient.bookmark.update.mutationOptions({
-			onSuccess: () => {
-				queryClient.invalidateQueries({
-					queryKey: orpcClient.bookmark.list.key()
-				})
+			onSuccess: async () => {
+				await Promise.all([
+					queryClient.invalidateQueries({
+						queryKey: orpcClient.bookmark.list.key()
+					}),
+
+					queryClient.invalidateQueries({
+						queryKey: orpcClient.bookmark.search.key()
+					})
+				])
 				form.reset()
 				resetTags()
 				onClose()
