@@ -9,10 +9,16 @@ export const useVisitedBookmarkMutation = () => {
 
 	const visitedBookmarkMutation = useMutation(
 		orpcClient.bookmark.visited.mutationOptions({
-			onSuccess: () => {
-				queryClient.invalidateQueries({
-					queryKey: orpcClient.bookmark.list.key()
-				})
+			onSuccess: async () => {
+				await Promise.all([
+					queryClient.invalidateQueries({
+						queryKey: orpcClient.bookmark.list.key()
+					}),
+
+					queryClient.invalidateQueries({
+						queryKey: orpcClient.bookmark.search.key()
+					})
+				])
 			}
 		})
 	)

@@ -8,6 +8,7 @@ import {
 	SidebarMenuItem
 } from 'ui/components/shadcn/ui/sidebar'
 import { cn } from 'ui/lib/utils'
+import { useSearchBookmarksStore } from '@/hooks/useBookmarks'
 
 interface NavLinkProps {
 	href: string
@@ -28,6 +29,13 @@ export const NavLink = ({
 
 	const isActive = exact ? pathname === href : pathname?.startsWith(href)
 
+	const { setSearchTerm, setOrder } = useSearchBookmarksStore()
+
+	const handleClick = () => {
+		setSearchTerm('')
+		setOrder('desc')
+	}
+
 	return (
 		<SidebarMenuItem>
 			<SidebarMenuButton
@@ -40,7 +48,7 @@ export const NavLink = ({
 					className
 				)}
 			>
-				<Link href={href}>
+				<Link href={href} onClick={handleClick}>
 					{Icon && <Icon />}
 					<span>{children}</span>
 				</Link>
