@@ -1,4 +1,3 @@
-import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 import { Inject, Injectable } from '@nestjs/common'
 import type {
 	CreateTag,
@@ -9,6 +8,7 @@ import type {
 } from '@repo/schemas'
 import { count, countDistinct, desc, eq, inArray } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import { CacheProvider } from '../cache/cache.provider'
 import { schema } from '../database/schemas'
 import { PaginationProvider } from '../pagination/pagination.provider'
 import { LISTTAGS_CACHE_KEY } from '../shared/constants/cache'
@@ -20,7 +20,7 @@ export class TagsService {
 		@Inject(DATABASE_CONNECTION)
 		private readonly db: NodePgDatabase<typeof schema>,
 		private readonly paginationProvider: PaginationProvider,
-		@Inject(CACHE_MANAGER) private cacheManager: Cache
+		private readonly cacheProvider: CacheProvider
 	) {}
 
 	async create(
@@ -77,7 +77,7 @@ export class TagsService {
 	): Promise<ListTags> {
 		const cacheKey = `${LISTTAGS_CACHE_KEY}_${ownerId}_${page}_${limit}`
 
-		const cachedResult = await this.cacheManager.get<ListTags>(cacheKey)
+		const cachedResult = await this.cacheProvider.get<ListTags>(cacheKey)
 
 		if (cachedResult) return cachedResult
 
@@ -137,6 +137,12 @@ export class TagsService {
 				data,
 				totalCount: uniqueTagsCount
 			})
+		})
+
+		await this.cacheProvider.registerAndCacheResult<ListTags>({
+			registryKey: `${LISTTAGS_CACHE_KEY}_${ownerId}_keys`,
+			cacheKey,
+			result
 		})
 
 		return result

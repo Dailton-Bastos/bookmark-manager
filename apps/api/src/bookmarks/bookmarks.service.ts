@@ -1,4 +1,3 @@
-import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 import { Inject, Injectable } from '@nestjs/common'
 import type {
 	ArchivedUnarchivedBookmark,
@@ -16,9 +15,13 @@ import type {
 import type { SQL } from 'drizzle-orm'
 import { and, count, desc, eq, sql } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import { CacheProvider } from '../cache/cache.provider'
 import { schema } from '../database/schemas'
 import { PaginationProvider } from '../pagination/pagination.provider'
-import { LISTBOOKMARKS_CACHE_KEY } from '../shared/constants/cache'
+import {
+	LISTBOOKMARKS_CACHE_KEY,
+	LISTTAGS_CACHE_KEY
+} from '../shared/constants/cache'
 import { DATABASE_CONNECTION } from '../shared/constants/database'
 import { TagsService } from '../tags/tags.service'
 
@@ -29,7 +32,7 @@ export class BookmarksService {
 		private readonly db: NodePgDatabase<typeof schema>,
 		private readonly tagsService: TagsService,
 		private readonly paginationProvider: PaginationProvider,
-		@Inject(CACHE_MANAGER) private cacheManager: Cache
+		private readonly cacheProvider: CacheProvider
 	) {}
 
 	async create(createBookmarkInput: CreateBookmark, ownerId: string) {
@@ -82,20 +85,26 @@ export class BookmarksService {
 
 		// Invalidate only this owner's bookmark list cache entries after the transaction commits
 		if (result !== null) {
-			await this.invalidateOwnerCache(ownerId)
+			const registryKey = this.cacheProvider.generateRegistryKey({
+				ownerId,
+				cacheKey: LISTBOOKMARKS_CACHE_KEY
+			})
+
+			await this.cacheProvider.invalidateOwnerCache({ registryKey })
+
+			if (result.tags.length > 0) {
+				const tagRegistryKey = this.cacheProvider.generateRegistryKey({
+					ownerId,
+					cacheKey: LISTTAGS_CACHE_KEY
+				})
+
+				await this.cacheProvider.invalidateOwnerCache({
+					registryKey: tagRegistryKey
+				})
+			}
 		}
 
 		return result
-	}
-
-	private async invalidateOwnerCache(ownerId: string): Promise<void> {
-		const registryKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
-		const cachedKeys = await this.cacheManager.get<string[]>(registryKey)
-
-		if (cachedKeys && cachedKeys.length > 0) {
-			await Promise.all(cachedKeys.map((key) => this.cacheManager.del(key)))
-			await this.cacheManager.del(registryKey)
-		}
 	}
 
 	async list(
@@ -111,7 +120,7 @@ export class BookmarksService {
 	): Promise<ListBookmarks> {
 		const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${page}_${limit}_${order}_${archived}`
 
-		const cachedResult = await this.cacheManager.get<ListBookmarks>(cacheKey)
+		const cachedResult = await this.cacheProvider.get<ListBookmarks>(cacheKey)
 
 		if (cachedResult) return cachedResult
 
@@ -216,7 +225,16 @@ export class BookmarksService {
 			})
 		})
 
-		await this.registerAndCacheResult(cacheKey, ownerId, result)
+		const registryKey = this.cacheProvider.generateRegistryKey({
+			ownerId,
+			cacheKey: LISTBOOKMARKS_CACHE_KEY
+		})
+
+		await this.cacheProvider.registerAndCacheResult({
+			registryKey,
+			cacheKey,
+			result
+		})
 
 		return result
 	}
@@ -227,7 +245,7 @@ export class BookmarksService {
 	): Promise<ListBookmarks> {
 		const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${page}_${limit}_${order}_search_${query}`
 
-		const cachedResult = await this.cacheManager.get<ListBookmarks>(cacheKey)
+		const cachedResult = await this.cacheProvider.get<ListBookmarks>(cacheKey)
 
 		if (cachedResult) return cachedResult
 
@@ -312,28 +330,18 @@ export class BookmarksService {
 			})
 		})
 
-		await this.registerAndCacheResult(cacheKey, ownerId, result)
+		const registryKey = this.cacheProvider.generateRegistryKey({
+			ownerId,
+			cacheKey: LISTBOOKMARKS_CACHE_KEY
+		})
+
+		await this.cacheProvider.registerAndCacheResult({
+			registryKey,
+			cacheKey,
+			result
+		})
 
 		return result
-	}
-
-	private async registerAndCacheResult(
-		cacheKey: string,
-		ownerId: string,
-		result: ListBookmarks
-	): Promise<void> {
-		const registryKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_keys`
-
-		// Read the registry before caching to minimise the window for concurrent
-		// writes to miss each other's keys (best-effort; not fully atomic).
-		const existingKeys =
-			(await this.cacheManager.get<string[]>(registryKey)) ?? []
-
-		await this.cacheManager.set(cacheKey, result)
-
-		if (!existingKeys.includes(cacheKey)) {
-			await this.cacheManager.set(registryKey, [...existingKeys, cacheKey])
-		}
 	}
 
 	async findById(id: number, ownerId: string): Promise<Bookmark | null> {
@@ -375,7 +383,12 @@ export class BookmarksService {
 		if (!updatedBookmark?.[0]) return null
 
 		// Invalidate this owner's bookmark list cache entries after archiving/unarchiving a bookmark
-		await this.invalidateOwnerCache(ownerId)
+		const registryKey = this.cacheProvider.generateRegistryKey({
+			ownerId,
+			cacheKey: LISTBOOKMARKS_CACHE_KEY
+		})
+
+		await this.cacheProvider.invalidateOwnerCache({ registryKey })
 
 		return {
 			...updatedBookmark[0],
@@ -404,7 +417,12 @@ export class BookmarksService {
 		if (!updatedBookmark?.[0]) return null
 
 		// Invalidate this owner's bookmark list cache entries after pinning/unpinning a bookmark
-		await this.invalidateOwnerCache(ownerId)
+		const registryKey = this.cacheProvider.generateRegistryKey({
+			ownerId,
+			cacheKey: LISTBOOKMARKS_CACHE_KEY
+		})
+
+		await this.cacheProvider.invalidateOwnerCache({ registryKey })
 
 		return {
 			...updatedBookmark[0],
@@ -435,7 +453,12 @@ export class BookmarksService {
 
 		if (!updatedBookmark?.[0]) return null
 
-		await this.invalidateOwnerCache(ownerId)
+		const registryKey = this.cacheProvider.generateRegistryKey({
+			ownerId,
+			cacheKey: LISTBOOKMARKS_CACHE_KEY
+		})
+
+		await this.cacheProvider.invalidateOwnerCache({ registryKey })
 
 		return {
 			...updatedBookmark[0],
@@ -458,7 +481,22 @@ export class BookmarksService {
 				and(eq(schema.bookmarks.id, id), eq(schema.bookmarks.ownerId, ownerId))
 			)
 
-		await this.invalidateOwnerCache(ownerId)
+		const bookmarkRegistryKey = this.cacheProvider.generateRegistryKey({
+			ownerId,
+			cacheKey: LISTBOOKMARKS_CACHE_KEY
+		})
+
+		const tagRegistryKey = this.cacheProvider.generateRegistryKey({
+			ownerId,
+			cacheKey: LISTTAGS_CACHE_KEY
+		})
+
+		await Promise.all([
+			this.cacheProvider.invalidateOwnerCache({
+				registryKey: bookmarkRegistryKey
+			}),
+			this.cacheProvider.invalidateOwnerCache({ registryKey: tagRegistryKey })
+		])
 	}
 
 	async update(
@@ -513,13 +551,27 @@ export class BookmarksService {
 						.values(validTags.map((tag) => ({ bookmarkId: id, tagId: tag.id })))
 				}
 
+				const tagRegistryKey = this.cacheProvider.generateRegistryKey({
+					ownerId,
+					cacheKey: LISTTAGS_CACHE_KEY
+				})
+
+				await this.cacheProvider.invalidateOwnerCache({
+					registryKey: tagRegistryKey
+				})
+
 				return { ...updatedBookmark[0], tags: validTags }
 			}
 
 			return { ...updatedBookmark[0], tags: existingBookmark.tags }
 		})
 
-		await this.invalidateOwnerCache(ownerId)
+		const registryKey = this.cacheProvider.generateRegistryKey({
+			ownerId,
+			cacheKey: LISTBOOKMARKS_CACHE_KEY
+		})
+
+		await this.cacheProvider.invalidateOwnerCache({ registryKey })
 
 		return result
 	}
