@@ -1,3 +1,4 @@
+import type { TagWithBookmarkCount } from '@repo/schemas'
 import { Badge } from 'ui/components/shadcn/ui/badge'
 import { Checkbox } from 'ui/components/shadcn/ui/checkbox'
 import {
@@ -8,22 +9,18 @@ import {
 } from 'ui/components/shadcn/ui/field'
 import {
 	SidebarGroup,
-	SidebarGroupLabel,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem
 } from 'ui/components/shadcn/ui/sidebar'
 
 interface NavTagsProps {
-	tags: { name: string; quantity: number }[]
+	tags: TagWithBookmarkCount[]
 }
 
 export const NavTags = ({ tags }: NavTagsProps) => {
 	return (
 		<SidebarGroup className="group-data-[collapsible=icon]:hidden pt-1 px-0 text-muted-foreground">
-			<SidebarGroupLabel className="font-bold uppercase">
-				Tags
-			</SidebarGroupLabel>
 			<SidebarMenu>
 				<FieldSet>
 					<FieldGroup className="gap-0">
@@ -38,14 +35,14 @@ export const NavTags = ({ tags }: NavTagsProps) => {
 										/>
 										<FieldLabel
 											htmlFor={`tag-${tag.name}`}
-											className="flex items-center gap-2 justify-between text-base font-semibold"
+											className="flex items-center gap-2 justify-between text-base font-semibold capitalize"
 										>
 											{tag.name}
 											<Badge
 												variant="secondary"
 												className="border-muted font-medium"
 											>
-												{tag.quantity}
+												{tag.bookmarkCount}
 											</Badge>
 										</FieldLabel>
 									</Field>

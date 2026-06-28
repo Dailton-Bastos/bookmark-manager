@@ -20,6 +20,10 @@ export const useDeleteBookmarkMutation = () => {
 
 					queryClient.invalidateQueries({
 						queryKey: orpcClient.bookmark.search.key()
+					}),
+
+					queryClient.invalidateQueries({
+						queryKey: orpcClient.tag.list.key()
 					})
 				])
 
