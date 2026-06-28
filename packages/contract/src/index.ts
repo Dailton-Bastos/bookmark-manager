@@ -10,6 +10,7 @@ import {
 	updateBookmarkContract,
 	visitedBookmarkContract
 } from './bookmark'
+import { listTagsContract } from './tag'
 
 export const contract = populateContractRouterPaths({
 	bookmark: {
@@ -21,5 +22,8 @@ export const contract = populateContractRouterPaths({
 		delete: deleteBookmarkContract,
 		update: updateBookmarkContract,
 		search: searchBookmarksContract
+	},
+	tag: {
+		list: listTagsContract
 	}
 })

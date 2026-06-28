@@ -5,6 +5,7 @@ import type { SQL } from 'drizzle-orm'
 import { and, eq } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { PgDialect } from 'drizzle-orm/pg-core'
+import { CacheProvider } from '../../cache/cache.provider'
 import { schema } from '../../database/schemas'
 import { mockMetaPagination } from '../../pagination/__mocks__/pagination.mock'
 import { PaginationProvider } from '../../pagination/pagination.provider'
@@ -24,6 +25,7 @@ describe('BookmarksService', () => {
 	let tagsService: TagsService
 	let paginationProvider: PaginationProvider
 	let cacheManager: Cache
+	let cacheProvider: CacheProvider
 	let db: NodePgDatabase<typeof schema>
 	let mockDb: {
 		insert: jest.Mock
@@ -66,6 +68,7 @@ describe('BookmarksService', () => {
 				BookmarksService,
 				TagsService,
 				PaginationProvider,
+				CacheProvider,
 				{
 					provide: DATABASE_CONNECTION,
 					useValue: mockDb as unknown as NodePgDatabase<typeof schema>
@@ -87,6 +90,7 @@ describe('BookmarksService', () => {
 		paginationProvider = module.get<PaginationProvider>(PaginationProvider)
 		db = module.get<NodePgDatabase<typeof schema>>(DATABASE_CONNECTION)
 		cacheManager = module.get<Cache>(CACHE_MANAGER)
+		cacheProvider = module.get<CacheProvider>(CacheProvider)
 	})
 
 	it('should be defined', () => {
@@ -95,6 +99,7 @@ describe('BookmarksService', () => {
 		expect(paginationProvider).toBeDefined()
 		expect(db).toBeDefined()
 		expect(cacheManager).toBeDefined()
+		expect(cacheProvider).toBeDefined()
 	})
 
 	describe('create', () => {
