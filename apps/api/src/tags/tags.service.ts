@@ -139,8 +139,13 @@ export class TagsService {
 			})
 		})
 
+		const registryKey = this.cacheProvider.generateRegistryKey({
+			ownerId,
+			cacheKey: LISTTAGS_CACHE_KEY
+		})
+
 		await this.cacheProvider.registerAndCacheResult<ListTags>({
-			registryKey: `${LISTTAGS_CACHE_KEY}_${ownerId}_keys`,
+			registryKey,
 			cacheKey,
 			result
 		})

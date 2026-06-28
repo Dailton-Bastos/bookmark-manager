@@ -13,19 +13,14 @@ export const createTagSchema = z.object({
 		.max(50, 'Tag name must be at most 50 characters')
 })
 
-export const listTagsSchema = z.object({
-	data: z.array(
-		z.object({
-			...tagSchema.shape,
-			bookmarkCount: z.number()
-		})
-	),
-	meta: paginationMetaSchema
-})
-
 export const tagWithBookmarkCountSchema = z.object({
 	...tagSchema.shape,
 	bookmarkCount: z.number()
+})
+
+export const listTagsSchema = z.object({
+	data: z.array(tagWithBookmarkCountSchema),
+	meta: paginationMetaSchema
 })
 
 export type Tag = z.infer<typeof tagSchema>

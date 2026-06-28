@@ -551,15 +551,6 @@ export class BookmarksService {
 						.values(validTags.map((tag) => ({ bookmarkId: id, tagId: tag.id })))
 				}
 
-				const tagRegistryKey = this.cacheProvider.generateRegistryKey({
-					ownerId,
-					cacheKey: LISTTAGS_CACHE_KEY
-				})
-
-				await this.cacheProvider.invalidateOwnerCache({
-					registryKey: tagRegistryKey
-				})
-
 				return { ...updatedBookmark[0], tags: validTags }
 			}
 
@@ -572,6 +563,17 @@ export class BookmarksService {
 		})
 
 		await this.cacheProvider.invalidateOwnerCache({ registryKey })
+
+		if (result !== null && input.tags !== undefined) {
+			const tagRegistryKey = this.cacheProvider.generateRegistryKey({
+				ownerId,
+				cacheKey: LISTTAGS_CACHE_KEY
+			})
+
+			await this.cacheProvider.invalidateOwnerCache({
+				registryKey: tagRegistryKey
+			})
+		}
 
 		return result
 	}

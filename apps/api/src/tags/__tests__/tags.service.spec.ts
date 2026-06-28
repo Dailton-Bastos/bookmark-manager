@@ -157,11 +157,8 @@ describe('TagsService', () => {
 			const cacheKey = `${LISTTAGS_CACHE_KEY}_${ownerId}_${paginationQuery.page}_${paginationQuery.limit}`
 
 			const cachedResult = {
-				tags: [mockTag],
-				totalCount: 1,
-				totalPages: 1,
-				currentPage: paginationQuery.page,
-				limit: paginationQuery.limit
+				data: [tagWithBookmarkCount],
+				meta: mockMetaPagination
 			}
 
 			const getCache = jest.spyOn(cacheProvider, 'get')
@@ -178,7 +175,7 @@ describe('TagsService', () => {
 			const ownerId = 'user-123'
 
 			const getCache = jest.spyOn(cacheProvider, 'get')
-			getCache.mockResolvedValueOnce(null)
+			getCache.mockResolvedValueOnce(undefined)
 
 			const transaction = jest.fn().mockImplementation(async (callback) => {
 				return callback(db)
@@ -257,7 +254,7 @@ describe('TagsService', () => {
 			const ownerId = 'user-123'
 
 			const getCache = jest.spyOn(cacheProvider, 'get')
-			getCache.mockResolvedValueOnce(null)
+			getCache.mockResolvedValueOnce(undefined)
 
 			const transaction = jest.fn().mockImplementation(async (callback) => {
 				return callback(db)
