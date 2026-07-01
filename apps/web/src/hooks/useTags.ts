@@ -17,17 +17,20 @@ export const useTagsQuery = () => {
 
 	const canViewAllTags = data?.meta?.hasNextPage ?? false
 
-	const remainingTagsCount = data?.meta?.totalItems
-		? data?.meta?.totalItems - DEFAULT_TAGS_LIMIT
-		: 0
+	const isExpanded = limit > DEFAULT_TAGS_LIMIT
+
+	const remainingTagsCount = Math.max(
+		0,
+		(data?.meta?.totalItems ?? 0) - DEFAULT_TAGS_LIMIT
+	)
 
 	const viewAllTags = useCallback(() => {
-		if (!data?.meta.totalItems) return
+		if (!data?.meta?.totalItems) return
 
-		if (data?.meta.totalItems > DEFAULT_TAGS_LIMIT) {
-			setLimit(data?.meta.totalItems)
+		if (data?.meta?.totalItems > DEFAULT_TAGS_LIMIT) {
+			setLimit(data?.meta?.totalItems)
 		}
-	}, [data?.meta.totalItems])
+	}, [data?.meta?.totalItems])
 
 	const viewLessTags = useCallback(() => {
 		setLimit(DEFAULT_TAGS_LIMIT)
@@ -50,6 +53,7 @@ export const useTagsQuery = () => {
 		viewAllTags,
 		viewLessTags,
 		canViewAllTags,
+		isExpanded,
 		remainingTagsCount,
 		...result
 	}

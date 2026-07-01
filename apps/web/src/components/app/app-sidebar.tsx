@@ -25,11 +25,12 @@ export const AppSidebar = ({
 		viewAllTags,
 		viewLessTags,
 		canViewAllTags,
+		isExpanded,
 		remainingTagsCount
 	} = useTagsQuery()
 
 	const shouldShowViewMoreButton = canViewAllTags && remainingTagsCount > 0
-	const shouldShowViewLessButton = !canViewAllTags && tags.length > 0
+	const shouldShowViewLessButton = isExpanded && tags.length > 0
 
 	return (
 		<Sidebar className="border-r-0" {...props}>
