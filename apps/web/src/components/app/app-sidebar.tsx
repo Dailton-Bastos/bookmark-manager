@@ -12,7 +12,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem
 } from 'ui/components/shadcn/ui/sidebar'
-import { useTagsInfiniteQuery } from '@/hooks/useTags'
+import { useTagsQuery } from '@/hooks/useTags'
 import { Logo } from '../shared/logo'
 import { NavMain } from './nav-main'
 import { NavTags } from './nav-tags'
@@ -21,12 +21,15 @@ export const AppSidebar = ({
 }: React.ComponentProps<typeof Sidebar>) => {
 	const {
 		tags,
-		isPending,
 		isFetching,
-		hasNextPage,
-		fetchNextPage,
-		isFetchingNextPage
-	} = useTagsInfiniteQuery({ limit: 15 })
+		viewAllTags,
+		viewLessTags,
+		canViewAllTags,
+		remainingTagsCount
+	} = useTagsQuery()
+
+	const shouldShowViewMoreButton = canViewAllTags && remainingTagsCount > 0
+	const shouldShowViewLessButton = !canViewAllTags && tags.length > 0
 
 	return (
 		<Sidebar className="border-r-0" {...props}>
@@ -60,22 +63,35 @@ export const AppSidebar = ({
 
 			<SidebarContent className="px-4">
 				<NavTags tags={tags} />
-			</SidebarContent>
 
-			{!isPending && hasNextPage && (
-				<div className="flex justify-center p-4">
-					<Button
-						type="button"
-						size="xs"
-						variant="link"
-						onClick={() => fetchNextPage()}
-						disabled={isFetchingNextPage}
-						className="cursor-pointer"
-					>
-						{isFetchingNextPage ? 'Loading...' : 'Load more'}
-					</Button>
+				<div className="flex items-center justify-start pb-4">
+					{shouldShowViewMoreButton && (
+						<Button
+							type="button"
+							size="xs"
+							variant="link"
+							onClick={viewAllTags}
+							disabled={isFetching}
+							className="cursor-pointer"
+						>
+							{isFetching ? 'Loading...' : `View more (${remainingTagsCount})`}
+						</Button>
+					)}
+
+					{shouldShowViewLessButton && (
+						<Button
+							type="button"
+							size="xs"
+							variant="link"
+							onClick={viewLessTags}
+							disabled={isFetching}
+							className="cursor-pointer"
+						>
+							{isFetching ? 'Loading...' : 'View less'}
+						</Button>
+					)}
 				</div>
-			)}
+			</SidebarContent>
 		</Sidebar>
 	)
 }

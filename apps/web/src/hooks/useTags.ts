@@ -1,35 +1,43 @@
-import { useInfiniteQuery } from '@tanstack/react-query'
-import { useEffect, useMemo } from 'react'
+import type { TagWithBookmarkCount } from '@repo/schemas'
+import { useQuery } from '@tanstack/react-query'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { orpcClient } from '@/lib/orpc-client'
+import { DEFAULT_TAGS_LIMIT } from '@/utils/constants'
 
-export const useTagsInfiniteQuery = ({ limit }: { limit: number }) => {
-	const {
-		data,
-		error,
-		isFetching,
-		isFetchingNextPage,
-		fetchNextPage,
-		hasNextPage,
-		isPending,
-		...result
-	} = useInfiniteQuery(
-		orpcClient.tag.list.infiniteOptions({
-			input: (pageParam = 1) => ({
-				limit,
-				page: pageParam
-			}),
-			initialPageParam: 1,
-			getNextPageParam: ({ meta }) =>
-				meta.hasNextPage ? meta.currentPage + 1 : undefined
+export const useTagsQuery = () => {
+	const [tags, setTags] = useState<TagWithBookmarkCount[]>([])
+	const [limit, setLimit] = useState(DEFAULT_TAGS_LIMIT)
+
+	const { data, error, ...result } = useQuery(
+		orpcClient.tag.list.queryOptions({
+			input: { limit, page: 1 }
 		})
 	)
 
-	const tags = useMemo(() => {
-		if (!data) return []
+	const canViewAllTags = data?.meta?.hasNextPage ?? false
 
-		return data.pages.flatMap((page) => page.data)
-	}, [data])
+	const remainingTagsCount = data?.meta?.totalItems
+		? data?.meta?.totalItems - DEFAULT_TAGS_LIMIT
+		: 0
+
+	const viewAllTags = useCallback(() => {
+		if (!data?.meta.totalItems) return
+
+		if (data?.meta.totalItems > DEFAULT_TAGS_LIMIT) {
+			setLimit(data?.meta.totalItems)
+		}
+	}, [data?.meta.totalItems])
+
+	const viewLessTags = useCallback(() => {
+		setLimit(DEFAULT_TAGS_LIMIT)
+	}, [])
+
+	useEffect(() => {
+		if (!data?.data) return
+
+		setTags(data.data)
+	}, [data?.data])
 
 	useEffect(() => {
 		if (error) {
@@ -39,11 +47,10 @@ export const useTagsInfiniteQuery = ({ limit }: { limit: number }) => {
 
 	return {
 		tags,
-		isFetching,
-		isFetchingNextPage,
-		fetchNextPage,
-		hasNextPage,
-		isPending,
+		viewAllTags,
+		viewLessTags,
+		canViewAllTags,
+		remainingTagsCount,
 		...result
 	}
 }

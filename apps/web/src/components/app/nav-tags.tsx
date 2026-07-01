@@ -25,17 +25,17 @@ export const NavTags = ({ tags }: NavTagsProps) => {
 				<FieldSet>
 					<FieldGroup className="gap-0">
 						{tags.map((tag) => (
-							<SidebarMenuItem key={tag.name}>
+							<SidebarMenuItem key={tag.id}>
 								<SidebarMenuButton asChild className="h-10.5">
 									<Field orientation="horizontal">
 										<Checkbox
-											id={`tag-${tag.name}`}
-											name={`tag-${tag.name}`}
+											id={`tag-${tag.id}`}
+											name={`tag-${tag.id}`}
 											className="border-checkbox cursor-pointer rounded-sm focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
 										/>
 										<FieldLabel
-											htmlFor={`tag-${tag.name}`}
-											className="flex items-center gap-2 justify-between text-base font-semibold capitalize"
+											htmlFor={`tag-${tag.id}`}
+											className="flex items-center gap-2 justify-between text-base font-semibold"
 										>
 											{tag.name}
 											<Badge
