@@ -8,6 +8,7 @@ import {
 	deleteBookmarkOutputSchema,
 	listBookmarksInputSchema,
 	listBookmarksSchema,
+	listBookmarksTaggedInputSchema,
 	pinUnpinBookmarkSchema,
 	visitedBookmarkSchema
 } from './bookmark.schema'
@@ -252,6 +253,23 @@ describe('ListBookmarksInputSchema', () => {
 
 		if (result.success) {
 			expect(result.data.archived).toBe('include')
+		}
+	})
+})
+
+describe('ListBookmarksTaggedInputSchema', () => {
+	it('should accept a single tag value and normalize it to an array', () => {
+		const result = listBookmarksTaggedInputSchema.safeParse({
+			page: 1,
+			limit: 10,
+			order: 'desc',
+			tags: '1'
+		})
+
+		expect(result.success).toBe(true)
+
+		if (result.success) {
+			expect(result.data.tags).toEqual([1])
 		}
 	})
 })

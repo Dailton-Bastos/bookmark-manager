@@ -137,4 +137,16 @@ export class BookmarksController {
 			return bookmarks
 		})
 	}
+
+	@Implement(contract.bookmark.tagged)
+	tagged(@Session() session: UserSession) {
+		return implement(contract.bookmark.tagged).handler(async ({ input }) => {
+			const bookmarks = await this.bookmarksService.listByTags(
+				input,
+				session.user.id
+			)
+
+			return bookmarks
+		})
+	}
 }

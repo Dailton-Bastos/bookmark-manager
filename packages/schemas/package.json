@@ -35,6 +35,8 @@
 		"@repo/biome-config": "workspace:*",
 		"@repo/testing-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
+		"@swc/core": "catalog:",
+		"@swc/jest": "catalog:",
 		"@types/jest": "catalog:",
 		"jest": "catalog:",
 		"typescript": "catalog:"
