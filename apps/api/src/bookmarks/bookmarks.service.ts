@@ -7,13 +7,14 @@ import type {
 	ListBookmarks,
 	ListBookmarksArchived,
 	ListBookmarksInput,
+	ListBookmarksTaggedInput,
 	PinUnpinBookmark,
 	SearchBookmarks,
 	UpdateBookmark,
 	VisitedBookmark
 } from '@repo/schemas'
 import type { SQL } from 'drizzle-orm'
-import { and, count, desc, eq, sql } from 'drizzle-orm'
+import { and, count, desc, eq, inArray, sql } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { CacheProvider } from '../cache/cache.provider'
 import { schema } from '../database/schemas'
@@ -574,6 +575,105 @@ export class BookmarksService {
 				registryKey: tagRegistryKey
 			})
 		}
+
+		return result
+	}
+
+	async listByTags(
+		{ limit, page, order, tags }: ListBookmarksTaggedInput,
+		ownerId: string
+	): Promise<ListBookmarks> {
+		const normalizedTags = [...new Set(tags)].sort((a, b) => a - b)
+
+		const cacheKey = `${LISTBOOKMARKS_CACHE_KEY}_${ownerId}_${page}_${limit}_${order}_tags_${normalizedTags.join(
+			'_'
+		)}`
+
+		const cachedResult = await this.cacheProvider.get<ListBookmarks>(cacheKey)
+
+		if (cachedResult) return cachedResult
+
+		const result = await this.db.transaction(async (tx) => {
+			const tagsFilter = sql`${schema.bookmarks.id} IN (
+				SELECT ${schema.bookmarkTags.bookmarkId}
+				FROM ${schema.bookmarkTags}
+				WHERE ${inArray(schema.bookmarkTags.tagId, normalizedTags)}
+			)`
+
+			const bookmarksTotalCount = await tx
+				.select({ bookmarksCount: count() })
+				.from(schema.bookmarks)
+				.where(and(eq(schema.bookmarks.ownerId, ownerId), tagsFilter))
+
+			const bookmarksCount = bookmarksTotalCount[0]?.bookmarksCount ?? 0
+
+			if (bookmarksCount === 0) {
+				return this.paginationProvider.paginateQuery<Bookmark>({
+					paginationQuery: { page, limit },
+					data: [],
+					totalCount: 0
+				})
+			}
+
+			const offset = (page - 1) * limit
+
+			let orderByClauses: SQL[]
+
+			switch (order) {
+				case 'recently_visited':
+					orderByClauses = [
+						sql`${schema.bookmarks.lastVisited} DESC NULLS LAST`,
+						desc(schema.bookmarks.id)
+					]
+					break
+				case 'most_visited':
+					orderByClauses = [
+						desc(schema.bookmarks.visitCount),
+						desc(schema.bookmarks.id)
+					]
+					break
+				default:
+					orderByClauses = [
+						desc(schema.bookmarks.createdAt),
+						desc(schema.bookmarks.id)
+					]
+			}
+
+			const bookmarks = await tx
+				.select()
+				.from(schema.bookmarks)
+				.where(and(eq(schema.bookmarks.ownerId, ownerId), tagsFilter))
+				.orderBy(...orderByClauses)
+				.limit(limit)
+				.offset(offset)
+
+			const bookmarkIds = bookmarks.map((bookmark) => bookmark.id)
+
+			const tagsByBookmarkId = await this.tagsService.findByBookmarkIds(
+				bookmarkIds,
+				tx as unknown as NodePgDatabase<typeof schema>
+			)
+
+			return this.paginationProvider.paginateQuery<Bookmark>({
+				paginationQuery: { page, limit },
+				data: bookmarks.map((bookmark) => ({
+					...bookmark,
+					tags: tagsByBookmarkId[bookmark.id] || []
+				})),
+				totalCount: bookmarksCount
+			})
+		})
+
+		const registryKey = this.cacheProvider.generateRegistryKey({
+			ownerId,
+			cacheKey: LISTBOOKMARKS_CACHE_KEY
+		})
+
+		await this.cacheProvider.registerAndCacheResult({
+			registryKey,
+			cacheKey,
+			result
+		})
 
 		return result
 	}

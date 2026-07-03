@@ -7,6 +7,7 @@ import {
 	deleteBookmarkSchema,
 	listBookmarksInputSchema,
 	listBookmarksSchema,
+	listBookmarksTaggedInputSchema,
 	pinUnpinBookmarkSchema,
 	searchBookmarksInputSchema,
 	updateBookmarkSchema,
@@ -91,4 +92,14 @@ export const searchBookmarksContract = oc
 		tags: ['Bookmarks']
 	})
 	.input(searchBookmarksInputSchema)
+	.output(listBookmarksSchema)
+
+export const listBookmarksTaggedContract = oc
+	.route({
+		method: 'GET',
+		path: '/bookmarks/tagged',
+		summary: 'List bookmarks that match at least one selected tag',
+		tags: ['Bookmarks']
+	})
+	.input(listBookmarksTaggedInputSchema)
 	.output(listBookmarksSchema)

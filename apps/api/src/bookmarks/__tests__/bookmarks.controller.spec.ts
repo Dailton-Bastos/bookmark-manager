@@ -36,7 +36,8 @@ jest.mock('@repo/contract', () => ({
 			visited: 'bookmark.visited',
 			delete: 'bookmark.delete',
 			update: 'bookmark.update',
-			search: 'bookmark.search'
+			search: 'bookmark.search',
+			tagged: 'bookmark.tagged'
 		}
 	}
 }))
@@ -56,6 +57,7 @@ describe('BookmarksController', () => {
 		delete: jest.Mock
 		update: jest.Mock
 		search: jest.Mock
+		listByTags: jest.Mock
 	}
 
 	beforeEach(async () => {
@@ -76,7 +78,8 @@ describe('BookmarksController', () => {
 						visited: jest.fn(),
 						delete: jest.fn(),
 						update: jest.fn(),
-						search: jest.fn()
+						search: jest.fn(),
+						listByTags: jest.fn()
 					}
 				}
 			]
@@ -366,5 +369,35 @@ describe('BookmarksController', () => {
 		await expect(controller.search(mockUserSession)).rejects.toThrow(
 			'Search failed'
 		)
+	})
+
+	it('should return bookmarks filtered by tags', async () => {
+		const taggedInput = {
+			limit: 10,
+			page: 1,
+			order: 'desc' as const,
+			tags: [1]
+		}
+
+		const mockTaggedResult: ListBookmarks = {
+			data: [mockBookmark],
+			meta: {
+				...mockMetaPagination
+			}
+		}
+
+		bookmarksServiceMock.listByTags.mockResolvedValue(mockTaggedResult)
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({ input: taggedInput })
+		)
+
+		const result = await controller.tagged(mockUserSession)
+
+		expect(implement).toHaveBeenCalledWith(contract.bookmark.tagged)
+		expect(bookmarksServiceMock.listByTags).toHaveBeenCalledWith(
+			taggedInput,
+			mockUserSession.user.id
+		)
+		expect(result).toEqual(mockTaggedResult)
 	})
 })

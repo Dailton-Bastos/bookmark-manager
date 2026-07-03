@@ -51,6 +51,24 @@ export const listBookmarksInputSchema = paginationQuerySchema.extend({
 	archived: z.enum(['include', 'exclude', 'only']).default('include')
 })
 
+export const listBookmarksTaggedInputSchema = listBookmarksInputSchema
+	.extend({
+		tags: z
+			.preprocess(
+				(value) => {
+					if (value === undefined || value === null) return value
+					return Array.isArray(value) ? value : [value]
+				},
+				z
+					.array(z.coerce.number<number>().int().positive())
+					.min(1, 'At least one tag is required')
+			)
+			.describe(
+				'Tag IDs. Returns bookmarks that match at least one of these tags.'
+			)
+	})
+	.omit({ archived: true })
+
 export const listBookmarksSchema = z.object({
 	data: z.array(bookmarkSchema),
 	meta: paginationMetaSchema
@@ -88,6 +106,9 @@ export type CreateBookmark = z.infer<typeof createBookmarkSchema>
 export type UpdateBookmark = z.infer<typeof updateBookmarkSchema>
 export type ListBookmarks = z.infer<typeof listBookmarksSchema>
 export type ListBookmarksInput = z.infer<typeof listBookmarksInputSchema>
+export type ListBookmarksTaggedInput = z.infer<
+	typeof listBookmarksTaggedInputSchema
+>
 export type ArchivedUnarchivedBookmark = z.infer<
 	typeof archivedUnarchivedBookmarkSchema
 >
