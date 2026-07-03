@@ -1,60 +1,37 @@
+'use client'
+
 import Link from 'next/link'
+import { LoaderCircle } from 'ui/components/icons'
+import { Button } from 'ui/components/shadcn/ui/button'
 import {
 	Sidebar,
 	SidebarContent,
+	SidebarGroupLabel,
 	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem
 } from 'ui/components/shadcn/ui/sidebar'
+import { useTagsQuery } from '@/hooks/useTags'
 import { Logo } from '../shared/logo'
 import { NavMain } from './nav-main'
 import { NavTags } from './nav-tags'
-
-const dataMock = {
-	tags: [
-		{
-			name: 'AI',
-			quantity: 12
-		},
-		{
-			name: 'Programming',
-			quantity: 8
-		},
-		{
-			name: 'Design',
-			quantity: 5
-		},
-		{
-			name: 'Travel',
-			quantity: 3
-		},
-		{
-			name: 'Food',
-			quantity: 7
-		},
-		{
-			name: 'Health',
-			quantity: 4
-		},
-		{
-			name: 'Finance',
-			quantity: 6
-		},
-		{
-			name: 'Education',
-			quantity: 9
-		},
-		{
-			name: 'Entertainment',
-			quantity: 2
-		}
-	]
-}
-
 export const AppSidebar = ({
 	...props
 }: React.ComponentProps<typeof Sidebar>) => {
+	const {
+		tags,
+		isFetching,
+		viewAllTags,
+		viewLessTags,
+		canViewAllTags,
+		isExpanded,
+		remainingTagsCount
+	} = useTagsQuery()
+
+	const shouldShowViewMoreButton = canViewAllTags && remainingTagsCount > 0
+	const shouldShowViewLessButton = isExpanded && tags.length > 0
+
 	return (
 		<Sidebar className="border-r-0" {...props}>
 			<SidebarHeader className="px-4 py-3 gap-4">
@@ -75,8 +52,46 @@ export const AppSidebar = ({
 				<NavMain />
 			</SidebarHeader>
 
+			<div className="flex items-center px-4">
+				<SidebarGroupLabel className="font-bold uppercase">
+					Tags
+				</SidebarGroupLabel>
+
+				{isFetching && (
+					<LoaderCircle className="size-4 text-muted-foreground animate-spin" />
+				)}
+			</div>
+
 			<SidebarContent className="px-4">
-				<NavTags tags={dataMock.tags} />
+				<NavTags tags={tags} />
+
+				<div className="flex items-center justify-start pb-4">
+					{shouldShowViewMoreButton && (
+						<Button
+							type="button"
+							size="xs"
+							variant="link"
+							onClick={viewAllTags}
+							disabled={isFetching}
+							className="cursor-pointer"
+						>
+							{isFetching ? 'Loading...' : `View more (${remainingTagsCount})`}
+						</Button>
+					)}
+
+					{shouldShowViewLessButton && (
+						<Button
+							type="button"
+							size="xs"
+							variant="link"
+							onClick={viewLessTags}
+							disabled={isFetching}
+							className="cursor-pointer"
+						>
+							{isFetching ? 'Loading...' : 'View less'}
+						</Button>
+					)}
+				</div>
 			</SidebarContent>
 		</Sidebar>
 	)
