@@ -20,6 +20,10 @@ export const useArchiveOrUnarchiveBookmarkMutation = () => {
 
 					queryClient.invalidateQueries({
 						queryKey: orpcClient.bookmark.search.key()
+					}),
+
+					queryClient.invalidateQueries({
+						queryKey: orpcClient.bookmark.tagged.key()
 					})
 				])
 
