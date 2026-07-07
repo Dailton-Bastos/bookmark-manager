@@ -17,6 +17,10 @@ export const useVisitedBookmarkMutation = () => {
 
 					queryClient.invalidateQueries({
 						queryKey: orpcClient.bookmark.search.key()
+					}),
+
+					queryClient.invalidateQueries({
+						queryKey: orpcClient.bookmark.tagged.key()
 					})
 				])
 			}

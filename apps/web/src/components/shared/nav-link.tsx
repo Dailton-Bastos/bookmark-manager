@@ -8,7 +8,10 @@ import {
 	SidebarMenuItem
 } from 'ui/components/shadcn/ui/sidebar'
 import { cn } from 'ui/lib/utils'
-import { useSearchBookmarksStore } from '@/hooks/useBookmarks'
+import {
+	useSearchBookmarksStore,
+	useTagBookmarksStore
+} from '@/hooks/useBookmarks'
 
 interface NavLinkProps {
 	href: string
@@ -31,9 +34,12 @@ export const NavLink = ({
 
 	const { setSearchTerm, setOrder } = useSearchBookmarksStore()
 
+	const { setTags } = useTagBookmarksStore()
+
 	const handleClick = () => {
 		setSearchTerm('')
 		setOrder('desc')
+		setTags([]) // Clear selected tags when navigating
 	}
 
 	return (
