@@ -70,9 +70,8 @@ export const TaggedBookmarks = ({ params }: TaggedBookmarksProps) => {
 	}, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 
 	useEffect(() => {
-		if (params.tags) setTags(params.tags)
-
-		if (params.order) setOrder(params.order)
+		setTags(params.tags ?? [])
+		setOrder(params.order ?? 'desc')
 	}, [params.tags, params.order, setTags, setOrder])
 
 	useEffect(() => {
@@ -110,7 +109,7 @@ export const TaggedBookmarks = ({ params }: TaggedBookmarksProps) => {
 		)
 	}
 
-	if (!isPending && error && !bookmarks) {
+	if (!isPending && error && bookmarks.length === 0) {
 		return (
 			<section className="flex flex-col pt-28 items-center justify-center gap-4 w-full p-4">
 				<p className="text-muted-foreground font-medium text-sm">

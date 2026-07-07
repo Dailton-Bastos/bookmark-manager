@@ -40,7 +40,10 @@ export const NavTags = ({ tags }: NavTagsProps) => {
 		(tagId: number) => {
 			const params = new URLSearchParams(searchParams.toString())
 
-			params.append('tags', tagId.toString())
+			const existingTags = params.getAll('tags')
+			if (!existingTags.includes(tagId.toString())) {
+				params.append('tags', tagId.toString())
+			}
 
 			const newUrl = `${pathname}?${params.toString()}`
 

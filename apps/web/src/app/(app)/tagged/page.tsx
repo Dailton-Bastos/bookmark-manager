@@ -4,7 +4,7 @@ import { PageSkeleton } from '@/components/shared/page-skeleton'
 import { TaggedBookmarks } from '../_components/tagged-bookmarks'
 
 type SearchParams = Promise<{
-	tags?: [key: string] | string[]
+	tags?: string | string[]
 	order?: ListBookmarksOrder
 }>
 

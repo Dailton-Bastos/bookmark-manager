@@ -233,10 +233,13 @@ export const useSearchBookmarksInfiniteQuery = ({
 export const useTagBookmarksStore = create<TaggedBookmarksStore>((set) => ({
 	tags: [],
 	order: 'desc',
-	addTag: (tag: number) => set((state) => ({ tags: [...state.tags, tag] })),
+	addTag: (tag: number) =>
+		set((state) =>
+			state.tags.includes(tag) ? state : { tags: [...state.tags, tag] }
+		),
 	removeTag: (tag: number) =>
 		set((state) => ({ tags: state.tags.filter((t) => t !== tag) })),
-	setTags: (tags: number[]) => set({ tags }),
+	setTags: (tags: number[]) => set({ tags: Array.from(new Set(tags)) }),
 	setOrder: (order: ListBookmarksOrder) => set({ order })
 }))
 
