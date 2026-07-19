@@ -12,6 +12,7 @@ import {
 	visitedBookmarkContract
 } from './bookmark'
 import { listTagsContract } from './tag'
+import { uploadContract } from './upload'
 
 export const contract = populateContractRouterPaths({
 	bookmark: {
@@ -27,5 +28,8 @@ export const contract = populateContractRouterPaths({
 	},
 	tag: {
 		list: listTagsContract
+	},
+	upload: {
+		image: uploadContract
 	}
 })

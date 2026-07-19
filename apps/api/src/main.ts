@@ -1,3 +1,4 @@
+import * as path from 'node:path'
 import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import type { NestExpressApplication } from '@nestjs/platform-express'
@@ -17,6 +18,10 @@ async function bootstrap() {
 		logger: ['log', 'error']
 	})
 	app.enableShutdownHooks()
+
+	app.useStaticAssets(path.join(__dirname, '..', 'uploads'), {
+		prefix: '/assets/'
+	})
 
 	appConfig(app)
 
