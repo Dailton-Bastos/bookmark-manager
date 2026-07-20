@@ -19,6 +19,7 @@ export const bookmarks = pgTable(
 		title: text().notNull(),
 		description: text(),
 		url: text().notNull(),
+		favicon: text(),
 		pinned: boolean().notNull().default(false),
 		isArchived: boolean('is_archived').notNull().default(false),
 		visitCount: integer('visit_count').notNull().default(0),

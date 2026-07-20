@@ -24,6 +24,7 @@ describe('BookmarkSchema', () => {
 			title: 'Example Bookmark',
 			description: 'This is an example bookmark.',
 			url: 'https://example.com',
+			favicon: '/assets/images/favicon.png',
 			pinned: false,
 			isArchived: false,
 			visitCount: 0,
@@ -62,6 +63,7 @@ describe('BookmarkSchema', () => {
 			id: 1,
 			title: 'Example Bookmark',
 			description: null,
+			favicon: null,
 			url: 'https://example.com',
 			pinned: false,
 			isArchived: false,
@@ -87,6 +89,7 @@ describe('BookmarkSchema', () => {
 			id: 1,
 			title: 'Example Bookmark',
 			description: null,
+			favicon: null,
 			url: 'https://example.com',
 			pinned: false,
 			isArchived: false,
@@ -140,6 +143,7 @@ describe('CreateBookmarkSchema', () => {
 		const validCreateBookmark = {
 			title: 'Example Bookmark',
 			description: 'This is an example bookmark.',
+			favicon: null,
 			url: 'https://example.com',
 			tags: ['example', 'bookmark']
 		}
@@ -158,6 +162,7 @@ describe('CreateBookmarkSchema', () => {
 	it('should allow tags to be omitted (nullish)', () => {
 		const bookmarkWithoutTags = {
 			title: 'Example Bookmark',
+			favicon: null,
 			description: 'This is an example bookmark.',
 			url: 'https://example.com'
 		}
@@ -175,6 +180,7 @@ describe('CreateBookmarkSchema', () => {
 		const bookmarkWithNullTags = {
 			title: 'Example Bookmark',
 			description: 'This is an example bookmark.',
+			favicon: null,
 			url: 'https://example.com',
 			tags: null
 		}
@@ -286,6 +292,7 @@ describe('ListBookmarksSchema', () => {
 					id: 1,
 					title: 'Example Bookmark',
 					description: 'This is an example bookmark.',
+					favicon: null,
 					url: 'https://example.com',
 					pinned: false,
 					isArchived: false,
