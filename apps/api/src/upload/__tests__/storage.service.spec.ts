@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises'
 import { Test, TestingModule } from '@nestjs/testing'
 import { StorageService } from '../storage.service'
 
@@ -27,6 +28,8 @@ describe('StorageService', () => {
 		expect(result).toHaveProperty('fileName')
 		expect(result).toHaveProperty('filePath')
 		expect(result.filePath).toContain(subFolder)
+
+		await fs.rm(result.filePath, { force: true })
 	})
 
 	it('should throw an error for non-image files', async () => {
@@ -36,7 +39,7 @@ describe('StorageService', () => {
 		const subFolder = 'test-folder'
 
 		await expect(service.saveFile(mockFile, subFolder)).rejects.toThrow(
-			'Invalid file type. Only image files are allowed.'
+			'Invalid file type. Please upload a JPEG, JPG, PNG, or WebP image.'
 		)
 	})
 })

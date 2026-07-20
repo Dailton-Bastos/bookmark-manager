@@ -61,8 +61,10 @@ describe('UploadController', () => {
 	})
 
 	it('should call uploadService.uploadImage when handler is invoked', async () => {
-		const mockFile = { originalname: 'test.jpg', buffer: Buffer.from('test') }
-		const mockResult = { url: 'http://example.com/test.jpg' }
+		const mockFile = new File(['test content'], 'test.jpg', {
+			type: 'image/jpeg'
+		})
+		const mockResult = { url: '/assets/images/test.jpg' }
 
 		uploadServiceMock.uploadImage.mockResolvedValue(mockResult)
 
@@ -76,8 +78,10 @@ describe('UploadController', () => {
 		expect(result).toEqual(mockResult)
 	})
 
-	it('should throw ORPCError if uploadService.uploadImage throws an error', async () => {
-		const mockFile = { originalname: 'test.jpg', buffer: Buffer.from('test') }
+	it('should throw ORPCError if uploadService.uploadImage returns null', async () => {
+		const mockFile = new File(['test content'], 'test.jpg', {
+			type: 'image/jpeg'
+		})
 
 		uploadServiceMock.uploadImage.mockResolvedValue(null)
 

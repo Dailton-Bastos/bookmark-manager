@@ -7,23 +7,20 @@ describe('UploadSchema', () => {
 		expect(uploadInputSchema).toBeDefined()
 	})
 
-	it('should validate a valid upload object', async () => {
-		const validUpload = {
-			filename: 'file.jpg',
-			mimetype: 'image/jpeg',
-			size: 1024
-		}
-
-		const file = new File(['dummy content'], validUpload.filename, {
-			type: validUpload.mimetype
-		})
-
-		const result = uploadInputSchema.safeParse(file)
-
+	it('should validate a valid upload output object', () => {
+		const validOutput = { url: '/assets/images/file.jpg' }
+		const result = uploadOutputSchema.safeParse(validOutput)
 		expect(result.success).toBe(true)
+	})
 
-		if (result.success) {
-			expect(await result.data.arrayBuffer()).toEqual(await file.arrayBuffer())
+	it('should fail validation for a non-image file', () => {
+		const nonImageFile = new File(['dummy content'], 'file.txt', {
+			type: 'text/plain'
+		})
+		const result = uploadInputSchema.safeParse(nonImageFile)
+		expect(result.success).toBe(false)
+		if (!result.success) {
+			expect(result.error).toBeInstanceOf(ZodError)
 		}
 	})
 

@@ -14,9 +14,16 @@ export class StorageService {
 		file: File,
 		subFolder: string
 	): Promise<{ fileName: string; filePath: string }> {
-		if (!file.type.startsWith('image/')) {
+		const allowedTypes = new Set([
+			'image/jpeg',
+			'image/jpg',
+			'image/png',
+			'image/webp'
+		])
+
+		if (!allowedTypes.has(file.type)) {
 			throw new BadRequestException(
-				'Invalid file type. Only image files are allowed.'
+				'Invalid file type. Please upload a JPEG, JPG, PNG, or WebP image.'
 			)
 		}
 
