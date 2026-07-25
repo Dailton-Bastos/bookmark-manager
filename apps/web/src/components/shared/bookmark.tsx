@@ -13,6 +13,8 @@ import {
 } from 'ui/components/shadcn/ui/card'
 import { Separator } from 'ui/components/shadcn/ui/separator'
 import { formatDate } from '@/utils/format-date'
+import { removePrefixesFromUrl } from '@/utils/remove-prefixes-from-url'
+import { truncateString } from '@/utils/truncate-string'
 import { BookmarkDropdown } from '../app/bookmark-dropdown'
 
 interface Props {
@@ -57,10 +59,10 @@ export const Bookmark = ({
 
 					<div className="w-full min-w-0">
 						<CardTitle className="text-lg font-bold font-sans text-foreground">
-							{title}
+							{truncateString(title, 35)}
 						</CardTitle>
 						<CardDescription className="text-xs text-muted-foreground font-medium min-w-0 truncate">
-							{url}
+							{truncateString(removePrefixesFromUrl(url), 35)}
 						</CardDescription>
 					</div>
 				</div>

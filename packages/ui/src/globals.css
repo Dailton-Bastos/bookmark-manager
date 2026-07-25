@@ -128,6 +128,7 @@
 
 @theme {
 	--font-roboto: "Roboto", sans-serif;
+	--container-8xl: 96rem;
 }
 
 @theme inline {

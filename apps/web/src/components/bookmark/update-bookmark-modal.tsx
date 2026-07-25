@@ -88,6 +88,10 @@ const UpdateBookmarkModalContent = () => {
 			data.favicon = url
 		}
 
+		if (!selectedFile && !preview) {
+			data.favicon = null
+		}
+
 		const normalizedData = normalizeFormData<UpdateBookmark>({
 			...data,
 			tags
