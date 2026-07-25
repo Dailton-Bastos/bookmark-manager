@@ -7,6 +7,7 @@ import { useLoadingBar } from 'react-top-loading-bar'
 import { toast } from 'sonner'
 import { create } from 'zustand'
 import { orpcClient } from '@/lib/orpc-client'
+import { getImageUrl } from '@/utils/get-image-url'
 
 interface BookmarksStore {
 	limit: number
@@ -95,6 +96,7 @@ export const useBookmarksInfiniteQuery = ({
 				...page,
 				data: page.data.map((bookmark) => ({
 					...bookmark,
+					favicon: bookmark.favicon ? getImageUrl(bookmark.favicon) : null,
 					createdAt: new Date(bookmark.createdAt),
 					updatedAt: new Date(bookmark.updatedAt),
 					lastVisited: bookmark.lastVisited

@@ -1,4 +1,5 @@
 import type { Bookmark as BookmarkProps } from '@repo/schemas'
+import Image from 'next/image'
 import { Calendar, Clock, Eye, Globe, Pin } from 'ui/components/icons'
 import { Badge } from 'ui/components/shadcn/ui/badge'
 import {
@@ -28,6 +29,7 @@ export const Bookmark = ({
 	const {
 		title,
 		url,
+		favicon,
 		description,
 		tags,
 		pinned,
@@ -41,7 +43,17 @@ export const Bookmark = ({
 		<Card className="@container/card p-4 pb-3 gap-3 min-h-68">
 			<CardHeader className="p-0 pb-1 gap-0">
 				<div className="flex items-center gap-3">
-					<Globe className="size-11" />
+					{favicon ? (
+						<Image
+							src={favicon}
+							alt={`Favicon for ${title}`}
+							width={44}
+							height={44}
+							className="rounded-lg object-cover w-11 h-11 border border-muted"
+						/>
+					) : (
+						<Globe className="size-11" />
+					)}
 
 					<div className="w-full min-w-0">
 						<CardTitle className="text-lg font-bold font-sans text-foreground">

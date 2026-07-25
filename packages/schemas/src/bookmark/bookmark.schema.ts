@@ -32,7 +32,7 @@ export const createBookmarkSchema = z.object({
 		protocol: /^https?$/,
 		message: 'URL must be a valid HTTP or HTTPS URL'
 	}),
-	favicon: z.string().nullable(),
+	favicon: z.string().nullish(),
 	tags: z
 		.array(
 			z
