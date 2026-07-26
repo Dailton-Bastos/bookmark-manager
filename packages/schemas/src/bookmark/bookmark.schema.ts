@@ -9,6 +9,7 @@ export const bookmarkSchema = z.object({
 	id: z.number(),
 	title: z.string(),
 	description: z.string().nullable(),
+	favicon: z.string().nullable(),
 	url: z.url(),
 	pinned: z.boolean(),
 	isArchived: z.boolean(),
@@ -31,6 +32,7 @@ export const createBookmarkSchema = z.object({
 		protocol: /^https?$/,
 		message: 'URL must be a valid HTTP or HTTPS URL'
 	}),
+	favicon: z.string().nullish(),
 	tags: z
 		.array(
 			z

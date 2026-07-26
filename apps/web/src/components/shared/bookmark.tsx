@@ -1,4 +1,5 @@
 import type { Bookmark as BookmarkProps } from '@repo/schemas'
+import Image from 'next/image'
 import { Calendar, Clock, Eye, Globe, Pin } from 'ui/components/icons'
 import { Badge } from 'ui/components/shadcn/ui/badge'
 import {
@@ -12,6 +13,8 @@ import {
 } from 'ui/components/shadcn/ui/card'
 import { Separator } from 'ui/components/shadcn/ui/separator'
 import { formatDate } from '@/utils/format-date'
+import { removePrefixesFromUrl } from '@/utils/remove-prefixes-from-url'
+import { truncateString } from '@/utils/truncate-string'
 import { BookmarkDropdown } from '../app/bookmark-dropdown'
 
 interface Props {
@@ -28,6 +31,7 @@ export const Bookmark = ({
 	const {
 		title,
 		url,
+		favicon,
 		description,
 		tags,
 		pinned,
@@ -41,14 +45,24 @@ export const Bookmark = ({
 		<Card className="@container/card p-4 pb-3 gap-3 min-h-68">
 			<CardHeader className="p-0 pb-1 gap-0">
 				<div className="flex items-center gap-3">
-					<Globe className="size-11" />
+					{favicon ? (
+						<Image
+							src={favicon}
+							alt={`Favicon for ${title}`}
+							width={44}
+							height={44}
+							className="rounded-lg object-cover w-11 h-11 border border-muted"
+						/>
+					) : (
+						<Globe className="size-11" />
+					)}
 
 					<div className="w-full min-w-0">
 						<CardTitle className="text-lg font-bold font-sans text-foreground">
-							{title}
+							{truncateString(title, 35)}
 						</CardTitle>
 						<CardDescription className="text-xs text-muted-foreground font-medium min-w-0 truncate">
-							{url}
+							{truncateString(removePrefixesFromUrl(url), 35)}
 						</CardDescription>
 					</div>
 				</div>

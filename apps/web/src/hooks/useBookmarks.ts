@@ -7,6 +7,7 @@ import { useLoadingBar } from 'react-top-loading-bar'
 import { toast } from 'sonner'
 import { create } from 'zustand'
 import { orpcClient } from '@/lib/orpc-client'
+import { formatBookmark } from '@/utils/format-bookmark'
 
 interface BookmarksStore {
 	limit: number
@@ -93,15 +94,7 @@ export const useBookmarksInfiniteQuery = ({
 		return data.pages.map((page) => {
 			return {
 				...page,
-				data: page.data.map((bookmark) => ({
-					...bookmark,
-					createdAt: new Date(bookmark.createdAt),
-					updatedAt: new Date(bookmark.updatedAt),
-					lastVisited: bookmark.lastVisited
-						? new Date(bookmark.lastVisited)
-						: null,
-					archivedAt: bookmark.archivedAt ? new Date(bookmark.archivedAt) : null
-				}))
+				data: page.data.map((bookmark) => formatBookmark(bookmark))
 			}
 		})
 	}, [data])
@@ -186,15 +179,7 @@ export const useSearchBookmarksInfiniteQuery = ({
 		return data.pages.map((page) => {
 			return {
 				...page,
-				data: page.data.map((bookmark) => ({
-					...bookmark,
-					createdAt: new Date(bookmark.createdAt),
-					updatedAt: new Date(bookmark.updatedAt),
-					lastVisited: bookmark.lastVisited
-						? new Date(bookmark.lastVisited)
-						: null,
-					archivedAt: bookmark.archivedAt ? new Date(bookmark.archivedAt) : null
-				}))
+				data: page.data.map((bookmark) => formatBookmark(bookmark))
 			}
 		})
 	}, [data])
@@ -280,15 +265,7 @@ export const useTaggedBookmarksInfiniteQuery = ({
 		return data.pages.map((page) => {
 			return {
 				...page,
-				data: page.data.map((bookmark) => ({
-					...bookmark,
-					createdAt: new Date(bookmark.createdAt),
-					updatedAt: new Date(bookmark.updatedAt),
-					lastVisited: bookmark.lastVisited
-						? new Date(bookmark.lastVisited)
-						: null,
-					archivedAt: bookmark.archivedAt ? new Date(bookmark.archivedAt) : null
-				}))
+				data: page.data.map((bookmark) => formatBookmark(bookmark))
 			}
 		})
 	}, [data])

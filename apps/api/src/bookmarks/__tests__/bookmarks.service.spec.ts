@@ -107,6 +107,7 @@ describe('BookmarksService', () => {
 			title: 'Test Bookmark',
 			description: 'This is a test bookmark.',
 			url: 'https://example.com',
+			favicon: null,
 			tags: ['Test Tag']
 		}
 		const ownerId = 'user-123'

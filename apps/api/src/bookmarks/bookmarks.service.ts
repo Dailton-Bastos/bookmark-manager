@@ -37,7 +37,7 @@ export class BookmarksService {
 	) {}
 
 	async create(createBookmarkInput: CreateBookmark, ownerId: string) {
-		const { title, description, url, tags } = createBookmarkInput
+		const { title, description, url, tags, favicon } = createBookmarkInput
 
 		const result = await this.db.transaction(async (tx) => {
 			const [bookmark] = await tx
@@ -46,7 +46,8 @@ export class BookmarksService {
 					title,
 					description,
 					url,
-					ownerId
+					ownerId,
+					favicon
 				})
 				.returning()
 
@@ -504,7 +505,7 @@ export class BookmarksService {
 		input: UpdateBookmark,
 		ownerId: string
 	): Promise<Bookmark | null> {
-		const { id, title, description, url, tags } = input
+		const { id, title, description, url, tags, favicon } = input
 
 		if (!id) return null
 
@@ -515,7 +516,12 @@ export class BookmarksService {
 		const result = await this.db.transaction(async (tx) => {
 			const updatedBookmark = await tx
 				.update(schema.bookmarks)
-				.set({ title, description, url })
+				.set({
+					title,
+					description,
+					url,
+					...(favicon !== undefined ? { favicon } : {})
+				})
 				.where(
 					and(
 						eq(schema.bookmarks.id, id),
