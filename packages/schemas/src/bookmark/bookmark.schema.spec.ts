@@ -3,9 +3,11 @@ import { ZodError } from 'zod'
 import type { ListBookmarks, ListBookmarksInput } from './bookmark.schema'
 import {
 	archivedUnarchivedBookmarkSchema,
+	bookmarkMetadataSchema,
 	bookmarkSchema,
 	createBookmarkSchema,
 	deleteBookmarkOutputSchema,
+	getBookmarkMetadataInputSchema,
 	listBookmarksInputSchema,
 	listBookmarksSchema,
 	listBookmarksTaggedInputSchema,
@@ -496,6 +498,78 @@ describe('DeleteBookmarkOutputSchema', () => {
 		}
 
 		const result = deleteBookmarkOutputSchema.safeParse(invalidOutput)
+
+		expect(result.success).toBe(false)
+
+		if (!result.success) {
+			expect(result.error).toBeInstanceOf(ZodError)
+			expect(result.error.issues.length).toBeGreaterThan(0)
+		}
+	})
+})
+
+describe('GetBookmarkMetadataInputSchema', () => {
+	it('should be defined', () => {
+		expect(getBookmarkMetadataInputSchema).toBeDefined()
+	})
+
+	it('should validate a valid get bookmark metadata input object', () => {
+		const validInput = {
+			url: 'https://example.com'
+		}
+
+		const result = getBookmarkMetadataInputSchema.safeParse(validInput)
+
+		expect(result.success).toBe(true)
+
+		if (result.success) {
+			expect(result.data.url).toBe('https://example.com')
+		}
+	})
+
+	it('should fail validation for an invalid get bookmark metadata input object', () => {
+		const invalidInput = {
+			url: 'invalid-url'
+		}
+
+		const result = getBookmarkMetadataInputSchema.safeParse(invalidInput)
+
+		expect(result.success).toBe(false)
+
+		if (!result.success) {
+			expect(result.error).toBeInstanceOf(ZodError)
+			expect(result.error.issues.length).toBeGreaterThan(0)
+		}
+	})
+})
+
+describe('BookmarkMetadata', () => {
+	it('should validate a valid bookmark metadata object', () => {
+		const validMetadata = {
+			title: 'Example Title',
+			description: 'This is an example description.',
+			favicon: 'https://example.com/favicon.ico'
+		}
+
+		const result = bookmarkMetadataSchema.safeParse(validMetadata)
+
+		expect(result.success).toBe(true)
+
+		if (result.success) {
+			expect(result.data.title).toBe('Example Title')
+			expect(result.data.description).toBe('This is an example description.')
+			expect(result.data.favicon).toBe('https://example.com/favicon.ico')
+		}
+	})
+
+	it('should fail validation for an invalid bookmark metadata object', () => {
+		const invalidMetadata = {
+			title: '',
+			description: 123,
+			favicon: 'invalid-url'
+		}
+
+		const result = bookmarkMetadataSchema.safeParse(invalidMetadata)
 
 		expect(result.success).toBe(false)
 

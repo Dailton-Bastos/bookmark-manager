@@ -1,7 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import type {
 	ArchivedUnarchivedBookmark,
 	Bookmark,
+	BookmarkMetadata,
 	CreateBookmark,
 	DeleteBookmark,
 	ListBookmarks,
@@ -13,6 +14,7 @@ import type {
 	UpdateBookmark,
 	VisitedBookmark
 } from '@repo/schemas'
+import * as cheerio from 'cheerio'
 import type { SQL } from 'drizzle-orm'
 import { and, count, desc, eq, inArray, sql } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
@@ -682,5 +684,52 @@ export class BookmarksService {
 		})
 
 		return result
+	}
+
+	async getUrlMetadata(url: string): Promise<BookmarkMetadata | null> {
+		try {
+			const response = await fetch(url, {
+				method: 'GET',
+				headers: {
+					'User-Agent':
+						'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+				}
+			})
+
+			if (!response.ok) {
+				throw new BadRequestException(
+					'Failed to fetch the URL metadata. Please check the URL and try again.'
+				)
+			}
+
+			const html = await response.text()
+			const $ = cheerio.load(html)
+			const parsedUrl = new URL(url)
+
+			const title =
+				$('meta[property="og:title"]').attr('content')?.trim() ||
+				$('head > title').text()?.trim() ||
+				''
+			const description =
+				$('meta[name="description"]').attr('content')?.trim() ||
+				$('meta[property="og:description"]').attr('content')?.trim() ||
+				''
+			const faviconHtml =
+				$(`link[rel="icon"]`).attr('href') ||
+				$(`link[rel="shortcut icon"]`).attr('href') ||
+				$('link[rel="apple-touch-icon"]').attr('href')
+
+			let favicon = ''
+
+			if (faviconHtml) {
+				favicon = new URL(faviconHtml, parsedUrl.origin).href
+			} else {
+				favicon = `https://www.google.com/s2/favicons?domain=${parsedUrl.hostname}&sz=64`
+			}
+
+			return { title, description, favicon }
+		} catch {
+			return null
+		}
 	}
 }

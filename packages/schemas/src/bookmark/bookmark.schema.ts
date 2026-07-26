@@ -103,6 +103,20 @@ export const searchBookmarksInputSchema = paginationQuerySchema.extend({
 	order: z.enum(['desc', 'recently_visited', 'most_visited']).default('desc')
 })
 
+export const getBookmarkMetadataInputSchema = z.object({
+	url: z.url({
+		protocol: /^https?$/,
+		message: 'URL must be a valid HTTP or HTTPS URL'
+	})
+})
+
+export const bookmarkMetadataSchema = z.object({
+	title: z.string(),
+	description: z.string().nullable(),
+	favicon: z.string().nullable()
+})
+
+export type BookmarkMetadata = z.infer<typeof bookmarkMetadataSchema>
 export type Bookmark = z.infer<typeof bookmarkSchema>
 export type CreateBookmark = z.infer<typeof createBookmarkSchema>
 export type UpdateBookmark = z.infer<typeof updateBookmarkSchema>

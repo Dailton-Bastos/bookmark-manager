@@ -15,7 +15,8 @@ import { TagsService } from '../../tags/tags.service'
 import {
 	mockBookmark,
 	mockBookmarkWithoutTags,
-	mockBookmarkWithTags
+	mockBookmarkWithTags,
+	mockMetadataResult
 } from '../__mocks__/bookmark.mock'
 import { BookmarksService } from '../bookmarks.service'
 
@@ -1524,6 +1525,133 @@ describe('BookmarksService', () => {
 				expect.stringContaining('user-123')
 			)
 			expect(result).toBeUndefined()
+		})
+	})
+
+	describe('getUrlMetadata', () => {
+		it('should return metadata for a valid URL', async () => {
+			const url = 'https://example.com'
+			const html = `
+				<html>
+					<head>
+						<meta property="og:title" content="Example Domain" />
+						<meta name="description" content="This domain is for use in illustrative examples in documents." />
+					</head>
+				</html>
+			`
+
+			jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+				ok: true,
+				text: jest.fn().mockResolvedValueOnce(html)
+			} as unknown as Response)
+
+			const result = await service.getUrlMetadata(url)
+
+			expect(global.fetch).toHaveBeenCalledWith(
+				url,
+				expect.objectContaining({
+					method: 'GET',
+					headers: expect.objectContaining({
+						'User-Agent': expect.any(String)
+					})
+				})
+			)
+			expect(result).toEqual(mockMetadataResult)
+		})
+
+		it('should return metadata using page favicon when available', async () => {
+			const url = 'https://example.com/page'
+			const html = `
+				<html>
+					<head>
+						<title>Example Domain</title>
+						<meta name="description" content="This domain is for use in illustrative examples in documents." />
+						<link rel="icon" href="/favicon.ico" />
+					</head>
+				</html>
+			`
+
+			jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+				ok: true,
+				text: jest.fn().mockResolvedValueOnce(html)
+			} as unknown as Response)
+
+			const result = await service.getUrlMetadata(url)
+
+			expect(result).toEqual({
+				title: 'Example Domain',
+				description:
+					'This domain is for use in illustrative examples in documents.',
+				favicon: 'https://example.com/favicon.ico'
+			})
+		})
+
+		it('should fallback to og:description when meta description is missing', async () => {
+			const url = 'https://example.com/page'
+			const html = `
+				<html>
+					<head>
+						<title>Example Domain</title>
+						<meta property="og:description" content="OG description content." />
+					</head>
+				</html>
+			`
+
+			jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+				ok: true,
+				text: jest.fn().mockResolvedValueOnce(html)
+			} as unknown as Response)
+
+			const result = await service.getUrlMetadata(url)
+
+			expect(result).toEqual({
+				title: 'Example Domain',
+				description: 'OG description content.',
+				favicon: 'https://www.google.com/s2/favicons?domain=example.com&sz=64'
+			})
+		})
+
+		it('should return null when fetch fails or URL metadata cannot be parsed', async () => {
+			const url = 'https://example.com'
+
+			jest
+				.spyOn(global, 'fetch')
+				.mockRejectedValueOnce(new Error('Network error'))
+
+			const result = await service.getUrlMetadata(url)
+
+			expect(result).toBeNull()
+		})
+
+		it('should return null when response is not ok', async () => {
+			const url = 'https://example.com'
+
+			jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+				ok: false,
+				text: jest.fn()
+			} as unknown as Response)
+
+			const result = await service.getUrlMetadata(url)
+
+			expect(result).toBeNull()
+		})
+
+		it('should return null for an invalid URL', async () => {
+			const url = 'invalid-url'
+			const html = '<html><head><title>Invalid</title></head></html>'
+
+			jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+				ok: true,
+				text: jest.fn().mockResolvedValueOnce(html)
+			} as unknown as Response)
+
+			const result = await service.getUrlMetadata(url)
+
+			expect(global.fetch).toHaveBeenCalledWith(
+				url,
+				expect.objectContaining({ method: 'GET' })
+			)
+			expect(result).toBeNull()
 		})
 	})
 })

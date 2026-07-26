@@ -4,6 +4,7 @@ import {
 	archivedUnarchivedBookmarkContract,
 	createBookmarkContract,
 	deleteBookmarkContract,
+	getUrlMetadataContract,
 	listBookmarksContract,
 	listBookmarksTaggedContract,
 	pinUnpinBookmarkContract,
@@ -24,7 +25,8 @@ export const contract = populateContractRouterPaths({
 		delete: deleteBookmarkContract,
 		update: updateBookmarkContract,
 		search: searchBookmarksContract,
-		tagged: listBookmarksTaggedContract
+		tagged: listBookmarksTaggedContract,
+		metadata: getUrlMetadataContract
 	},
 	tag: {
 		list: listTagsContract

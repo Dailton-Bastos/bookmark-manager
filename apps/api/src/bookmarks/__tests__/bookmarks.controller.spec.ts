@@ -6,6 +6,7 @@ import { mockMetaPagination } from '../../pagination/__mocks__/pagination.mock'
 import {
 	mockBookmark,
 	mockCreateBookmarkInput,
+	mockMetadataResult,
 	mockUserSession
 } from '../__mocks__/bookmark.mock'
 import { BookmarksController } from '../bookmarks.controller'
@@ -37,7 +38,8 @@ jest.mock('@repo/contract', () => ({
 			delete: 'bookmark.delete',
 			update: 'bookmark.update',
 			search: 'bookmark.search',
-			tagged: 'bookmark.tagged'
+			tagged: 'bookmark.tagged',
+			metadata: 'bookmark.metadata'
 		}
 	}
 }))
@@ -58,6 +60,7 @@ describe('BookmarksController', () => {
 		update: jest.Mock
 		search: jest.Mock
 		listByTags: jest.Mock
+		getUrlMetadata: jest.Mock
 	}
 
 	beforeEach(async () => {
@@ -79,7 +82,8 @@ describe('BookmarksController', () => {
 						delete: jest.fn(),
 						update: jest.fn(),
 						search: jest.fn(),
-						listByTags: jest.fn()
+						listByTags: jest.fn(),
+						getUrlMetadata: jest.fn()
 					}
 				}
 			]
@@ -399,5 +403,37 @@ describe('BookmarksController', () => {
 			mockUserSession.user.id
 		)
 		expect(result).toEqual(mockTaggedResult)
+	})
+
+	it('should return bookmark metadata successfully', async () => {
+		const metadataInput = {
+			url: 'https://example.com'
+		}
+
+		bookmarksServiceMock.getUrlMetadata.mockResolvedValue(mockMetadataResult)
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({ input: metadataInput })
+		)
+
+		const result = await controller.metadata()
+
+		expect(implement).toHaveBeenCalledWith(contract.bookmark.metadata)
+		expect(bookmarksServiceMock.getUrlMetadata).toHaveBeenCalledWith(
+			metadataInput.url
+		)
+		expect(result).toEqual(mockMetadataResult)
+	})
+
+	it('should throw error when service fails to get bookmark metadata', async () => {
+		bookmarksServiceMock.getUrlMetadata.mockResolvedValue(null)
+		handlerMock.mockImplementation(async (resolver) =>
+			resolver({ input: { url: 'https://example.com' } })
+		)
+
+		await expect(controller.metadata()).rejects.toBeInstanceOf(ORPCError)
+		await expect(controller.metadata()).rejects.toHaveProperty(
+			'message',
+			'Metadata not found for the provided URL'
+		)
 	})
 })
