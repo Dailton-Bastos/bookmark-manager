@@ -71,19 +71,18 @@ const UpdateBookmarkModalContent = () => {
 
 	const onSubmit = async (data: UpdateBookmark) => {
 		if (selectedFile) {
-			const uploadResult = toast.promise(
-				mutateFileUpload.mutateAsync(selectedFile),
-				{
-					loading: 'Uploading image...',
-					error: (err) => {
-						if (err instanceof Error) return err.message
+			const uploadPromise = mutateFileUpload.mutateAsync(selectedFile)
 
-						return 'An error occurred while uploading the image. Please try again.'
-					}
+			toast.promise(uploadPromise, {
+				loading: 'Uploading image...',
+				error: (err) => {
+					if (err instanceof Error) return err.message
+
+					return 'An error occurred while uploading the image. Please try again.'
 				}
-			)
+			})
 
-			const { url } = await uploadResult.unwrap()
+			const { url } = await uploadPromise
 
 			data.favicon = url
 		}

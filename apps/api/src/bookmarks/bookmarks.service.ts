@@ -516,7 +516,12 @@ export class BookmarksService {
 		const result = await this.db.transaction(async (tx) => {
 			const updatedBookmark = await tx
 				.update(schema.bookmarks)
-				.set({ title, description, url, favicon })
+				.set({
+					title,
+					description,
+					url,
+					...(favicon !== undefined ? { favicon } : {})
+				})
 				.where(
 					and(
 						eq(schema.bookmarks.id, id),

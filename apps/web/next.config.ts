@@ -6,7 +6,7 @@ const backendHost = process.env.API_HOST
 const backendPort = process.env.API_PORT
 
 if (!apiUrl) {
-	throw new Error('Missing required environment variable: API_URL')
+	throw new Error('Missing required environment variable: NEXT_PUBLIC_API_URL')
 }
 
 if (!backendProtocol) {

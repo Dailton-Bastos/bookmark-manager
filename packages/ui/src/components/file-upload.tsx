@@ -1,7 +1,8 @@
 /** biome-ignore-all lint/a11y/useSemanticElements: <> */
 import { ImagePlus } from "lucide-react";
+import type * as React from "react";
 import { useRef, useState } from "react";
-import { Input } from "../components/shadcn/ui/input";
+import { Input } from "./shadcn/ui/input";
 
 interface FileUploadProps {
 	onFileSelected: (file: File) => void;
@@ -67,6 +68,7 @@ export const FileUpload = ({ onFileSelected }: FileUploadProps) => {
 				onClick={handleClick}
 				onKeyDown={(e) => {
 					if (e.key === "Enter" || e.key === " ") {
+						e.preventDefault();
 						handleClick();
 					}
 				}}

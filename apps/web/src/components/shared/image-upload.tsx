@@ -28,6 +28,8 @@ export const ImageUpload = ({
 				/>
 
 				<Button
+					type="button"
+					aria-label="Remove selected image"
 					variant="secondary"
 					className="w-6 h-6 absolute top-1 right-1 cursor-pointer bg-white rounded-lg shadow-md hover:bg-gray-100"
 					onClick={clearSelection}
