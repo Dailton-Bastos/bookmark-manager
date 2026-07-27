@@ -1546,6 +1546,9 @@ describe('BookmarksService', () => {
 
 			jest.spyOn(global, 'fetch').mockResolvedValueOnce({
 				ok: true,
+				headers: {
+					get: jest.fn().mockReturnValue('text/html; charset=utf-8')
+				},
 				text: jest.fn().mockResolvedValueOnce(html)
 			} as unknown as Response)
 
@@ -1581,6 +1584,9 @@ describe('BookmarksService', () => {
 
 			jest.spyOn(global, 'fetch').mockResolvedValueOnce({
 				ok: true,
+				headers: {
+					get: jest.fn().mockReturnValue('text/html; charset=utf-8')
+				},
 				text: jest.fn().mockResolvedValueOnce(html)
 			} as unknown as Response)
 
@@ -1607,6 +1613,9 @@ describe('BookmarksService', () => {
 
 			jest.spyOn(global, 'fetch').mockResolvedValueOnce({
 				ok: true,
+				headers: {
+					get: jest.fn().mockReturnValue('text/html; charset=utf-8')
+				},
 				text: jest.fn().mockResolvedValueOnce(html)
 			} as unknown as Response)
 
@@ -1641,6 +1650,71 @@ describe('BookmarksService', () => {
 
 			const result = await service.getUrlMetadata(url)
 
+			expect(result).toBeNull()
+		})
+
+		it('should return null when response is not HTML', async () => {
+			const text = jest.fn()
+
+			jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+				ok: true,
+				headers: {
+					get: jest.fn().mockReturnValue('application/json')
+				},
+				text
+			} as unknown as Response)
+
+			const result = await service.getUrlMetadata('https://example.com')
+
+			expect(text).not.toHaveBeenCalled()
+			expect(result).toBeNull()
+		})
+
+		it('should return null for localhost URLs', async () => {
+			const fetchSpy = jest.spyOn(global, 'fetch')
+			const result = await service.getUrlMetadata('http://localhost:3000')
+
+			expect(fetchSpy).not.toHaveBeenCalled()
+			expect(result).toBeNull()
+		})
+
+		it('should return null for private IPv4 URLs', async () => {
+			const fetchSpy = jest.spyOn(global, 'fetch')
+			const result = await service.getUrlMetadata('http://192.168.1.10')
+
+			expect(fetchSpy).not.toHaveBeenCalled()
+			expect(result).toBeNull()
+		})
+
+		it('should return null for reserved IPv4 URLs', async () => {
+			const fetchSpy = jest.spyOn(global, 'fetch')
+			const result = await service.getUrlMetadata('http://224.0.0.1')
+
+			expect(fetchSpy).not.toHaveBeenCalled()
+			expect(result).toBeNull()
+		})
+
+		it('should return null for loopback IPv6 URLs', async () => {
+			const fetchSpy = jest.spyOn(global, 'fetch')
+			const result = await service.getUrlMetadata('http://[::1]')
+
+			expect(fetchSpy).not.toHaveBeenCalled()
+			expect(result).toBeNull()
+		})
+
+		it('should return null for multicast IPv6 URLs', async () => {
+			const fetchSpy = jest.spyOn(global, 'fetch')
+			const result = await service.getUrlMetadata('http://[ff02::1]')
+
+			expect(fetchSpy).not.toHaveBeenCalled()
+			expect(result).toBeNull()
+		})
+
+		it('should return null for IPv4-mapped IPv6 URLs', async () => {
+			const fetchSpy = jest.spyOn(global, 'fetch')
+			const result = await service.getUrlMetadata('http://[::ffff:127.0.0.1]')
+
+			expect(fetchSpy).not.toHaveBeenCalled()
 			expect(result).toBeNull()
 		})
 	})

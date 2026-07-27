@@ -1,3 +1,4 @@
+import { isIP } from 'node:net'
 import { Inject, Injectable } from '@nestjs/common'
 import type {
 	ArchivedUnarchivedBookmark,
@@ -689,9 +690,19 @@ export class BookmarksService {
 	async getUrlMetadata(url: string): Promise<BookmarkMetadata | null> {
 		try {
 			const parsedUrl = new URL(url)
+			const { hostname } = parsedUrl
+
+			if (
+				hostname === 'localhost' ||
+				hostname.endsWith('.localhost') ||
+				this.isBlockedIpAddress(hostname)
+			) {
+				return null
+			}
 
 			const response = await fetch(parsedUrl.href, {
 				method: 'GET',
+				// Avoid following user-controlled redirects that could bounce requests into blocked targets.
 				redirect: 'manual',
 				signal: AbortSignal.timeout(5000),
 				headers: {
@@ -701,6 +712,18 @@ export class BookmarksService {
 			})
 
 			if (!response.ok) return null
+
+			const contentType = response.headers
+				.get('content-type')
+				?.toLowerCase()
+				.trim()
+
+			if (
+				!contentType?.includes('text/html') &&
+				!contentType?.includes('application/xhtml+xml')
+			) {
+				return null
+			}
 
 			const html = await response.text()
 			const $ = cheerio.load(html)
@@ -730,5 +753,55 @@ export class BookmarksService {
 		} catch {
 			return null
 		}
+	}
+
+	private isBlockedIpAddress(hostname: string) {
+		const normalizedHostname = hostname.replace(/^\[(.*)\]$/, '$1')
+		const lowerCaseHostname = normalizedHostname.toLowerCase()
+
+		if (lowerCaseHostname.startsWith('::ffff:')) {
+			return true
+		}
+
+		const ipVersion = isIP(normalizedHostname)
+
+		if (ipVersion === 4) {
+			return this.isBlockedIpv4Address(normalizedHostname)
+		}
+
+		if (ipVersion === 6) {
+			return (
+				lowerCaseHostname === '::' ||
+				lowerCaseHostname === '::1' ||
+				lowerCaseHostname.startsWith('fc') ||
+				lowerCaseHostname.startsWith('fd') ||
+				/^fe[89a-f]/.test(lowerCaseHostname) ||
+				lowerCaseHostname.startsWith('ff')
+			)
+		}
+
+		return false
+	}
+
+	private isBlockedIpv4Address(hostname: string) {
+		const [firstOctet, secondOctet] = hostname.split('.').map(Number)
+
+		if (firstOctet === 10 || firstOctet === 127 || firstOctet === 0) {
+			return true
+		}
+
+		if (firstOctet === 169 && secondOctet === 254) {
+			return true
+		}
+
+		if (firstOctet === 172 && secondOctet >= 16 && secondOctet <= 31) {
+			return true
+		}
+
+		if (firstOctet === 192 && secondOctet === 168) {
+			return true
+		}
+
+		return firstOctet >= 224
 	}
 }
