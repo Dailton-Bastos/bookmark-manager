@@ -1,7 +1,9 @@
+import { isIP } from 'node:net'
 import { Inject, Injectable } from '@nestjs/common'
 import type {
 	ArchivedUnarchivedBookmark,
 	Bookmark,
+	BookmarkMetadata,
 	CreateBookmark,
 	DeleteBookmark,
 	ListBookmarks,
@@ -13,6 +15,7 @@ import type {
 	UpdateBookmark,
 	VisitedBookmark
 } from '@repo/schemas'
+import * as cheerio from 'cheerio'
 import type { SQL } from 'drizzle-orm'
 import { and, count, desc, eq, inArray, sql } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
@@ -682,5 +685,128 @@ export class BookmarksService {
 		})
 
 		return result
+	}
+
+	async getUrlMetadata(url: string): Promise<BookmarkMetadata | null> {
+		try {
+			const parsedUrl = new URL(url)
+			const { hostname } = parsedUrl
+
+			if (
+				hostname === 'localhost' ||
+				hostname.endsWith('.localhost') ||
+				this.isBlockedIpAddress(hostname)
+			) {
+				return null
+			}
+
+			const response = await fetch(parsedUrl.href, {
+				method: 'GET',
+				// Avoid following user-controlled redirects that could bounce requests into blocked targets.
+				redirect: 'manual',
+				signal: AbortSignal.timeout(5000),
+				headers: {
+					'User-Agent':
+						'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+				}
+			})
+
+			if (!response.ok) return null
+
+			const contentType = response.headers
+				.get('content-type')
+				?.toLowerCase()
+				.trim()
+
+			if (
+				!contentType?.includes('text/html') &&
+				!contentType?.includes('application/xhtml+xml')
+			) {
+				return null
+			}
+
+			const html = await response.text()
+			const $ = cheerio.load(html)
+
+			const title =
+				$('meta[property="og:title"]').attr('content')?.trim() ||
+				$('head > title').text()?.trim() ||
+				''
+			const description =
+				$('meta[name="description"]').attr('content')?.trim() ||
+				$('meta[property="og:description"]').attr('content')?.trim() ||
+				''
+			const faviconHtml =
+				$(`link[rel="icon"]`).attr('href') ||
+				$(`link[rel="shortcut icon"]`).attr('href') ||
+				$('link[rel="apple-touch-icon"]').attr('href')
+
+			let favicon = ''
+
+			if (faviconHtml) {
+				favicon = new URL(faviconHtml, parsedUrl.origin).href
+			} else {
+				favicon = `https://www.google.com/s2/favicons?domain=${parsedUrl.hostname}&sz=64`
+			}
+
+			return { title, description, favicon }
+		} catch {
+			return null
+		}
+	}
+
+	private isBlockedIpAddress(hostname: string) {
+		const normalizedHostname = hostname.replace(/^\[(.*)\]$/, '$1')
+		const lowerCaseHostname = normalizedHostname.toLowerCase()
+
+		if (lowerCaseHostname.startsWith('::ffff:')) {
+			return true
+		}
+
+		const ipVersion = isIP(normalizedHostname)
+
+		if (ipVersion === 4) {
+			return this.isBlockedIpv4Address(normalizedHostname)
+		}
+
+		if (ipVersion === 6) {
+			return (
+				lowerCaseHostname === '::' ||
+				lowerCaseHostname === '::1' ||
+				lowerCaseHostname.startsWith('fc') ||
+				lowerCaseHostname.startsWith('fd') ||
+				/^fe[89a-f]/.test(lowerCaseHostname) ||
+				lowerCaseHostname.startsWith('ff')
+			)
+		}
+
+		return false
+	}
+
+	private isBlockedIpv4Address(hostname: string) {
+		const [firstOctet, secondOctet] = hostname.split('.').map(Number)
+
+		if (firstOctet === 10 || firstOctet === 127 || firstOctet === 0) {
+			return true
+		}
+
+		if (firstOctet === 169 && secondOctet === 254) {
+			return true
+		}
+
+		if (
+			firstOctet === 172 &&
+			secondOctet &&
+			secondOctet >= 16 &&
+			secondOctet <= 31
+		) {
+			return true
+		}
+
+		if (firstOctet === 192 && secondOctet && secondOctet === 168) {
+			return true
+		}
+
+		return firstOctet ? firstOctet >= 224 : false
 	}
 }

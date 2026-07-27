@@ -48,6 +48,7 @@
 		"better-auth": "catalog:",
 		"cache-manager": "^7.2.8",
 		"cacheable": "^2.3.4",
+		"cheerio": "^1.2.0",
 		"drizzle-orm": "^0.45.2",
 		"keyv": "^5.6.0",
 		"pg": "^8.20.0",

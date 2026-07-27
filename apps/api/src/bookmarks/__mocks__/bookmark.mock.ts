@@ -5,6 +5,7 @@ export const mockBookmark: Bookmark = {
 	id: 1,
 	title: 'Test Bookmark',
 	description: 'This is a test bookmark.',
+	favicon: 'https://example.com/favicon.ico',
 	url: 'https://example.com',
 	pinned: false,
 	isArchived: false,
@@ -35,4 +36,10 @@ export const mockBookmarkWithTags = {
 export const mockBookmarkWithoutTags = {
 	...mockBookmark,
 	tags: []
+}
+
+export const mockMetadataResult = {
+	title: 'Example Domain',
+	description: 'This domain is for use in illustrative examples in documents.',
+	favicon: 'https://www.google.com/s2/favicons?domain=example.com&sz=64'
 }

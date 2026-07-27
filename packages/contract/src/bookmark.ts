@@ -1,10 +1,12 @@
 import { oc } from '@orpc/contract'
 import {
 	archivedUnarchivedBookmarkSchema,
+	bookmarkMetadataSchema,
 	bookmarkSchema,
 	createBookmarkSchema,
 	deleteBookmarkOutputSchema,
 	deleteBookmarkSchema,
+	getBookmarkMetadataInputSchema,
 	listBookmarksInputSchema,
 	listBookmarksSchema,
 	listBookmarksTaggedInputSchema,
@@ -103,3 +105,13 @@ export const listBookmarksTaggedContract = oc
 	})
 	.input(listBookmarksTaggedInputSchema)
 	.output(listBookmarksSchema)
+
+export const getUrlMetadataContract = oc
+	.route({
+		method: 'GET',
+		path: '/bookmarks/metadata',
+		summary: 'Get metadata for a URL',
+		tags: ['Bookmarks']
+	})
+	.input(getBookmarkMetadataInputSchema)
+	.output(bookmarkMetadataSchema)
