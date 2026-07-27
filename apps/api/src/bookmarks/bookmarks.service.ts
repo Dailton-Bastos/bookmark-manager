@@ -794,14 +794,19 @@ export class BookmarksService {
 			return true
 		}
 
-		if (firstOctet === 172 && secondOctet >= 16 && secondOctet <= 31) {
+		if (
+			firstOctet === 172 &&
+			secondOctet &&
+			secondOctet >= 16 &&
+			secondOctet <= 31
+		) {
 			return true
 		}
 
-		if (firstOctet === 192 && secondOctet === 168) {
+		if (firstOctet === 192 && secondOctet && secondOctet === 168) {
 			return true
 		}
 
-		return firstOctet >= 224
+		return firstOctet ? firstOctet >= 224 : false
 	}
 }
