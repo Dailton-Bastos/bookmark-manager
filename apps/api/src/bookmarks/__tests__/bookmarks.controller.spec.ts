@@ -430,8 +430,10 @@ describe('BookmarksController', () => {
 			resolver({ input: { url: 'https://example.com' } })
 		)
 
-		await expect(controller.metadata()).rejects.toBeInstanceOf(ORPCError)
-		await expect(controller.metadata()).rejects.toHaveProperty(
+		const resultPromise = controller.metadata()
+
+		await expect(resultPromise).rejects.toBeInstanceOf(ORPCError)
+		await expect(resultPromise).rejects.toHaveProperty(
 			'message',
 			'Metadata not found for the provided URL'
 		)

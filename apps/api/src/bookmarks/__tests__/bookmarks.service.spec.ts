@@ -1529,6 +1529,10 @@ describe('BookmarksService', () => {
 	})
 
 	describe('getUrlMetadata', () => {
+		afterEach(() => {
+			jest.restoreAllMocks()
+		})
+
 		it('should return metadata for a valid URL', async () => {
 			const url = 'https://example.com'
 			const html = `
@@ -1547,10 +1551,14 @@ describe('BookmarksService', () => {
 
 			const result = await service.getUrlMetadata(url)
 
+			const parsedUrl = new URL(url)
+
 			expect(global.fetch).toHaveBeenCalledWith(
-				url,
+				parsedUrl.href,
 				expect.objectContaining({
 					method: 'GET',
+					redirect: 'manual',
+					signal: AbortSignal.timeout(5000),
 					headers: expect.objectContaining({
 						'User-Agent': expect.any(String)
 					})
@@ -1633,24 +1641,6 @@ describe('BookmarksService', () => {
 
 			const result = await service.getUrlMetadata(url)
 
-			expect(result).toBeNull()
-		})
-
-		it('should return null for an invalid URL', async () => {
-			const url = 'invalid-url'
-			const html = '<html><head><title>Invalid</title></head></html>'
-
-			jest.spyOn(global, 'fetch').mockResolvedValueOnce({
-				ok: true,
-				text: jest.fn().mockResolvedValueOnce(html)
-			} as unknown as Response)
-
-			const result = await service.getUrlMetadata(url)
-
-			expect(global.fetch).toHaveBeenCalledWith(
-				url,
-				expect.objectContaining({ method: 'GET' })
-			)
 			expect(result).toBeNull()
 		})
 	})

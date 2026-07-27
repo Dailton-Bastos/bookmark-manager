@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import type {
 	ArchivedUnarchivedBookmark,
 	Bookmark,
@@ -688,23 +688,22 @@ export class BookmarksService {
 
 	async getUrlMetadata(url: string): Promise<BookmarkMetadata | null> {
 		try {
-			const response = await fetch(url, {
+			const parsedUrl = new URL(url)
+
+			const response = await fetch(parsedUrl.href, {
 				method: 'GET',
+				redirect: 'manual',
+				signal: AbortSignal.timeout(5000),
 				headers: {
 					'User-Agent':
 						'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
 				}
 			})
 
-			if (!response.ok) {
-				throw new BadRequestException(
-					'Failed to fetch the URL metadata. Please check the URL and try again.'
-				)
-			}
+			if (!response.ok) return null
 
 			const html = await response.text()
 			const $ = cheerio.load(html)
-			const parsedUrl = new URL(url)
 
 			const title =
 				$('meta[property="og:title"]').attr('content')?.trim() ||
