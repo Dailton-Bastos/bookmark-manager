@@ -17,7 +17,13 @@ import { Textarea } from 'ui/components/shadcn/ui/textarea'
 import { useBookmarkTags } from '@/hooks/useBookmarkTags'
 import { MAX_BOOKMARK_TAGS } from '@/utils/constants'
 
-export const BookmarkFormInputs = () => {
+interface BookmarkFormInputsProps {
+	isFetchingMetadata: boolean
+}
+
+export const BookmarkFormInputs = ({
+	isFetchingMetadata
+}: BookmarkFormInputsProps) => {
 	const {
 		register,
 		watch,
@@ -45,6 +51,7 @@ export const BookmarkFormInputs = () => {
 					aria-invalid={errors.url ? 'true' : 'false'}
 					autoComplete="off"
 					required
+					disabled={isFetchingMetadata}
 					className="hover:bg-secondary focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
 				/>
 				{errors.url && (
@@ -63,6 +70,7 @@ export const BookmarkFormInputs = () => {
 					aria-invalid={errors.title ? 'true' : 'false'}
 					autoComplete="off"
 					required
+					disabled={isFetchingMetadata}
 					className="hover:bg-secondary focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
 				/>
 				{errors.title && (
@@ -81,6 +89,7 @@ export const BookmarkFormInputs = () => {
 					maxLength={280}
 					rows={4}
 					autoComplete="off"
+					disabled={isFetchingMetadata}
 					className="min-h-22.5 hover:bg-secondary border border-chart-2 focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
 				/>
 				<FieldDescription className="text-right">
@@ -101,7 +110,7 @@ export const BookmarkFormInputs = () => {
 						aria-invalid={errors.tags ? 'true' : 'false'}
 						id="tags"
 						placeholder='e.g. "work", "personal", "react"'
-						disabled={tags.length >= MAX_BOOKMARK_TAGS}
+						disabled={isFetchingMetadata || tags.length >= MAX_BOOKMARK_TAGS}
 					/>
 					{errors.tags && (
 						<FieldError

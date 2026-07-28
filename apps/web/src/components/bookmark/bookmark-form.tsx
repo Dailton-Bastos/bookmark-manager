@@ -10,6 +10,7 @@ interface BookmarkFormProps {
 	clearSelection: () => void
 	preview: string | null
 	isPending: boolean
+	isFetchingMetadata: boolean
 	submitButtonTitle?: string
 }
 
@@ -19,6 +20,7 @@ export const BookmarkForm = ({
 	clearSelection,
 	preview,
 	isPending,
+	isFetchingMetadata,
 	submitButtonTitle = 'Save Bookmark'
 }: BookmarkFormProps) => {
 	return (
@@ -31,13 +33,13 @@ export const BookmarkForm = ({
 				/>
 			</div>
 
-			<BookmarkFormInputs />
+			<BookmarkFormInputs isFetchingMetadata={isFetchingMetadata} />
 
 			<DialogFooter className="gap-4 mt-8">
 				<DialogClose asChild>
 					<Button
 						variant="ghost"
-						disabled={isPending}
+						disabled={isPending || isFetchingMetadata}
 						className="h-11.5 min-w-22.5 rounded-lg border cursor-pointer font-semibold text-base text-foreground hover:bg-secondary"
 					>
 						Cancel
@@ -48,7 +50,7 @@ export const BookmarkForm = ({
 					type="submit"
 					title={submitButtonTitle}
 					className="w-36.25"
-					disabled={isPending}
+					disabled={isPending || isFetchingMetadata}
 				/>
 			</DialogFooter>
 		</form>

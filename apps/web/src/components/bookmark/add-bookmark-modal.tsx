@@ -1,16 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type CreateBookmark, createBookmarkSchema } from '@repo/schemas'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCallback } from 'react'
-import { FormProvider, useForm } from 'react-hook-form'
+import { useCallback, useEffect, useRef } from 'react'
+import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { BookmarkForm } from '@/components/bookmark/bookmark-form'
 import { ModalWrapper } from '@/components/bookmark/modal-wrapper'
 import { useAddBookmarkModal } from '@/hooks/useBookmarkModal'
 import { useBookmarkTags } from '@/hooks/useBookmarkTags'
+import { useDebounce } from '@/hooks/useDebounce'
 import { useFileSelect } from '@/hooks/useFileSelect'
 import { orpcClient } from '@/lib/orpc-client'
 import { BookmarkTagsProvider } from '@/providers/bookmark-tags-provider'
+import { isValidWebUrl } from '@/utils/is-valid-web-url'
 import { normalizeFormData } from '@/utils/normalize-form-data'
 
 const AddBookmarkModalContent = () => {
@@ -28,9 +30,15 @@ const AddBookmarkModalContent = () => {
 		defaultValues: {
 			url: '',
 			title: '',
+			description: '',
 			tags: []
 		}
 	})
+
+	const url = useWatch({ control: form.control, name: 'url' })
+
+	const debouncedUrl = useDebounce<string>(url, 500)
+	const lastFetchedMetadataUrlRef = useRef<string | null>(null)
 
 	const { mutateAsync, isPending } = useMutation(
 		orpcClient.bookmark.create.mutationOptions({
@@ -63,6 +71,40 @@ const AddBookmarkModalContent = () => {
 			}
 		})
 	)
+
+	const { mutateAsync: fetchMetadataAsync, isPending: isFetchingMetadata } =
+		useMutation(orpcClient.bookmark.metadata.mutationOptions())
+
+	const fetchBookmarkMetadata = useCallback(async () => {
+		if (!isOpen) return
+
+		const normalizedUrl = debouncedUrl.trim()
+
+		if (!isValidWebUrl(normalizedUrl)) {
+			lastFetchedMetadataUrlRef.current = null
+			return
+		}
+
+		if (lastFetchedMetadataUrlRef.current === normalizedUrl) return
+
+		lastFetchedMetadataUrlRef.current = normalizedUrl
+
+		try {
+			const metadata = await fetchMetadataAsync({ url: normalizedUrl })
+
+			const currentUrl = form.getValues('url').trim()
+			if (currentUrl !== normalizedUrl) return
+
+			form.setValue('title', metadata.title, { shouldDirty: false })
+			form.setValue('description', metadata.description ?? '', {
+				shouldDirty: false
+			})
+		} catch {
+			form.setValue('title', '', { shouldDirty: false })
+			form.setValue('description', '', { shouldDirty: false })
+			lastFetchedMetadataUrlRef.current = null
+		}
+	}, [fetchMetadataAsync, debouncedUrl, form, isOpen])
 
 	const onSubmit = async (data: CreateBookmark) => {
 		if (selectedFile) {
@@ -105,6 +147,10 @@ const AddBookmarkModalContent = () => {
 		onClose()
 	}, [form, resetTags, onClose, clearSelection])
 
+	useEffect(() => {
+		fetchBookmarkMetadata()
+	}, [fetchBookmarkMetadata])
+
 	return (
 		<ModalWrapper
 			isOpen={isOpen}
@@ -119,6 +165,7 @@ const AddBookmarkModalContent = () => {
 					clearSelection={clearSelection}
 					preview={preview}
 					isPending={isPending}
+					isFetchingMetadata={isFetchingMetadata}
 					submitButtonTitle="Add Bookmark"
 				/>
 			</FormProvider>

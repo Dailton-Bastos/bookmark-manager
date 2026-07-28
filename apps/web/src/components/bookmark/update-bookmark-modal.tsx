@@ -1,16 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type UpdateBookmark, updateBookmarkSchema } from '@repo/schemas'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect } from 'react'
-import { FormProvider, useForm } from 'react-hook-form'
+import { useCallback, useEffect, useRef } from 'react'
+import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { BookmarkForm } from '@/components/bookmark/bookmark-form'
 import { ModalWrapper } from '@/components/bookmark/modal-wrapper'
 import { useUpdateBookmarkModal } from '@/hooks/useBookmarkModal'
 import { useBookmarkTags } from '@/hooks/useBookmarkTags'
+import { useDebounce } from '@/hooks/useDebounce'
 import { useFileSelect } from '@/hooks/useFileSelect'
 import { orpcClient } from '@/lib/orpc-client'
 import { BookmarkTagsProvider } from '@/providers/bookmark-tags-provider'
+import { isValidWebUrl } from '@/utils/is-valid-web-url'
 import { normalizeFormData } from '@/utils/normalize-form-data'
 
 const UpdateBookmarkModalContent = () => {
@@ -23,6 +25,10 @@ const UpdateBookmarkModalContent = () => {
 	})
 
 	const { reset } = form
+	const url = useWatch({ control: form.control, name: 'url' }) || ''
+	const debouncedUrl = useDebounce<string>(url, 500)
+	const lastFetchedMetadataUrlRef = useRef<string | null>(null)
+	const initialBookmarkUrlRef = useRef<string | null>(null)
 
 	const { tags, setTags, resetTags } = useBookmarkTags()
 
@@ -68,6 +74,60 @@ const UpdateBookmarkModalContent = () => {
 			}
 		})
 	)
+
+	const { mutateAsync: fetchMetadataAsync, isPending: isFetchingMetadata } =
+		useMutation(orpcClient.bookmark.metadata.mutationOptions())
+
+	const fetchBookmarkMetadata = useCallback(async () => {
+		if (!isOpen || !bookmark) return
+
+		const normalizedUrl = debouncedUrl.trim()
+
+		if (!isValidWebUrl(normalizedUrl)) {
+			lastFetchedMetadataUrlRef.current = null
+			return
+		}
+
+		// Do not overwrite values when opening an existing bookmark without URL edits.
+		if (normalizedUrl === initialBookmarkUrlRef.current) return
+
+		if (lastFetchedMetadataUrlRef.current === normalizedUrl) return
+
+		lastFetchedMetadataUrlRef.current = normalizedUrl
+
+		try {
+			const metadata = await fetchMetadataAsync({ url: normalizedUrl })
+
+			const currentUrl = (form.getValues('url') || '').trim()
+			if (currentUrl !== normalizedUrl) return
+
+			form.setValue('title', metadata.title, { shouldDirty: false })
+			form.setValue('description', metadata.description ?? '', {
+				shouldDirty: false
+			})
+
+			if (!selectedFile) {
+				setPreview(
+					`https://www.google.com/s2/favicons?domain=${normalizedUrl}&sz=64`
+				)
+			}
+		} catch {
+			if (!selectedFile) {
+				setPreview(null)
+				form.setValue('favicon', null, { shouldDirty: false })
+			}
+
+			lastFetchedMetadataUrlRef.current = null
+		}
+	}, [
+		bookmark,
+		debouncedUrl,
+		fetchMetadataAsync,
+		form,
+		isOpen,
+		selectedFile,
+		setPreview
+	])
 
 	const onSubmit = async (data: UpdateBookmark) => {
 		if (selectedFile) {
@@ -128,6 +188,8 @@ const UpdateBookmarkModalContent = () => {
 		})
 
 		setTags(initialTags)
+		initialBookmarkUrlRef.current = bookmark.url
+		lastFetchedMetadataUrlRef.current = null
 	}, [
 		isOpen,
 		bookmark?.id,
@@ -139,6 +201,10 @@ const UpdateBookmarkModalContent = () => {
 		reset,
 		setTags
 	])
+
+	useEffect(() => {
+		fetchBookmarkMetadata()
+	}, [fetchBookmarkMetadata])
 
 	useEffect(() => {
 		if (bookmark?.favicon) {
@@ -157,6 +223,7 @@ const UpdateBookmarkModalContent = () => {
 				<BookmarkForm
 					onSubmit={form.handleSubmit(onSubmit)}
 					isPending={isPending}
+					isFetchingMetadata={isFetchingMetadata}
 					handleFileSelect={handleFileSelect}
 					clearSelection={clearSelection}
 					preview={preview}
