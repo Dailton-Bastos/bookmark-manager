@@ -153,7 +153,7 @@ export class BookmarksController {
 	@Implement(contract.bookmark.metadata)
 	metadata() {
 		return implement(contract.bookmark.metadata).handler(async ({ input }) => {
-			const metadata = await this.bookmarksService.getUrlMetadata(input.url)
+			const metadata = await this.bookmarksService.getUrlMetadata(input)
 
 			if (!metadata) {
 				throw new ORPCError('NOT_FOUND', {

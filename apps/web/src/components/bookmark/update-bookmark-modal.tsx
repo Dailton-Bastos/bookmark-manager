@@ -6,13 +6,14 @@ import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { BookmarkForm } from '@/components/bookmark/bookmark-form'
 import { ModalWrapper } from '@/components/bookmark/modal-wrapper'
+import { useBookmarkMetadata } from '@/hooks/useBookmarkMetadata'
 import { useUpdateBookmarkModal } from '@/hooks/useBookmarkModal'
 import { useBookmarkTags } from '@/hooks/useBookmarkTags'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useFileSelect } from '@/hooks/useFileSelect'
+import { useFileUploadMutation } from '@/hooks/useFileUploadMutation'
 import { orpcClient } from '@/lib/orpc-client'
 import { BookmarkTagsProvider } from '@/providers/bookmark-tags-provider'
-import { isValidWebUrl } from '@/utils/is-valid-web-url'
 import { normalizeFormData } from '@/utils/normalize-form-data'
 
 const UpdateBookmarkModalContent = () => {
@@ -39,6 +40,12 @@ const UpdateBookmarkModalContent = () => {
 		setPreview,
 		preview
 	} = useFileSelect()
+
+	const { data, isLoading } = useBookmarkMetadata({
+		url: debouncedUrl,
+		initialBookmarkUrlRef,
+		enabled: isOpen || !!bookmark
+	})
 
 	const { mutateAsync, isPending } = useMutation(
 		orpcClient.bookmark.update.mutationOptions({
@@ -67,71 +74,11 @@ const UpdateBookmarkModalContent = () => {
 		})
 	)
 
-	const mutateFileUpload = useMutation(
-		orpcClient.upload.image.mutationOptions({
-			onError: () => {
-				toast.error('Failed to upload image. Please try again.')
-			}
-		})
-	)
-
-	const { mutateAsync: fetchMetadataAsync, isPending: isFetchingMetadata } =
-		useMutation(orpcClient.bookmark.metadata.mutationOptions())
-
-	const fetchBookmarkMetadata = useCallback(async () => {
-		if (!isOpen || !bookmark) return
-
-		const normalizedUrl = debouncedUrl.trim()
-
-		if (!isValidWebUrl(normalizedUrl)) {
-			lastFetchedMetadataUrlRef.current = null
-			return
-		}
-
-		// Do not overwrite values when opening an existing bookmark without URL edits.
-		if (normalizedUrl === initialBookmarkUrlRef.current) return
-
-		if (lastFetchedMetadataUrlRef.current === normalizedUrl) return
-
-		lastFetchedMetadataUrlRef.current = normalizedUrl
-
-		try {
-			const metadata = await fetchMetadataAsync({ url: normalizedUrl })
-
-			const currentUrl = (form.getValues('url') || '').trim()
-			if (currentUrl !== normalizedUrl) return
-
-			form.setValue('title', metadata.title, { shouldDirty: false })
-			form.setValue('description', metadata.description ?? '', {
-				shouldDirty: false
-			})
-
-			if (!selectedFile) {
-				setPreview(
-					`https://www.google.com/s2/favicons?domain=${normalizedUrl}&sz=64`
-				)
-			}
-		} catch {
-			if (!selectedFile) {
-				setPreview(null)
-				form.setValue('favicon', null, { shouldDirty: false })
-			}
-
-			lastFetchedMetadataUrlRef.current = null
-		}
-	}, [
-		bookmark,
-		debouncedUrl,
-		fetchMetadataAsync,
-		form,
-		isOpen,
-		selectedFile,
-		setPreview
-	])
+	const { mutateAsync: mutateFileUpload } = useFileUploadMutation()
 
 	const onSubmit = async (data: UpdateBookmark) => {
 		if (selectedFile) {
-			const uploadPromise = mutateFileUpload.mutateAsync(selectedFile)
+			const uploadPromise = mutateFileUpload(selectedFile)
 
 			toast.promise(uploadPromise, {
 				loading: 'Uploading image...',
@@ -203,14 +150,21 @@ const UpdateBookmarkModalContent = () => {
 	])
 
 	useEffect(() => {
-		fetchBookmarkMetadata()
-	}, [fetchBookmarkMetadata])
-
-	useEffect(() => {
 		if (bookmark?.favicon) {
 			setPreview(bookmark.favicon)
 		}
 	}, [bookmark, setPreview])
+
+	useEffect(() => {
+		if (debouncedUrl.trim() === initialBookmarkUrlRef.current || !data) return
+
+		form.setValue('title', data.title, { shouldDirty: false })
+		form.setValue('description', data.description, { shouldDirty: false })
+
+		if (data?.favicon) {
+			handleFileSelect(data.favicon)
+		}
+	}, [debouncedUrl, data, handleFileSelect, form.setValue])
 
 	return (
 		<ModalWrapper
@@ -223,7 +177,7 @@ const UpdateBookmarkModalContent = () => {
 				<BookmarkForm
 					onSubmit={form.handleSubmit(onSubmit)}
 					isPending={isPending}
-					isFetchingMetadata={isFetchingMetadata}
+					isFetchingMetadata={isLoading}
 					handleFileSelect={handleFileSelect}
 					clearSelection={clearSelection}
 					preview={preview}

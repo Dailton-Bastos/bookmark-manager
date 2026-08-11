@@ -42,7 +42,9 @@ export const Bookmark = ({
 		lastVisited
 	} = bookmark
 
-	const [faviconUrl, setFaviconUrl] = useState(favicon || '')
+	const [faviconNotFound, setFaviconNotFound] = useState(false)
+
+	const faviconUrl = faviconNotFound ? '/world.png' : favicon || '/world.png'
 
 	return (
 		<Card className="@container/card p-4 pb-3 gap-3 min-h-68">
@@ -53,7 +55,7 @@ export const Bookmark = ({
 						alt={`Favicon for ${title}`}
 						width={44}
 						height={44}
-						onError={() => setFaviconUrl('/world.png')}
+						onError={() => setFaviconNotFound(true)}
 						className="rounded-lg object-cover w-11 h-11 border border-muted"
 					/>
 

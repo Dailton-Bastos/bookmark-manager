@@ -4,6 +4,7 @@ import type {
 	ArchivedUnarchivedBookmark,
 	Bookmark,
 	BookmarkMetadata,
+	BookmarkMetadataInput,
 	CreateBookmark,
 	DeleteBookmark,
 	ListBookmarks,
@@ -687,7 +688,10 @@ export class BookmarksService {
 		return result
 	}
 
-	async getUrlMetadata(url: string): Promise<BookmarkMetadata | null> {
+	async getUrlMetadata({
+		url,
+		theme = 'light'
+	}: BookmarkMetadataInput): Promise<BookmarkMetadata | null> {
 		try {
 			const parsedUrl = new URL(url)
 			const { hostname } = parsedUrl
@@ -736,18 +740,8 @@ export class BookmarksService {
 				$('meta[name="description"]').attr('content')?.trim() ||
 				$('meta[property="og:description"]').attr('content')?.trim() ||
 				''
-			const faviconHtml =
-				$(`link[rel="icon"]`).attr('href') ||
-				$(`link[rel="shortcut icon"]`).attr('href') ||
-				$('link[rel="apple-touch-icon"]').attr('href')
 
-			let favicon = ''
-
-			if (faviconHtml) {
-				favicon = new URL(faviconHtml, parsedUrl.origin).href
-			} else {
-				favicon = `https://www.google.com/s2/favicons?domain=${parsedUrl.hostname}&sz=64`
-			}
+			const favicon = `https://cdn.brandfetch.io/domain/${hostname}/w/64/h/64/theme/${theme}/fallback/lettermark/type/icon.png?c=1idfNdzLnGrK3-FMweE`
 
 			return { title, description, favicon }
 		} catch {
