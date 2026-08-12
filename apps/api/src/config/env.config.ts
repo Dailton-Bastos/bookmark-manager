@@ -41,7 +41,10 @@ const envSchema = z.object({
 		protocol: /^rediss?$/,
 		message: 'REDIS_URL must be a valid redis:// or rediss:// URL'
 	}),
-	CACHE_TTL: z.coerce.number().default(60000)
+	CACHE_TTL: z.coerce.number().default(60000),
+	BRANDFETCH_API_CLIENT: z
+		.string()
+		.nonempty({ message: 'BRANDFETCH_API_CLIENT is required' })
 })
 
 export const validate = (config: Record<string, unknown>) => {

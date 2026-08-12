@@ -22,6 +22,7 @@ import { and, count, desc, eq, inArray, sql } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { CacheProvider } from '../cache/cache.provider'
 import { schema } from '../database/schemas'
+import { EnvService } from '../env/env.service'
 import { PaginationProvider } from '../pagination/pagination.provider'
 import {
 	LISTBOOKMARKS_CACHE_KEY,
@@ -37,7 +38,8 @@ export class BookmarksService {
 		private readonly db: NodePgDatabase<typeof schema>,
 		private readonly tagsService: TagsService,
 		private readonly paginationProvider: PaginationProvider,
-		private readonly cacheProvider: CacheProvider
+		private readonly cacheProvider: CacheProvider,
+		private readonly env: EnvService
 	) {}
 
 	async create(createBookmarkInput: CreateBookmark, ownerId: string) {
@@ -692,6 +694,8 @@ export class BookmarksService {
 		url,
 		theme = 'light'
 	}: BookmarkMetadataInput): Promise<BookmarkMetadata | null> {
+		const brandfetchApiClient = this.env.get('BRANDFETCH_API_CLIENT')
+
 		try {
 			const parsedUrl = new URL(url)
 			const { hostname } = parsedUrl
@@ -741,7 +745,7 @@ export class BookmarksService {
 				$('meta[property="og:description"]').attr('content')?.trim() ||
 				''
 
-			const favicon = `https://cdn.brandfetch.io/domain/${hostname}/w/64/h/64/theme/${theme}/fallback/lettermark/type/icon.png?c=1idfNdzLnGrK3-FMweE`
+			const favicon = `https://cdn.brandfetch.io/domain/${hostname}/w/64/h/64/theme/${theme}/fallback/lettermark/type/icon.png?c=${brandfetchApiClient}`
 
 			return { title, description, favicon }
 		} catch {

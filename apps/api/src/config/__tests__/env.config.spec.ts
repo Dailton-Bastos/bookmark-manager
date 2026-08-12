@@ -18,7 +18,8 @@ describe('EnvConfig', () => {
 				UI_URL: 'http://localhost:3000',
 				API_URL: 'http://localhost:3001',
 				REDIS_URL: 'redis://localhost:6379',
-				CACHE_TTL: 60000
+				CACHE_TTL: 60000,
+				BRANDFETCH_API_CLIENT: 'client_id'
 			}
 
 			expect(() => validate(config)).not.toThrow()
@@ -33,7 +34,8 @@ describe('EnvConfig', () => {
 				DATABASE_USER: 'user',
 				DATABASE_PASSWORD: 'password',
 				DATABASE_NAME: 'database',
-				DATABASE_URL: ''
+				DATABASE_URL: '',
+				BRANDFETCH_API_CLIENT: ''
 			}
 
 			expect(() => validate(config)).toThrow(
