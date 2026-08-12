@@ -407,6 +407,7 @@ describe('BookmarksController', () => {
 
 	it('should return bookmark metadata successfully', async () => {
 		const metadataInput = {
+			theme: 'light',
 			url: 'https://example.com'
 		}
 
@@ -419,7 +420,7 @@ describe('BookmarksController', () => {
 
 		expect(implement).toHaveBeenCalledWith(contract.bookmark.metadata)
 		expect(bookmarksServiceMock.getUrlMetadata).toHaveBeenCalledWith(
-			metadataInput.url
+			metadataInput
 		)
 		expect(result).toEqual(mockMetadataResult)
 	})
@@ -427,7 +428,7 @@ describe('BookmarksController', () => {
 	it('should throw error when service fails to get bookmark metadata', async () => {
 		bookmarksServiceMock.getUrlMetadata.mockResolvedValue(null)
 		handlerMock.mockImplementation(async (resolver) =>
-			resolver({ input: { url: 'https://example.com' } })
+			resolver({ input: { url: 'https://example.com', theme: 'light' } })
 		)
 
 		const resultPromise = controller.metadata()

@@ -41,5 +41,5 @@ export const mockBookmarkWithoutTags = {
 export const mockMetadataResult = {
 	title: 'Example Domain',
 	description: 'This domain is for use in illustrative examples in documents.',
-	favicon: 'https://www.google.com/s2/favicons?domain=example.com&sz=64'
+	favicon: `https://cdn.brandfetch.io/domain/example.com/w/64/h/64/theme/light/fallback/lettermark/type/icon.png?c=test-brandfetch-client`
 }

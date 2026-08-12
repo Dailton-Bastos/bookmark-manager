@@ -515,7 +515,8 @@ describe('GetBookmarkMetadataInputSchema', () => {
 
 	it('should validate a valid get bookmark metadata input object', () => {
 		const validInput = {
-			url: 'https://example.com'
+			url: 'https://example.com',
+			theme: 'light'
 		}
 
 		const result = getBookmarkMetadataInputSchema.safeParse(validInput)
@@ -524,12 +525,14 @@ describe('GetBookmarkMetadataInputSchema', () => {
 
 		if (result.success) {
 			expect(result.data.url).toBe('https://example.com')
+			expect(result.data.theme).toBe('light')
 		}
 	})
 
 	it('should fail validation for an invalid get bookmark metadata input object', () => {
 		const invalidInput = {
-			url: 'invalid-url'
+			url: 'invalid-url',
+			theme: 'invalid-theme'
 		}
 
 		const result = getBookmarkMetadataInputSchema.safeParse(invalidInput)

@@ -7,9 +7,13 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { PgDialect } from 'drizzle-orm/pg-core'
 import { CacheProvider } from '../../cache/cache.provider'
 import { schema } from '../../database/schemas'
+import { EnvService } from '../../env/env.service'
 import { mockMetaPagination } from '../../pagination/__mocks__/pagination.mock'
 import { PaginationProvider } from '../../pagination/pagination.provider'
-import { LISTBOOKMARKS_CACHE_KEY } from '../../shared/constants/cache'
+import {
+	BOOKMARK_METADATA_CACHE_KEY,
+	LISTBOOKMARKS_CACHE_KEY
+} from '../../shared/constants/cache'
 import { DATABASE_CONNECTION } from '../../shared/constants/database'
 import { TagsService } from '../../tags/tags.service'
 import {
@@ -70,6 +74,7 @@ describe('BookmarksService', () => {
 				TagsService,
 				PaginationProvider,
 				CacheProvider,
+				EnvService,
 				{
 					provide: DATABASE_CONNECTION,
 					useValue: mockDb as unknown as NodePgDatabase<typeof schema>
@@ -82,6 +87,12 @@ describe('BookmarksService', () => {
 						del: jest.fn(),
 						clear: jest.fn()
 					} as unknown as Cache
+				},
+				{
+					provide: EnvService,
+					useValue: {
+						get: jest.fn().mockReturnValue('test-brandfetch-client')
+					}
 				}
 			]
 		}).compile()
@@ -606,9 +617,13 @@ describe('BookmarksService', () => {
 			const result = await service.list(query, ownerId)
 
 			expect(cacheManager.get).toHaveBeenCalledWith(cacheKey)
-			expect(cacheManager.set).toHaveBeenCalledWith(cacheKey, result)
+			expect(cacheManager.set).toHaveBeenCalledWith(cacheKey, result, undefined)
 			expect(cacheManager.get).toHaveBeenCalledWith(registryKey)
-			expect(cacheManager.set).toHaveBeenCalledWith(registryKey, [cacheKey])
+			expect(cacheManager.set).toHaveBeenCalledWith(
+				registryKey,
+				[cacheKey],
+				undefined
+			)
 		})
 
 		it.each([
@@ -836,9 +851,13 @@ describe('BookmarksService', () => {
 				[1],
 				expect.anything()
 			)
-			expect(cacheManager.set).toHaveBeenCalledWith(cacheKey, result)
+			expect(cacheManager.set).toHaveBeenCalledWith(cacheKey, result, undefined)
 			expect(cacheManager.get).toHaveBeenCalledWith(registryKey)
-			expect(cacheManager.set).toHaveBeenCalledWith(registryKey, [cacheKey])
+			expect(cacheManager.set).toHaveBeenCalledWith(
+				registryKey,
+				[cacheKey],
+				undefined
+			)
 			expect(result).toEqual({
 				data: [mockBookmarkWithTags],
 				meta: { ...mockMetaPagination, totalItems: 1, totalPages: 1 }
@@ -1040,9 +1059,13 @@ describe('BookmarksService', () => {
 				[1],
 				expect.anything()
 			)
-			expect(cacheManager.set).toHaveBeenCalledWith(cacheKey, result)
+			expect(cacheManager.set).toHaveBeenCalledWith(cacheKey, result, undefined)
 			expect(cacheManager.get).toHaveBeenCalledWith(registryKey)
-			expect(cacheManager.set).toHaveBeenCalledWith(registryKey, [cacheKey])
+			expect(cacheManager.set).toHaveBeenCalledWith(
+				registryKey,
+				[cacheKey],
+				undefined
+			)
 			expect(result).toEqual({
 				data: [mockBookmarkWithTags],
 				meta: { ...mockMetaPagination, totalItems: 1, totalPages: 1 }
@@ -1533,6 +1556,23 @@ describe('BookmarksService', () => {
 			jest.restoreAllMocks()
 		})
 
+		it('should return cached null metadata without refetching the URL', async () => {
+			const url = 'https://example.com'
+			const cacheKey = `${BOOKMARK_METADATA_CACHE_KEY}_${url}_light`
+			const fetchSpy = jest.spyOn(global, 'fetch')
+
+			jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(null)
+
+			const result = await service.getUrlMetadata({
+				theme: 'light',
+				url
+			})
+
+			expect(fetchSpy).not.toHaveBeenCalled()
+			expect(cacheManager.get).toHaveBeenCalledWith(cacheKey)
+			expect(result).toBeNull()
+		})
+
 		it('should return metadata for a valid URL', async () => {
 			const url = 'https://example.com'
 			const html = `
@@ -1552,7 +1592,10 @@ describe('BookmarksService', () => {
 				text: jest.fn().mockResolvedValueOnce(html)
 			} as unknown as Response)
 
-			const result = await service.getUrlMetadata(url)
+			const result = await service.getUrlMetadata({
+				theme: 'light',
+				url
+			})
 
 			const parsedUrl = new URL(url)
 
@@ -1590,13 +1633,16 @@ describe('BookmarksService', () => {
 				text: jest.fn().mockResolvedValueOnce(html)
 			} as unknown as Response)
 
-			const result = await service.getUrlMetadata(url)
+			const result = await service.getUrlMetadata({
+				theme: 'light',
+				url
+			})
 
 			expect(result).toEqual({
 				title: 'Example Domain',
 				description:
 					'This domain is for use in illustrative examples in documents.',
-				favicon: 'https://example.com/favicon.ico'
+				favicon: expect.stringContaining('https://cdn.brandfetch.io/domain/')
 			})
 		})
 
@@ -1619,12 +1665,15 @@ describe('BookmarksService', () => {
 				text: jest.fn().mockResolvedValueOnce(html)
 			} as unknown as Response)
 
-			const result = await service.getUrlMetadata(url)
+			const result = await service.getUrlMetadata({
+				theme: 'light',
+				url
+			})
 
 			expect(result).toEqual({
 				title: 'Example Domain',
 				description: 'OG description content.',
-				favicon: 'https://www.google.com/s2/favicons?domain=example.com&sz=64'
+				favicon: expect.stringContaining('https://cdn.brandfetch.io/domain/')
 			})
 		})
 
@@ -1635,7 +1684,10 @@ describe('BookmarksService', () => {
 				.spyOn(global, 'fetch')
 				.mockRejectedValueOnce(new Error('Network error'))
 
-			const result = await service.getUrlMetadata(url)
+			const result = await service.getUrlMetadata({
+				theme: 'light',
+				url
+			})
 
 			expect(result).toBeNull()
 		})
@@ -1648,7 +1700,10 @@ describe('BookmarksService', () => {
 				text: jest.fn()
 			} as unknown as Response)
 
-			const result = await service.getUrlMetadata(url)
+			const result = await service.getUrlMetadata({
+				theme: 'light',
+				url
+			})
 
 			expect(result).toBeNull()
 		})
@@ -1664,7 +1719,10 @@ describe('BookmarksService', () => {
 				text
 			} as unknown as Response)
 
-			const result = await service.getUrlMetadata('https://example.com')
+			const result = await service.getUrlMetadata({
+				theme: 'light',
+				url: 'https://example.com'
+			})
 
 			expect(text).not.toHaveBeenCalled()
 			expect(result).toBeNull()
@@ -1672,7 +1730,10 @@ describe('BookmarksService', () => {
 
 		it('should return null for localhost URLs', async () => {
 			const fetchSpy = jest.spyOn(global, 'fetch')
-			const result = await service.getUrlMetadata('http://localhost:3000')
+			const result = await service.getUrlMetadata({
+				theme: 'light',
+				url: 'http://localhost:3000'
+			})
 
 			expect(fetchSpy).not.toHaveBeenCalled()
 			expect(result).toBeNull()
@@ -1680,7 +1741,10 @@ describe('BookmarksService', () => {
 
 		it('should return null for private IPv4 URLs', async () => {
 			const fetchSpy = jest.spyOn(global, 'fetch')
-			const result = await service.getUrlMetadata('http://192.168.1.10')
+			const result = await service.getUrlMetadata({
+				theme: 'light',
+				url: 'http://192.168.1.10'
+			})
 
 			expect(fetchSpy).not.toHaveBeenCalled()
 			expect(result).toBeNull()
@@ -1688,7 +1752,10 @@ describe('BookmarksService', () => {
 
 		it('should return null for reserved IPv4 URLs', async () => {
 			const fetchSpy = jest.spyOn(global, 'fetch')
-			const result = await service.getUrlMetadata('http://224.0.0.1')
+			const result = await service.getUrlMetadata({
+				theme: 'light',
+				url: 'http://224.0.0.1'
+			})
 
 			expect(fetchSpy).not.toHaveBeenCalled()
 			expect(result).toBeNull()
@@ -1696,7 +1763,10 @@ describe('BookmarksService', () => {
 
 		it('should return null for loopback IPv6 URLs', async () => {
 			const fetchSpy = jest.spyOn(global, 'fetch')
-			const result = await service.getUrlMetadata('http://[::1]')
+			const result = await service.getUrlMetadata({
+				theme: 'light',
+				url: 'http://[::1]'
+			})
 
 			expect(fetchSpy).not.toHaveBeenCalled()
 			expect(result).toBeNull()
@@ -1704,7 +1774,10 @@ describe('BookmarksService', () => {
 
 		it('should return null for multicast IPv6 URLs', async () => {
 			const fetchSpy = jest.spyOn(global, 'fetch')
-			const result = await service.getUrlMetadata('http://[ff02::1]')
+			const result = await service.getUrlMetadata({
+				theme: 'light',
+				url: 'http://[ff02::1]'
+			})
 
 			expect(fetchSpy).not.toHaveBeenCalled()
 			expect(result).toBeNull()
@@ -1712,7 +1785,10 @@ describe('BookmarksService', () => {
 
 		it('should return null for IPv4-mapped IPv6 URLs', async () => {
 			const fetchSpy = jest.spyOn(global, 'fetch')
-			const result = await service.getUrlMetadata('http://[::ffff:127.0.0.1]')
+			const result = await service.getUrlMetadata({
+				theme: 'light',
+				url: 'http://[::ffff:127.0.0.1]'
+			})
 
 			expect(fetchSpy).not.toHaveBeenCalled()
 			expect(result).toBeNull()
