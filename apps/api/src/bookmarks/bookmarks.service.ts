@@ -25,6 +25,7 @@ import { schema } from '../database/schemas'
 import { EnvService } from '../env/env.service'
 import { PaginationProvider } from '../pagination/pagination.provider'
 import {
+	BOOKMARK_METADATA_CACHE_KEY,
 	LISTBOOKMARKS_CACHE_KEY,
 	LISTTAGS_CACHE_KEY
 } from '../shared/constants/cache'
@@ -696,7 +697,16 @@ export class BookmarksService {
 	}: BookmarkMetadataInput): Promise<BookmarkMetadata | null> {
 		const brandfetchApiClient = this.env.get('BRANDFETCH_API_CLIENT')
 
+		const cacheKey = `${BOOKMARK_METADATA_CACHE_KEY}_${url}_${theme}`
+		const registryKey = `${BOOKMARK_METADATA_CACHE_KEY}_keys`
+		const ttl = 3_600_000 // Cache for 1 hour in milliseconds
+
 		try {
+			const cachedMetadata =
+				await this.cacheProvider.get<BookmarkMetadata | null>(cacheKey)
+
+			if (cachedMetadata !== undefined) return cachedMetadata
+
 			const parsedUrl = new URL(url)
 			const { hostname } = parsedUrl
 
@@ -730,6 +740,13 @@ export class BookmarksService {
 				!contentType?.includes('text/html') &&
 				!contentType?.includes('application/xhtml+xml')
 			) {
+				await this.cacheProvider.registerAndCacheResult<null>({
+					registryKey,
+					cacheKey,
+					result: null,
+					ttl
+				})
+
 				return null
 			}
 
@@ -746,6 +763,13 @@ export class BookmarksService {
 				''
 
 			const favicon = `https://cdn.brandfetch.io/domain/${hostname}/w/64/h/64/theme/${theme}/fallback/lettermark/type/icon.png?c=${brandfetchApiClient}`
+
+			await this.cacheProvider.registerAndCacheResult<BookmarkMetadata>({
+				registryKey,
+				cacheKey,
+				result: { title, description, favicon },
+				ttl
+			})
 
 			return { title, description, favicon }
 		} catch {

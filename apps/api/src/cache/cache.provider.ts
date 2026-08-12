@@ -12,21 +12,23 @@ export class CacheProvider {
 	async registerAndCacheResult<T>({
 		registryKey,
 		cacheKey,
-		result
+		result,
+		ttl
 	}: {
 		registryKey: string
 		cacheKey: string
 		result: T
+		ttl?: number
 	}): Promise<void> {
 		// Read the registry before caching to minimise the window for concurrent
 		// writes to miss each other's keys (best-effort; not fully atomic).
 		const existingKeys =
 			(await this.cacheManager.get<string[]>(registryKey)) ?? []
 
-		await this.cacheManager.set(cacheKey, result)
+		await this.cacheManager.set(cacheKey, result, ttl)
 
 		if (!existingKeys.includes(cacheKey)) {
-			await this.cacheManager.set(registryKey, [...existingKeys, cacheKey])
+			await this.cacheManager.set(registryKey, [...existingKeys, cacheKey], ttl)
 		}
 	}
 
