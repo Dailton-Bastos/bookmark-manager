@@ -1,6 +1,6 @@
 import type { Bookmark as BookmarkProps } from '@repo/schemas'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Calendar, Clock, Eye, Pin } from 'ui/components/icons'
 import { Badge } from 'ui/components/shadcn/ui/badge'
 import {
@@ -45,6 +45,12 @@ export const Bookmark = ({
 	const [faviconNotFound, setFaviconNotFound] = useState(false)
 
 	const faviconUrl = faviconNotFound ? '/world.png' : favicon || '/world.png'
+
+	useEffect(() => {
+		if (favicon) {
+			setFaviconNotFound(false)
+		}
+	}, [favicon])
 
 	return (
 		<Card className="@container/card p-4 pb-3 gap-3 min-h-68">

@@ -27,7 +27,7 @@ const UpdateBookmarkModalContent = () => {
 
 	const { reset } = form
 	const url = useWatch({ control: form.control, name: 'url' }) || ''
-	const debouncedUrl = useDebounce<string>(url, 500)
+	const debouncedUrl = useDebounce(url, 500)
 	const lastFetchedMetadataUrlRef = useRef<string | null>(null)
 	const initialBookmarkUrlRef = useRef<string | null>(null)
 

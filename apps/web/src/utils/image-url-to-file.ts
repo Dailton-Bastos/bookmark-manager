@@ -5,24 +5,27 @@ export const imageUrlToFile = async (
 ): Promise<File | null> => {
 	try {
 		const response = await fetch(imageUrl)
+
+		if (!response.ok) return null
+
 		const blob = await response.blob()
 
 		if (blob.size > MAX_BOOKMARK_LOGO_SIZE) return null
 
-		const allowedTypes = new Set([
-			'image/jpeg',
-			'image/jpg',
-			'image/png',
-			'image/webp'
-		])
+		const extensionByType: Record<string, string> = {
+			'image/jpeg': 'jpg',
+			'image/jpg': 'jpg',
+			'image/png': 'png',
+			'image/webp': 'webp'
+		}
 
-		if (!allowedTypes.has(blob.type)) return null
+		const extension = extensionByType[blob.type]
 
-		const contentType = blob.type
+		if (!extension) return null
 
-		const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}.png`
+		const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${extension}`
 
-		return new File([blob], fileName, { type: contentType })
+		return new File([blob], fileName, { type: blob.type })
 	} catch {
 		return null
 	}

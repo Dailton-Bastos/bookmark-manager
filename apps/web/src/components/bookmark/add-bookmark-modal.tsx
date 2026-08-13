@@ -38,7 +38,7 @@ const AddBookmarkModalContent = () => {
 
 	const url = useWatch({ control: form.control, name: 'url' })
 
-	const debouncedUrl = useDebounce<string>(url, 500)
+	const debouncedUrl = useDebounce(url, 500)
 
 	const { data, isLoading } = useBookmarkMetadata({
 		url: debouncedUrl,

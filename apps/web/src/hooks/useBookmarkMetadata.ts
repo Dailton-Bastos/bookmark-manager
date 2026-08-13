@@ -18,13 +18,13 @@ export const useBookmarkMetadata = ({
 	initialBookmarkUrlRef = null,
 	enabled = false
 }: UseBookmarkMetadataParams) => {
-	const { theme } = useTheme()
+	const { resolvedTheme } = useTheme()
 
 	const lastFetchedMetadataUrlRef = useRef<string | null>(null)
 
 	// Ensure theme is either 'light' or 'dark'
-	const currentTheme =
-		theme === 'system' ? 'light' : (theme as 'light' | 'dark')
+	const currentTheme: 'light' | 'dark' =
+		resolvedTheme === 'dark' ? 'dark' : 'light'
 
 	const { bookmark } = orpcClient
 
