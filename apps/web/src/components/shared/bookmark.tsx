@@ -1,6 +1,7 @@
 import type { Bookmark as BookmarkProps } from '@repo/schemas'
 import Image from 'next/image'
-import { Calendar, Clock, Eye, Globe, Pin } from 'ui/components/icons'
+import { useEffect, useState } from 'react'
+import { Calendar, Clock, Eye, Pin } from 'ui/components/icons'
 import { Badge } from 'ui/components/shadcn/ui/badge'
 import {
 	Card,
@@ -41,25 +42,35 @@ export const Bookmark = ({
 		lastVisited
 	} = bookmark
 
+	const [faviconNotFound, setFaviconNotFound] = useState(false)
+
+	const faviconUrl = faviconNotFound ? '/world.png' : favicon || '/world.png'
+
+	useEffect(() => {
+		if (favicon) {
+			setFaviconNotFound(false)
+		}
+	}, [favicon])
+
 	return (
 		<Card className="@container/card p-4 pb-3 gap-3 min-h-68">
 			<CardHeader className="p-0 pb-1 gap-0">
 				<div className="flex items-center gap-3">
-					{favicon ? (
-						<Image
-							src={favicon}
-							alt={`Favicon for ${title}`}
-							width={44}
-							height={44}
-							className="rounded-lg object-cover w-11 h-11 border border-muted"
-						/>
-					) : (
-						<Globe className="size-11" />
-					)}
+					<Image
+						src={faviconUrl}
+						alt={`Favicon for ${title}`}
+						width={44}
+						height={44}
+						onError={() => setFaviconNotFound(true)}
+						className="rounded-lg object-cover w-11 h-11 border border-muted"
+					/>
 
 					<div className="w-full min-w-0">
-						<CardTitle className="text-lg font-bold font-sans text-foreground">
-							{truncateString(title, 35)}
+						<CardTitle
+							className="text-lg font-bold font-sans text-foreground min-w-0 truncate"
+							title={title}
+						>
+							{truncateString(title, 30)}
 						</CardTitle>
 						<CardDescription className="text-xs text-muted-foreground font-medium min-w-0 truncate">
 							{truncateString(removePrefixesFromUrl(url), 35)}

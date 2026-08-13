@@ -4,6 +4,7 @@ import type {
 	ArchivedUnarchivedBookmark,
 	Bookmark,
 	BookmarkMetadata,
+	BookmarkMetadataInput,
 	CreateBookmark,
 	DeleteBookmark,
 	ListBookmarks,
@@ -21,8 +22,10 @@ import { and, count, desc, eq, inArray, sql } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { CacheProvider } from '../cache/cache.provider'
 import { schema } from '../database/schemas'
+import { EnvService } from '../env/env.service'
 import { PaginationProvider } from '../pagination/pagination.provider'
 import {
+	BOOKMARK_METADATA_CACHE_KEY,
 	LISTBOOKMARKS_CACHE_KEY,
 	LISTTAGS_CACHE_KEY
 } from '../shared/constants/cache'
@@ -36,7 +39,8 @@ export class BookmarksService {
 		private readonly db: NodePgDatabase<typeof schema>,
 		private readonly tagsService: TagsService,
 		private readonly paginationProvider: PaginationProvider,
-		private readonly cacheProvider: CacheProvider
+		private readonly cacheProvider: CacheProvider,
+		private readonly env: EnvService
 	) {}
 
 	async create(createBookmarkInput: CreateBookmark, ownerId: string) {
@@ -687,8 +691,21 @@ export class BookmarksService {
 		return result
 	}
 
-	async getUrlMetadata(url: string): Promise<BookmarkMetadata | null> {
+	async getUrlMetadata({
+		url,
+		theme = 'light'
+	}: BookmarkMetadataInput): Promise<BookmarkMetadata | null> {
+		const brandfetchApiClient = this.env.get('BRANDFETCH_API_CLIENT')
+
+		const cacheKey = `${BOOKMARK_METADATA_CACHE_KEY}_${url}_${theme}`
+		const ttl = 3_600_000 // Cache for 1 hour in milliseconds
+
 		try {
+			const cachedMetadata =
+				await this.cacheProvider.get<BookmarkMetadata | null>(cacheKey)
+
+			if (cachedMetadata !== undefined) return cachedMetadata
+
 			const parsedUrl = new URL(url)
 			const { hostname } = parsedUrl
 
@@ -722,6 +739,8 @@ export class BookmarksService {
 				!contentType?.includes('text/html') &&
 				!contentType?.includes('application/xhtml+xml')
 			) {
+				await this.cacheProvider.set<null>(cacheKey, null, ttl)
+
 				return null
 			}
 
@@ -736,18 +755,14 @@ export class BookmarksService {
 				$('meta[name="description"]').attr('content')?.trim() ||
 				$('meta[property="og:description"]').attr('content')?.trim() ||
 				''
-			const faviconHtml =
-				$(`link[rel="icon"]`).attr('href') ||
-				$(`link[rel="shortcut icon"]`).attr('href') ||
-				$('link[rel="apple-touch-icon"]').attr('href')
 
-			let favicon = ''
+			const favicon = `https://cdn.brandfetch.io/domain/${hostname}/w/64/h/64/theme/${theme}/fallback/lettermark/type/icon.png?c=${brandfetchApiClient}`
 
-			if (faviconHtml) {
-				favicon = new URL(faviconHtml, parsedUrl.origin).href
-			} else {
-				favicon = `https://www.google.com/s2/favicons?domain=${parsedUrl.hostname}&sz=64`
-			}
+			await this.cacheProvider.set<BookmarkMetadata>(
+				cacheKey,
+				{ title, description, favicon },
+				ttl
+			)
 
 			return { title, description, favicon }
 		} catch {

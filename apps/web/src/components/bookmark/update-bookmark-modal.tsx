@@ -1,14 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type UpdateBookmark, updateBookmarkSchema } from '@repo/schemas'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect } from 'react'
-import { FormProvider, useForm } from 'react-hook-form'
+import { useCallback, useEffect, useRef } from 'react'
+import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { BookmarkForm } from '@/components/bookmark/bookmark-form'
 import { ModalWrapper } from '@/components/bookmark/modal-wrapper'
+import { useBookmarkMetadata } from '@/hooks/useBookmarkMetadata'
 import { useUpdateBookmarkModal } from '@/hooks/useBookmarkModal'
 import { useBookmarkTags } from '@/hooks/useBookmarkTags'
+import { useDebounce } from '@/hooks/useDebounce'
 import { useFileSelect } from '@/hooks/useFileSelect'
+import { useFileUploadMutation } from '@/hooks/useFileUploadMutation'
 import { orpcClient } from '@/lib/orpc-client'
 import { BookmarkTagsProvider } from '@/providers/bookmark-tags-provider'
 import { normalizeFormData } from '@/utils/normalize-form-data'
@@ -23,6 +26,10 @@ const UpdateBookmarkModalContent = () => {
 	})
 
 	const { reset } = form
+	const url = useWatch({ control: form.control, name: 'url' }) || ''
+	const debouncedUrl = useDebounce(url, 500)
+	const lastFetchedMetadataUrlRef = useRef<string | null>(null)
+	const initialBookmarkUrlRef = useRef<string | null>(null)
 
 	const { tags, setTags, resetTags } = useBookmarkTags()
 
@@ -33,6 +40,12 @@ const UpdateBookmarkModalContent = () => {
 		setPreview,
 		preview
 	} = useFileSelect()
+
+	const { data, isLoading } = useBookmarkMetadata({
+		url: debouncedUrl,
+		initialBookmarkUrlRef,
+		enabled: isOpen || !!bookmark
+	})
 
 	const { mutateAsync, isPending } = useMutation(
 		orpcClient.bookmark.update.mutationOptions({
@@ -61,17 +74,11 @@ const UpdateBookmarkModalContent = () => {
 		})
 	)
 
-	const mutateFileUpload = useMutation(
-		orpcClient.upload.image.mutationOptions({
-			onError: () => {
-				toast.error('Failed to upload image. Please try again.')
-			}
-		})
-	)
+	const { mutateAsync: mutateFileUpload } = useFileUploadMutation()
 
 	const onSubmit = async (data: UpdateBookmark) => {
 		if (selectedFile) {
-			const uploadPromise = mutateFileUpload.mutateAsync(selectedFile)
+			const uploadPromise = mutateFileUpload(selectedFile)
 
 			toast.promise(uploadPromise, {
 				loading: 'Uploading image...',
@@ -128,6 +135,8 @@ const UpdateBookmarkModalContent = () => {
 		})
 
 		setTags(initialTags)
+		initialBookmarkUrlRef.current = bookmark.url
+		lastFetchedMetadataUrlRef.current = null
 	}, [
 		isOpen,
 		bookmark?.id,
@@ -146,6 +155,17 @@ const UpdateBookmarkModalContent = () => {
 		}
 	}, [bookmark, setPreview])
 
+	useEffect(() => {
+		if (debouncedUrl.trim() === initialBookmarkUrlRef.current || !data) return
+
+		form.setValue('title', data.title, { shouldDirty: false })
+		form.setValue('description', data.description, { shouldDirty: false })
+
+		if (data?.favicon) {
+			handleFileSelect(data.favicon)
+		}
+	}, [debouncedUrl, data, handleFileSelect, form.setValue])
+
 	return (
 		<ModalWrapper
 			isOpen={isOpen}
@@ -157,6 +177,7 @@ const UpdateBookmarkModalContent = () => {
 				<BookmarkForm
 					onSubmit={form.handleSubmit(onSubmit)}
 					isPending={isPending}
+					isFetchingMetadata={isLoading}
 					handleFileSelect={handleFileSelect}
 					clearSelection={clearSelection}
 					preview={preview}
