@@ -9,6 +9,10 @@ export class CacheProvider {
 		return this.cacheManager.get<T>(key)
 	}
 
+	async set<T>(key: string, value: T, ttl?: number): Promise<void> {
+		await this.cacheManager.set(key, value, ttl)
+	}
+
 	async registerAndCacheResult<T>({
 		registryKey,
 		cacheKey,

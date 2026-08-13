@@ -698,7 +698,6 @@ export class BookmarksService {
 		const brandfetchApiClient = this.env.get('BRANDFETCH_API_CLIENT')
 
 		const cacheKey = `${BOOKMARK_METADATA_CACHE_KEY}_${url}_${theme}`
-		const registryKey = `${BOOKMARK_METADATA_CACHE_KEY}_keys`
 		const ttl = 3_600_000 // Cache for 1 hour in milliseconds
 
 		try {
@@ -740,12 +739,7 @@ export class BookmarksService {
 				!contentType?.includes('text/html') &&
 				!contentType?.includes('application/xhtml+xml')
 			) {
-				await this.cacheProvider.registerAndCacheResult<null>({
-					registryKey,
-					cacheKey,
-					result: null,
-					ttl
-				})
+				await this.cacheProvider.set<null>(cacheKey, null, ttl)
 
 				return null
 			}
@@ -764,12 +758,11 @@ export class BookmarksService {
 
 			const favicon = `https://cdn.brandfetch.io/domain/${hostname}/w/64/h/64/theme/${theme}/fallback/lettermark/type/icon.png?c=${brandfetchApiClient}`
 
-			await this.cacheProvider.registerAndCacheResult<BookmarkMetadata>({
-				registryKey,
+			await this.cacheProvider.set<BookmarkMetadata>(
 				cacheKey,
-				result: { title, description, favicon },
+				{ title, description, favicon },
 				ttl
-			})
+			)
 
 			return { title, description, favicon }
 		} catch {
