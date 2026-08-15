@@ -22,4 +22,22 @@ export class UsersController {
 			return user
 		})
 	}
+
+	@Implement(contract.user.updateProfile)
+	updateProfile(@Session() session: UserSession) {
+		return implement(contract.user.updateProfile).handler(async ({ input }) => {
+			const updatedUser = await this.usersService.updateProfile(
+				session.user.id,
+				input
+			)
+
+			if (!updatedUser) {
+				throw new ORPCError('NOT_FOUND', {
+					message: 'User profile not found for the provided ID'
+				})
+			}
+
+			return updatedUser
+		})
+	}
 }

@@ -1,5 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common'
-import type { UserProfile } from '@repo/schemas'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common'
+import type { UpdateUserProfileInput, UserProfile } from '@repo/schemas'
 import { eq } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres/driver'
 import { CacheProvider } from '../cache/cache.provider'
@@ -47,6 +47,48 @@ export class UsersService {
 		}
 
 		// Cache the user profile for future requests
+		await this.cacheProvider.set<UserProfile>(cacheKey, profile, ttl)
+
+		return profile
+	}
+
+	async updateProfile(
+		userId: string,
+		updatedProfile: UpdateUserProfileInput
+	): Promise<UserProfile | null> {
+		const cacheKey = `${USER_PROFILE_CACHE_KEY}_${userId}`
+		const ttl = 3_600_000 // Cache for 1 hour in milliseconds
+
+		const existingProfile = await this.getProfile(userId)
+
+		if (!existingProfile) {
+			await this.cacheProvider.set<null>(cacheKey, null, ttl)
+
+			throw new NotFoundException('User profile not found for the provided ID')
+		}
+
+		// Update the user profile in the database
+		const updatedUserProfile = await this.db
+			.update(schema.users)
+			.set(updatedProfile)
+			.where(eq(schema.users.id, userId))
+			.returning()
+
+		if (updatedUserProfile.length === 0) {
+			await this.cacheProvider.set<null>(cacheKey, null, ttl)
+
+			return null
+		}
+
+		const profile = updatedUserProfile[0]
+
+		if (!profile) {
+			await this.cacheProvider.set<null>(cacheKey, null, ttl)
+
+			return null
+		}
+
+		// Cache the updated user profile for future requests
 		await this.cacheProvider.set<UserProfile>(cacheKey, profile, ttl)
 
 		return profile
