@@ -1,9 +1,6 @@
+import Image from 'next/image'
 import { User } from 'ui/components/icons'
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage
-} from 'ui/components/shadcn/ui/avatar'
+import { Avatar, AvatarFallback } from 'ui/components/shadcn/ui/avatar'
 
 interface UserAvatarProps {
 	imageUrl?: string | null
@@ -14,7 +11,13 @@ export const UserAvatar = ({ imageUrl = null, altText }: UserAvatarProps) => {
 	return (
 		<Avatar size="lg">
 			{imageUrl ? (
-				<AvatarImage src={imageUrl} alt={altText} className="grayscale" />
+				<Image
+					src={imageUrl || ''}
+					alt={altText || 'User Avatar'}
+					width={256}
+					height={256}
+					className="rounded-lg object-cover w-full h-full"
+				/>
 			) : (
 				<AvatarFallback className="w-10 h-10 bg-secondary text-muted-foreground rounded-full flex items-center justify-center">
 					<User className="text-muted-foreground" />
