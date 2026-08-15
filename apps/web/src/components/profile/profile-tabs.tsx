@@ -1,4 +1,3 @@
-import type { UserProfile } from '@repo/schemas'
 import { LockKeyhole, UserCog } from 'ui/components/icons'
 import {
 	Tabs,
@@ -8,11 +7,7 @@ import {
 } from 'ui/components/shadcn/ui/tabs'
 import { ProfileInfo } from './profile-info'
 
-type ProfileTabsProps = {
-	profile: UserProfile
-}
-
-export const ProfileTabs = ({ profile }: ProfileTabsProps) => {
+export const ProfileTabs = () => {
 	return (
 		<Tabs defaultValue="profile" className="w-full max-w-2xl mx-auto">
 			<TabsList className="w-full justify-start bg-primary-foreground">
@@ -34,7 +29,7 @@ export const ProfileTabs = ({ profile }: ProfileTabsProps) => {
 			</TabsList>
 
 			<TabsContent value="profile">
-				<ProfileInfo profile={profile} />
+				<ProfileInfo />
 			</TabsContent>
 
 			<TabsContent value="password">Password</TabsContent>

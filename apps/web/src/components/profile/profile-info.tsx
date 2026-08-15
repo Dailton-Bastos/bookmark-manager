@@ -3,7 +3,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
 	type UpdateUserProfileInput,
-	type UserProfile,
 	updateUserProfileSchema
 } from '@repo/schemas'
 import { useEffect } from 'react'
@@ -24,41 +23,50 @@ import {
 } from 'ui/components/shadcn/ui/field'
 import { Input } from 'ui/components/shadcn/ui/input'
 import { useFileSelect } from '@/hooks/useFileSelect'
+import { useFileUploadMutation } from '@/hooks/useFileUploadMutation'
+import { useProfileMutation } from '@/hooks/useProfileMutation'
+import { useSession } from '@/providers/session-provider'
 import { ImageUpload } from '../shared/image-upload'
 
-type ProfileTabsProps = {
-	profile: UserProfile
-}
+export const ProfileInfo = () => {
+	const { user } = useSession()
 
-export const ProfileInfo = ({ profile }: ProfileTabsProps) => {
-	const { clearSelection, handleFileSelect, preview, setPreview } =
-		useFileSelect()
+	const {
+		selectedFile,
+		clearSelection,
+		handleFileSelect,
+		preview,
+		setPreview
+	} = useFileSelect()
 
 	const form = useForm<UpdateUserProfileInput>({
 		resolver: zodResolver(updateUserProfileSchema),
-		defaultValues: {
-			name: profile.name,
-			image: profile.image
-		}
+		defaultValues: { name: user?.name }
+	})
+
+	const { mutateAsync: mutateFileUpload, isPending: isFileUploadPending } =
+		useFileUploadMutation()
+
+	const { handleUpdateProfile, isPending } = useProfileMutation({
+		clearSelection,
+		selectedFile,
+		mutateFileUpload,
+		preview
 	})
 
 	const onSubmit = async (data: UpdateUserProfileInput) => {
-		// Handle form submission logic here
-		return data
+		await handleUpdateProfile(data)
 	}
 
 	useEffect(() => {
-		if (profile?.image) {
-			setPreview(profile.image)
+		if (user?.image) {
+			setPreview(user.image)
 		}
-	}, [profile?.image, setPreview])
+	}, [user, setPreview])
 
 	useEffect(() => {
-		form.reset({
-			name: profile.name,
-			image: profile.image
-		})
-	}, [form, profile])
+		form.reset({ name: user?.name })
+	}, [form, user?.name])
 
 	return (
 		<Card className="w-full px-8 py-10 gap-8 rounded-xl">
@@ -84,6 +92,7 @@ export const ProfileInfo = ({ profile }: ProfileTabsProps) => {
 								onFileSelected={handleFileSelect}
 								clearSelection={clearSelection}
 								preview={preview}
+								isPending={isFileUploadPending}
 							/>
 						</div>
 
@@ -92,7 +101,7 @@ export const ProfileInfo = ({ profile }: ProfileTabsProps) => {
 								Email address
 							</FieldLabel>
 							<Input
-								value={profile.email}
+								value={user?.email}
 								id="email"
 								type="email"
 								readOnly
@@ -133,7 +142,7 @@ export const ProfileInfo = ({ profile }: ProfileTabsProps) => {
 						<Button
 							type="submit"
 							className="w-fit h-11.5 rounded-lg hover:bg-chart-3 cursor-pointer font-semibold"
-							// disabled={isPending}
+							disabled={isPending || isFileUploadPending}
 						>
 							Save Changes
 						</Button>
