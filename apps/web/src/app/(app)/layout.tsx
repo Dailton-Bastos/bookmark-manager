@@ -1,22 +1,27 @@
 'use client'
 
+import type { UserProfile } from '@repo/schemas'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLoadingBar } from 'react-top-loading-bar'
 import { AlertError } from 'ui/components/alert-error'
 import { SidebarInset, SidebarProvider } from 'ui/components/shadcn/ui/sidebar'
 import { AppHeader } from '@/components/app/app-header'
 import { AppSidebar } from '@/components/app/app-sidebar'
 import { authClient } from '@/lib/auth-client'
+import { orpcClient } from '@/lib/orpc-client'
 import { SessionProvider } from '@/providers/session-provider'
 import { DEFAULT_UNAUTHENTICATED_REDIRECT } from '@/routes'
+import { getImageUrl } from '@/utils/get-image-url'
 
 export default function AppLayout({
 	children
 }: Readonly<{
 	children: React.ReactNode
 }>) {
+	const [profile, setProfile] = useState<UserProfile | null>(null)
+
 	const router = useRouter()
 
 	const { start, complete } = useLoadingBar()
@@ -39,8 +44,19 @@ export default function AppLayout({
 		retry: 3
 	})
 
+	const {
+		data: profileData,
+		error: profileError,
+		isPending: profileIsPending
+	} = useQuery(
+		orpcClient.user.getProfile.queryOptions({
+			input: {},
+			enabled: !!session?.user?.id
+		})
+	)
+
 	useEffect(() => {
-		if (isPending) {
+		if (isPending || profileIsPending) {
 			start()
 			return
 		}
@@ -48,15 +64,35 @@ export default function AppLayout({
 		complete()
 
 		return () => complete()
-	}, [isPending, start, complete])
+	}, [isPending, profileIsPending, start, complete])
 
 	useEffect(() => {
-		if (!isPending && !session) {
+		if (!isPending && !profileIsPending && !session && !profile) {
 			router.replace(DEFAULT_UNAUTHENTICATED_REDIRECT)
 		}
-	}, [isPending, session, router])
+	}, [isPending, profileIsPending, session, router, profile])
 
-	if (error) {
+	useEffect(() => {
+		if (profileData) {
+			setProfile({
+				...profileData,
+				image: profileData?.image ? getImageUrl(profileData.image) : null,
+				createdAt: new Date(profileData.createdAt),
+				updatedAt: new Date(profileData.updatedAt)
+			})
+		}
+	}, [profileData])
+
+	const sessionWithProfile = useMemo(() => {
+		if (!session || !profile) return null
+
+		return {
+			...session,
+			user: profile
+		}
+	}, [session, profile])
+
+	if (error || profileError) {
 		return (
 			<main className="flex items-center justify-end w-full p-4">
 				<AlertError
@@ -78,11 +114,19 @@ export default function AppLayout({
 			</main>
 		)
 	}
-	if (!session) return null
+	if (!sessionWithProfile) {
+		return (
+			<main>
+				<p role="status" aria-live="polite" className="sr-only">
+					This user could not be found. Please try again.
+				</p>
+			</main>
+		)
+	}
 
 	return (
 		<div className="[--header-height:calc(--spacing(14))]">
-			<SessionProvider data={session}>
+			<SessionProvider data={sessionWithProfile}>
 				<SidebarProvider
 					style={
 						{
