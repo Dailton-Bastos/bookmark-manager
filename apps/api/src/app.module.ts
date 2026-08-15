@@ -25,6 +25,7 @@ import { DATABASE_CONNECTION } from './shared/constants/database'
 import { requestContextStorage } from './shared/request-context'
 import { TagsModule } from './tags/tags.module'
 import { UploadModule } from './upload/upload.module'
+import { UsersModule } from './users/users.module'
 
 declare module '@orpc/nest' {
 	/**
@@ -132,7 +133,8 @@ const logger = new Logger('oRPC')
 		BookmarksModule,
 		TagsModule,
 		PaginationModule,
-		UploadModule
+		UploadModule,
+		UsersModule
 	],
 	controllers: [],
 	providers: []
