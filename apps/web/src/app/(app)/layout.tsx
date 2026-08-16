@@ -83,6 +83,10 @@ export default function AppLayout({
 		}
 	}, [profileData])
 
+	useEffect(() => {
+		if (profileError) return router.push(DEFAULT_UNAUTHENTICATED_REDIRECT)
+	}, [router, profileError])
+
 	const sessionWithProfile = useMemo(() => {
 		if (!session || !profile) return null
 
@@ -92,7 +96,7 @@ export default function AppLayout({
 		}
 	}, [session, profile])
 
-	if (error || profileError) {
+	if (error) {
 		return (
 			<main className="flex items-center justify-end w-full p-4">
 				<AlertError
