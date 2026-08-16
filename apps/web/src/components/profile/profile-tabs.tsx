@@ -6,6 +6,7 @@ import {
 	TabsTrigger
 } from 'ui/components/shadcn/ui/tabs'
 import { ProfileInfo } from './profile-info'
+import { ProfilePassword } from './profile-password'
 
 export const ProfileTabs = () => {
 	return (
@@ -32,7 +33,9 @@ export const ProfileTabs = () => {
 				<ProfileInfo />
 			</TabsContent>
 
-			<TabsContent value="password">Password</TabsContent>
+			<TabsContent value="password">
+				<ProfilePassword />
+			</TabsContent>
 		</Tabs>
 	)
 }
