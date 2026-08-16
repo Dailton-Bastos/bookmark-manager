@@ -1,5 +1,9 @@
 import { oc } from '@orpc/contract'
-import { updateUserProfileSchema, userProfileSchema } from '@repo/schemas'
+import {
+	updateUserPasswordSchema,
+	updateUserProfileSchema,
+	userProfileSchema
+} from '@repo/schemas'
 
 export const getUserProfileContract = oc
 	.route({
@@ -19,3 +23,12 @@ export const updateUserProfileContract = oc
 	})
 	.input(updateUserProfileSchema)
 	.output(userProfileSchema)
+
+export const updateUserPasswordContract = oc
+	.route({
+		method: 'PATCH',
+		path: '/user/password',
+		summary: 'Update user password',
+		tags: ['User']
+	})
+	.input(updateUserPasswordSchema)

@@ -14,7 +14,11 @@ import {
 } from './bookmark'
 import { listTagsContract } from './tag'
 import { uploadContract } from './upload'
-import { getUserProfileContract, updateUserProfileContract } from './user'
+import {
+	getUserProfileContract,
+	updateUserPasswordContract,
+	updateUserProfileContract
+} from './user'
 
 export const contract = populateContractRouterPaths({
 	bookmark: {
@@ -37,6 +41,7 @@ export const contract = populateContractRouterPaths({
 	},
 	user: {
 		getProfile: getUserProfileContract,
-		updateProfile: updateUserProfileContract
+		updateProfile: updateUserProfileContract,
+		updatePassword: updateUserPasswordContract
 	}
 })

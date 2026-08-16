@@ -19,5 +19,26 @@ export const updateUserProfileSchema = z.object({
 	image: z.string().nullable().optional()
 })
 
+export const updateUserPasswordSchema = z
+	.object({
+		currentPassword: z
+			.string()
+			.min(1, { message: 'Current password is required' }),
+		newPassword: z
+			.string()
+			.min(8, { message: 'New password must be at least 8 characters long' })
+			.max(100, {
+				message: 'New password must be less than 100 characters long'
+			}),
+		confirmNewPassword: z
+			.string()
+			.min(1, { message: 'Please confirm your new password' })
+	})
+	.refine((data) => data.newPassword === data.confirmNewPassword, {
+		message: 'Passwords do not match',
+		path: ['confirmNewPassword']
+	})
+
 export type UserProfile = z.infer<typeof userProfileSchema>
 export type UpdateUserProfileInput = z.infer<typeof updateUserProfileSchema>
+export type UpdateUserPasswordInput = z.infer<typeof updateUserPasswordSchema>
