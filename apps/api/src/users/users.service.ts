@@ -112,7 +112,8 @@ export class UsersService {
 		{
 			currentPassword,
 			newPassword,
-			confirmNewPassword
+			confirmNewPassword,
+			revokeOtherSessions = true
 		}: UpdateUserPasswordInput,
 		headers: Record<string, string>
 	): Promise<void> {
@@ -138,7 +139,7 @@ export class UsersService {
 				body: {
 					newPassword,
 					currentPassword,
-					revokeOtherSessions: true
+					revokeOtherSessions
 				},
 				headers
 			})
