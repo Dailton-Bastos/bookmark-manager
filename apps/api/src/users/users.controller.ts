@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common'
+import { Controller, Headers } from '@nestjs/common'
 import { Implement, implement, ORPCError } from '@orpc/nest'
 import { contract } from '@repo/contract'
 import { Session, type UserSession } from '@thallesp/nestjs-better-auth'
@@ -39,5 +39,17 @@ export class UsersController {
 
 			return updatedUser
 		})
+	}
+
+	@Implement(contract.user.updatePassword)
+	updatePassword(
+		@Session() session: UserSession,
+		@Headers() headers: Record<string, string>
+	) {
+		return implement(contract.user.updatePassword).handler(
+			async ({ input }) => {
+				await this.usersService.updatePassword(session.user.id, input, headers)
+			}
+		)
 	}
 }

@@ -1,5 +1,17 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common'
-import type { UpdateUserProfileInput, UserProfile } from '@repo/schemas'
+import {
+	BadRequestException,
+	Inject,
+	Injectable,
+	NotFoundException
+} from '@nestjs/common'
+import { ORPCError } from '@orpc/nest'
+import type {
+	UpdateUserPasswordInput,
+	UpdateUserProfileInput,
+	UserProfile
+} from '@repo/schemas'
+import { AuthService } from '@thallesp/nestjs-better-auth'
+import { APIError } from 'better-auth'
 import { eq } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres/driver'
 import { CacheProvider } from '../cache/cache.provider'
@@ -12,7 +24,8 @@ export class UsersService {
 	constructor(
 		@Inject(DATABASE_CONNECTION)
 		private readonly db: NodePgDatabase<typeof schema>,
-		private readonly cacheProvider: CacheProvider
+		private readonly cacheProvider: CacheProvider,
+		private readonly authService: AuthService
 	) {}
 
 	async getProfile(userId: string): Promise<UserProfile | null> {
@@ -92,5 +105,53 @@ export class UsersService {
 		await this.cacheProvider.set<UserProfile>(cacheKey, profile, ttl)
 
 		return profile
+	}
+
+	async updatePassword(
+		userId: string,
+		{
+			currentPassword,
+			newPassword,
+			confirmNewPassword
+		}: UpdateUserPasswordInput,
+		headers: Record<string, string>
+	): Promise<void> {
+		const cacheKey = `${USER_PROFILE_CACHE_KEY}_${userId}`
+		const ttl = 3_600_000 // Cache for 1 hour in milliseconds
+
+		if (newPassword !== confirmNewPassword) {
+			throw new BadRequestException(
+				'New password and confirm password do not match'
+			)
+		}
+
+		const existingProfile = await this.getProfile(userId)
+
+		if (!existingProfile) {
+			await this.cacheProvider.set<null>(cacheKey, null, ttl)
+
+			throw new NotFoundException('User profile not found for the provided ID')
+		}
+
+		try {
+			await this.authService.api.changePassword({
+				body: {
+					newPassword,
+					currentPassword,
+					revokeOtherSessions: true
+				},
+				headers
+			})
+		} catch (error) {
+			if (error instanceof APIError) {
+				if (error.status === 'BAD_REQUEST') {
+					throw new BadRequestException('Current password is incorrect')
+				}
+			}
+
+			throw new ORPCError('INTERNAL_ERROR', {
+				message: 'An error occurred while updating the password'
+			})
+		}
 	}
 }
