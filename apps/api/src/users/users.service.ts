@@ -40,18 +40,10 @@ export class UsersService {
 		if (cachedProfile !== undefined) return cachedProfile
 
 		// Fetch the user profile from the database
-		const userProfile = await this.db
+		const [profile = null] = await this.db
 			.select()
 			.from(schema.users)
 			.where(eq(schema.users.id, userId))
-
-		if (userProfile.length === 0) {
-			await this.cacheProvider.set<null>(cacheKey, null, ttl)
-
-			return null
-		}
-
-		const profile = userProfile[0]
 
 		if (!profile) {
 			await this.cacheProvider.set<null>(cacheKey, null, ttl)
@@ -81,21 +73,13 @@ export class UsersService {
 		}
 
 		// Update the user profile in the database
-		const updatedUserProfile = await this.db
+		const [profile = null] = await this.db
 			.update(schema.users)
 			.set(updatedProfile)
 			.where(eq(schema.users.id, userId))
 			.returning()
 
-		if (updatedUserProfile.length === 0) {
-			await this.cacheProvider.set<null>(cacheKey, null, ttl)
-
-			return null
-		}
-
-		const profile = updatedUserProfile[0]
-
-		if (!profile) {
+		if (profile === null) {
 			await this.cacheProvider.set<null>(cacheKey, null, ttl)
 
 			return null
