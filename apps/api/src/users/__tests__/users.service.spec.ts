@@ -6,7 +6,11 @@ import { APIError } from 'better-auth'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { CacheProvider } from '../../cache/cache.provider'
 import { schema } from '../../database/schemas'
-import { USER_PROFILE_CACHE_KEY } from '../../shared/constants/cache'
+import { EnvService } from '../../env/env.service'
+import {
+	RESET_PASSWORD_CACHE_KEY,
+	USER_PROFILE_CACHE_KEY
+} from '../../shared/constants/cache'
 import { DATABASE_CONNECTION } from '../../shared/constants/database'
 import { userMock } from '../__mocks__/user.mock'
 import { UsersService } from '../users.service'
@@ -43,6 +47,7 @@ describe('UsersService', () => {
 	let cacheManager: Cache
 	let cacheProvider: CacheProvider
 	let authService: AuthService
+	let env: EnvService
 	let db: NodePgDatabase<typeof schema>
 	let mockDb: {
 		select: jest.Mock
@@ -79,8 +84,15 @@ describe('UsersService', () => {
 					provide: AuthService,
 					useValue: {
 						api: {
-							changePassword: jest.fn()
+							changePassword: jest.fn(),
+							requestPasswordReset: jest.fn()
 						}
+					}
+				},
+				{
+					provide: EnvService,
+					useValue: {
+						get: jest.fn().mockReturnValue('http://localhost:3000')
 					}
 				}
 			]
@@ -91,6 +103,7 @@ describe('UsersService', () => {
 		cacheProvider = module.get<CacheProvider>(CacheProvider)
 		cacheManager = module.get<Cache>(CACHE_MANAGER)
 		authService = module.get<AuthService>(AuthService)
+		env = module.get<EnvService>(EnvService)
 	})
 
 	it('should be defined', () => {
@@ -99,6 +112,7 @@ describe('UsersService', () => {
 		expect(cacheManager).toBeDefined()
 		expect(cacheProvider).toBeDefined()
 		expect(authService).toBeDefined()
+		expect(env).toBeDefined()
 	})
 
 	describe('getProfile', () => {
@@ -387,6 +401,68 @@ describe('UsersService', () => {
 			await expect(
 				service.updatePassword(userId, input, headers)
 			).rejects.toThrow('An error occurred while updating the password')
+		})
+	})
+
+	describe('requestPasswordReset', () => {
+		it('should throw BadRequestException if password reset request is already cached', async () => {
+			const email = 'john.doe@example.com'
+			jest.spyOn(cacheProvider, 'get').mockResolvedValue(true)
+
+			const promise = service.requestPasswordReset({ email })
+
+			await expect(promise).rejects.toThrow(BadRequestException)
+			await expect(promise).rejects.toThrow(
+				'Password reset request already sent. Please check your email for the reset link.'
+			)
+			expect(cacheProvider.get).toHaveBeenCalledWith(
+				`${RESET_PASSWORD_CACHE_KEY}_${email}`
+			)
+			expect(cacheManager.set).not.toHaveBeenCalled()
+			expect(authService.api.requestPasswordReset).not.toHaveBeenCalled()
+		})
+
+		it('should throw INTERNAL_ERROR if authService.api.requestPasswordReset fails', async () => {
+			const email = 'john.doe@example.com'
+
+			jest.spyOn(cacheProvider, 'get').mockResolvedValue(false)
+			jest
+				.spyOn(authService.api, 'requestPasswordReset')
+				.mockRejectedValue(new Error('some upstream error'))
+
+			const promise = service.requestPasswordReset({ email })
+
+			await expect(promise).rejects.toThrow(
+				'An error occurred while requesting password reset'
+			)
+			expect(authService.api.requestPasswordReset).toHaveBeenCalledWith({
+				body: { email, redirectTo: 'http://localhost:3000' }
+			})
+			expect(cacheManager.set).not.toHaveBeenCalled()
+		})
+
+		it('should call authService.api.requestPasswordReset with correct parameters and cache the request', async () => {
+			const email = 'john.doe@example.com'
+
+			jest.spyOn(cacheProvider, 'get').mockResolvedValue(false)
+
+			// Mock the authService.api.requestPasswordReset to resolve successfully
+			jest.spyOn(authService.api, 'requestPasswordReset').mockResolvedValue({
+				status: true,
+				message: 'Password reset request sent successfully'
+			})
+
+			const promise = service.requestPasswordReset({ email })
+
+			await expect(promise).resolves.toBeUndefined()
+			expect(authService.api.requestPasswordReset).toHaveBeenCalledWith({
+				body: { email, redirectTo: 'http://localhost:3000' }
+			})
+			expect(cacheManager.set).toHaveBeenCalledWith(
+				`${RESET_PASSWORD_CACHE_KEY}_${email}`,
+				email,
+				3_600_000
+			)
 		})
 	})
 })
