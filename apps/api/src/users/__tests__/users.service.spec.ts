@@ -380,14 +380,13 @@ describe('UsersService', () => {
 			})
 
 			// Mock authService.api.changePassword to throw an error
-			const errorMessage = 'An error occurred while updating the password'
 			jest
 				.spyOn(authService.api, 'changePassword')
-				.mockRejectedValue(new Error(errorMessage))
+				.mockRejectedValue(new Error('some upstream error'))
 
 			await expect(
 				service.updatePassword(userId, input, headers)
-			).rejects.toThrow(errorMessage)
+			).rejects.toThrow('An error occurred while updating the password')
 		})
 	})
 })

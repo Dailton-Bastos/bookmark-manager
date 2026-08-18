@@ -152,7 +152,14 @@ describe('UsersController', () => {
 	it('should update user password correctly', async () => {
 		usersServiceMock.updatePassword.mockResolvedValue(true)
 		handlerMock.mockImplementation(async (resolver) => {
-			return resolver({ input: { oldPassword: 'old', newPassword: 'new' } })
+			return resolver({
+				input: {
+					currentPassword: 'old',
+					newPassword: 'new',
+					confirmNewPassword: 'new',
+					revokeOtherSessions: true
+				}
+			})
 		})
 
 		const headersMock = { 'user-agent': 'test-agent' }
@@ -161,7 +168,12 @@ describe('UsersController', () => {
 		expect(implement).toHaveBeenCalledWith(contract.user.updatePassword)
 		expect(usersServiceMock.updatePassword).toHaveBeenCalledWith(
 			mockUserSession.user.id,
-			{ oldPassword: 'old', newPassword: 'new' },
+			{
+				currentPassword: 'old',
+				newPassword: 'new',
+				confirmNewPassword: 'new',
+				revokeOtherSessions: true
+			},
 			headersMock
 		)
 		expect(handlerMock).toHaveBeenCalled()
