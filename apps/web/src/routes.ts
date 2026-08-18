@@ -3,7 +3,11 @@
  * These routes will redirect logged in users to /
  * @type {string[]}
  */
-export const authRoutes: string[] = ['/login', '/signup']
+export const authRoutes: string[] = [
+	'/login',
+	'/signup',
+	'/request-password-reset'
+]
 
 /**
  * The default redirect path after logging in
