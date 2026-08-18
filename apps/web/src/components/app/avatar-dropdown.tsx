@@ -26,7 +26,7 @@ export const AvatarDropdown = () => {
 				<Button
 					variant="ghost"
 					size="icon"
-					className="rounded-full cursor-pointer"
+					className="rounded-full cursor-pointer border border-input/20 hover:bg-transparent"
 				>
 					<UserAvatar imageUrl={user?.image} altText={user?.name || ''} />
 				</Button>
@@ -69,7 +69,11 @@ export const AvatarDropdown = () => {
 								Theme
 							</div>
 
-							<Tabs value={resolvedTheme} onValueChange={setTheme} className="ml-auto">
+							<Tabs
+								value={resolvedTheme}
+								onValueChange={setTheme}
+								className="ml-auto"
+							>
 								<TabsList>
 									<TabsTrigger
 										value="light"

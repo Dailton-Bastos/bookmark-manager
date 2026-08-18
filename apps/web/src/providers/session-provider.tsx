@@ -1,11 +1,12 @@
 'use client'
 
+import type { UserProfile } from '@repo/schemas'
 import {
 	type UseMutationResult,
 	useMutation,
 	useQueryClient
 } from '@tanstack/react-query'
-import type { Session, User } from 'better-auth'
+import type { Session } from 'better-auth'
 import { useRouter } from 'next/navigation'
 import { createContext, useContext, useMemo } from 'react'
 import { toast } from 'sonner'
@@ -15,13 +16,13 @@ import { DEFAULT_UNAUTHENTICATED_REDIRECT } from '@/routes'
 interface SessionProviderProps {
 	children: React.ReactNode
 	data: {
-		user: User
+		user: UserProfile
 		session: Session
 	}
 }
 
 interface SessionContextValue {
-	user: User
+	user: UserProfile
 	session: Session
 	signOut: {
 		mutateAsync: UseMutationResult<void, Error, void>['mutateAsync']
