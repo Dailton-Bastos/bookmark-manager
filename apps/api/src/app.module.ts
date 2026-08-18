@@ -70,7 +70,15 @@ const logger = new Logger('oRPC')
 						provider: 'pg',
 						usePlural: true
 					}),
-					emailAndPassword: { enabled: true },
+					emailAndPassword: {
+						enabled: true,
+						sendResetPassword: async () => {
+							// TODO: Implement email sending logic here
+						},
+						onPasswordReset: async () => {
+							// TODO: Implement logic to handle password reset confirmation here
+						}
+					},
 					trustedOrigins: [envService.get('UI_URL')]
 				})
 			}),
