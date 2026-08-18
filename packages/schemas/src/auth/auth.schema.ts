@@ -14,5 +14,12 @@ export const signupSchema = z.object({
 		.max(100, 'Password must be less than 100 characters long')
 })
 
+export const requestPasswordResetSchema = z.object({
+	email: z.email('Please enter a valid email address')
+})
+
 export type LoginFormData = z.infer<typeof loginSchema>
 export type SignupFormData = z.infer<typeof signupSchema>
+export type RequestPasswordResetFormData = z.infer<
+	typeof requestPasswordResetSchema
+>

@@ -1,6 +1,10 @@
 import { describe, expect, it } from '@jest/globals'
 import { ZodError } from 'zod'
-import { loginSchema, signupSchema } from './auth.schema'
+import {
+	loginSchema,
+	requestPasswordResetSchema,
+	signupSchema
+} from './auth.schema'
 
 describe('AuthSchema', () => {
 	describe('LoginSchema', () => {
@@ -117,6 +121,41 @@ describe('AuthSchema', () => {
 
 				expect(passwordIssue).toBeDefined()
 				expect(passwordIssue?.code).toBe('too_big')
+			}
+		})
+	})
+
+	describe('RequestPasswordResetSchema', () => {
+		it('should validate a valid request password reset object', () => {
+			const validRequest = {
+				email: 'john.doe@example.com'
+			}
+
+			const result = requestPasswordResetSchema.safeParse(validRequest)
+
+			expect(result.success).toBe(true)
+			expect(result.data?.email).toBe('john.doe@example.com')
+		})
+
+		it('should fail validation for an invalid request password reset object', () => {
+			const invalidRequest = {
+				email: 'invalid-email'
+			}
+
+			const result = requestPasswordResetSchema.safeParse(invalidRequest)
+
+			expect(result.success).toBe(false)
+
+			if (!result.success) {
+				expect(result.error).toBeInstanceOf(ZodError)
+				expect(result.error.issues.length).toBe(1)
+
+				const emailIssue = result.error.issues.find(
+					(issue) => issue.path[0] === 'email'
+				)
+
+				expect(emailIssue).toBeDefined()
+				expect(emailIssue?.code).toBe('invalid_format')
 			}
 		})
 	})
