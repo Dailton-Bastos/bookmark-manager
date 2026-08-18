@@ -109,7 +109,7 @@ export default function AppLayout({
 		)
 	}
 
-	if (isPending) {
+	if (isPending || profileIsPending) {
 		return (
 			<main>
 				<p role="status" aria-live="polite" className="sr-only">
