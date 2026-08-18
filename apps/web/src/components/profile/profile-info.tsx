@@ -114,7 +114,7 @@ export const ProfileInfo = () => {
 							control={form.control}
 							name="name"
 							render={({ field, fieldState }) => (
-								<Field className="gap-1.5" data-invalid={false}>
+								<Field className="gap-1.5" data-invalid={fieldState.invalid}>
 									<FieldLabel htmlFor="name" className="text-foreground">
 										Full name
 									</FieldLabel>
