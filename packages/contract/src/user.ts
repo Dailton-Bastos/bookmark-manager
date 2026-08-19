@@ -1,6 +1,7 @@
 import { oc } from '@orpc/contract'
 import {
 	requestPasswordResetSchema,
+	resetPasswordSchema,
 	updateUserPasswordSchema,
 	updateUserProfileSchema,
 	userProfileSchema
@@ -42,3 +43,12 @@ export const requestPasswordResetContract = oc
 		tags: ['Auth']
 	})
 	.input(requestPasswordResetSchema)
+
+export const resetPasswordContract = oc
+	.route({
+		method: 'POST',
+		path: '/user/reset-password',
+		summary: 'Reset user password',
+		tags: ['Auth']
+	})
+	.input(resetPasswordSchema)

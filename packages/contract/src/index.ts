@@ -17,6 +17,7 @@ import { uploadContract } from './upload'
 import {
 	getUserProfileContract,
 	requestPasswordResetContract,
+	resetPasswordContract,
 	updateUserPasswordContract,
 	updateUserProfileContract
 } from './user'
@@ -44,6 +45,7 @@ export const contract = populateContractRouterPaths({
 		getProfile: getUserProfileContract,
 		updateProfile: updateUserProfileContract,
 		updatePassword: updateUserPasswordContract,
-		requestPasswordReset: requestPasswordResetContract
+		requestPasswordReset: requestPasswordResetContract,
+		resetPassword: resetPasswordContract
 	}
 })
