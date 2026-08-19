@@ -7,6 +7,7 @@ import {
 import { ORPCError } from '@orpc/nest'
 import type {
 	RequestPasswordResetFormData,
+	ResetPasswordFormData,
 	UpdateUserPasswordInput,
 	UpdateUserProfileInput,
 	UserProfile
@@ -20,6 +21,7 @@ import { schema } from '../database/schemas'
 import { EnvService } from '../env/env.service'
 import {
 	RESET_PASSWORD_CACHE_KEY,
+	RESET_PASSWORD_TOKEN_CACHE_KEY,
 	USER_PROFILE_CACHE_KEY
 } from '../shared/constants/cache'
 import { DATABASE_CONNECTION } from '../shared/constants/database'
@@ -173,6 +175,51 @@ export class UsersService {
 		} catch {
 			throw new ORPCError('INTERNAL_ERROR', {
 				message: 'An error occurred while requesting password reset'
+			})
+		}
+	}
+
+	async resetPassword({
+		token,
+		newPassword,
+		confirmNewPassword
+	}: ResetPasswordFormData): Promise<void> {
+		const cacheKey = `${RESET_PASSWORD_TOKEN_CACHE_KEY}_${token}`
+
+		const ttl = 3_600_000 // Cache for 1 hour in milliseconds
+
+		if (newPassword !== confirmNewPassword) {
+			throw new BadRequestException(
+				'New password and confirm password do not match'
+			)
+		}
+
+		// Check if the password reset token is already cached
+		const cachedRequest = await this.cacheProvider.get<string>(cacheKey)
+
+		if (cachedRequest) {
+			throw new BadRequestException(
+				'Password reset request already used or expired. Please request a new password reset.'
+			)
+		}
+
+		try {
+			await this.authService.api.resetPassword({
+				body: { token, newPassword }
+			})
+
+			// Cache the token for future requests
+			await this.cacheProvider.set<string>(cacheKey, token, ttl)
+		} catch (error) {
+			if (error instanceof APIError) {
+				if (error.status === 'BAD_REQUEST') {
+					throw new BadRequestException(
+						error.message || 'Invalid or expired password reset token'
+					)
+				}
+			}
+			throw new ORPCError('INTERNAL_ERROR', {
+				message: 'An error occurred while resetting the password'
 			})
 		}
 	}

@@ -13,6 +13,10 @@ export class CacheProvider {
 		await this.cacheManager.set(key, value, ttl)
 	}
 
+	async del(key: string): Promise<void> {
+		await this.cacheManager.del(key)
+	}
+
 	async registerAndCacheResult<T>({
 		registryKey,
 		cacheKey,

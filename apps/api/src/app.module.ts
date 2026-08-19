@@ -1,5 +1,5 @@
 import KeyvRedis from '@keyv/redis'
-import { CacheModule } from '@nestjs/cache-manager'
+import { CacheModule as NestCacheModule } from '@nestjs/cache-manager'
 import { Logger, MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { ORPCError, ORPCModule, onError } from '@orpc/nest'
@@ -14,6 +14,8 @@ import type { Request } from 'express'
 import { Keyv } from 'keyv'
 import z from 'zod'
 import { BookmarksModule } from './bookmarks/bookmarks.module'
+import { CacheModule } from './cache/cache.module'
+import { CacheProvider } from './cache/cache.provider'
 import { validate } from './config/env.config'
 import { RequestContextMiddleware } from './core/request-context.middleware'
 import { DatabaseModule } from './database/database.module'
@@ -21,6 +23,7 @@ import { EnvModule } from './env/env.module'
 import { EnvService } from './env/env.service'
 import { HealthModule } from './health/health.module'
 import { PaginationModule } from './pagination/pagination.module'
+import { RESET_PASSWORD_CACHE_KEY } from './shared/constants/cache'
 import { DATABASE_CONNECTION } from './shared/constants/database'
 import { requestContextStorage } from './shared/request-context'
 import { TagsModule } from './tags/tags.module'
@@ -45,7 +48,7 @@ const logger = new Logger('oRPC')
 			expandVariables: true,
 			validate
 		}),
-		CacheModule.registerAsync({
+		NestCacheModule.registerAsync({
 			isGlobal: true,
 			imports: [EnvModule],
 			useFactory: async (envService: EnvService) => {
@@ -63,8 +66,12 @@ const logger = new Logger('oRPC')
 			inject: [EnvService]
 		}),
 		AuthModule.forRootAsync({
-			imports: [DatabaseModule, EnvModule],
-			useFactory: (database: NodePgDatabase, envService: EnvService) => ({
+			imports: [DatabaseModule, EnvModule, CacheModule],
+			useFactory: (
+				database: NodePgDatabase,
+				envService: EnvService,
+				cacheProvider: CacheProvider
+			) => ({
 				auth: betterAuth({
 					database: drizzleAdapter(database, {
 						provider: 'pg',
@@ -75,14 +82,18 @@ const logger = new Logger('oRPC')
 						sendResetPassword: async () => {
 							// TODO: Implement email sending logic here
 						},
-						onPasswordReset: async () => {
+						onPasswordReset: async ({ user }) => {
 							// TODO: Implement logic to handle password reset confirmation here
+
+							// Invalidate the password reset token cache after a successful password reset
+							const cacheKey = `${RESET_PASSWORD_CACHE_KEY}_${user.email}`
+							await cacheProvider.del(cacheKey)
 						}
 					},
 					trustedOrigins: [envService.get('UI_URL')]
 				})
 			}),
-			inject: [DATABASE_CONNECTION, EnvService]
+			inject: [DATABASE_CONNECTION, EnvService, CacheProvider]
 		}),
 		ORPCModule.forRoot({
 			context: () => ({ request: requestContextStorage.getStore() as Request }), // per-request context via AsyncLocalStorage

@@ -66,4 +66,12 @@ export class UsersController {
 			}
 		)
 	}
+
+	@Implement(contract.user.resetPassword)
+	@AllowAnonymous()
+	resetPassword() {
+		return implement(contract.user.resetPassword).handler(async ({ input }) => {
+			await this.usersService.resetPassword(input)
+		})
+	}
 }
