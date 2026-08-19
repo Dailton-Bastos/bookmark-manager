@@ -19,7 +19,8 @@ describe('EnvConfig', () => {
 				API_URL: 'http://localhost:3001',
 				REDIS_URL: 'redis://localhost:6379',
 				CACHE_TTL: 60000,
-				BRANDFETCH_API_CLIENT: 'client_id'
+				BRANDFETCH_API_CLIENT: 'client_id',
+				UI_URL_RESET_PASSWORD_REDIRECT: 'http://localhost:3000/reset-password'
 			}
 
 			expect(() => validate(config)).not.toThrow()
@@ -35,7 +36,8 @@ describe('EnvConfig', () => {
 				DATABASE_PASSWORD: 'password',
 				DATABASE_NAME: 'database',
 				DATABASE_URL: '',
-				BRANDFETCH_API_CLIENT: ''
+				BRANDFETCH_API_CLIENT: '',
+				UI_URL_RESET_PASSWORD_REDIRECT: ''
 			}
 
 			expect(() => validate(config)).toThrow(

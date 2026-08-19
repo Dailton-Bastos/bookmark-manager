@@ -456,7 +456,7 @@ describe('UsersService', () => {
 
 			await expect(promise).resolves.toBeUndefined()
 			expect(authService.api.requestPasswordReset).toHaveBeenCalledWith({
-				body: { email, redirectTo: 'http://localhost:3000' }
+				body: { email, redirectTo: env.get('UI_URL_RESET_PASSWORD_REDIRECT') }
 			})
 			expect(cacheManager.set).toHaveBeenCalledWith(
 				`${RESET_PASSWORD_CACHE_KEY}_${email}`,

@@ -163,7 +163,7 @@ export class UsersService {
 			)
 		}
 
-		const redirectTo = this.env.get('UI_URL')
+		const redirectTo = this.env.get('UI_URL_RESET_PASSWORD_REDIRECT')
 
 		try {
 			await this.authService.api.requestPasswordReset({
