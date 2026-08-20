@@ -18,7 +18,7 @@ import {
 	FieldLabel
 } from 'ui/components/shadcn/ui/field'
 import { orpcClient } from '@/lib/orpc-client'
-import { DEFAULT_LOGIN_REDIRECT } from '@/routes'
+import { DEFAULT_UNAUTHENTICATED_REDIRECT } from '@/routes'
 import { CardWrapper } from './card-wrapper'
 
 type ResetPasswordFormProps = {
@@ -31,7 +31,7 @@ export const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
 		defaultValues: {
 			newPassword: '',
 			confirmNewPassword: '',
-			token: ''
+			token
 		}
 	})
 
@@ -41,7 +41,7 @@ export const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
 		orpcClient.user.resetPassword.mutationOptions({
 			onSuccess: () => {
 				form.reset()
-				router.push(DEFAULT_LOGIN_REDIRECT)
+				router.push(DEFAULT_UNAUTHENTICATED_REDIRECT)
 			}
 		})
 	)
