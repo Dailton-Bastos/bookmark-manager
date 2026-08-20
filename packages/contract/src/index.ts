@@ -16,6 +16,8 @@ import { listTagsContract } from './tag'
 import { uploadContract } from './upload'
 import {
 	getUserProfileContract,
+	requestPasswordResetContract,
+	resetPasswordContract,
 	updateUserPasswordContract,
 	updateUserProfileContract
 } from './user'
@@ -42,6 +44,8 @@ export const contract = populateContractRouterPaths({
 	user: {
 		getProfile: getUserProfileContract,
 		updateProfile: updateUserProfileContract,
-		updatePassword: updateUserPasswordContract
+		updatePassword: updateUserPasswordContract,
+		requestPasswordReset: requestPasswordResetContract,
+		resetPassword: resetPasswordContract
 	}
 })

@@ -44,7 +44,11 @@ const envSchema = z.object({
 	CACHE_TTL: z.coerce.number().default(60000),
 	BRANDFETCH_API_CLIENT: z
 		.string()
-		.nonempty({ message: 'BRANDFETCH_API_CLIENT is required' })
+		.nonempty({ message: 'BRANDFETCH_API_CLIENT is required' }),
+	UI_URL_RESET_PASSWORD_REDIRECT: z.url({
+		protocol: /^https?$/,
+		message: 'UI_URL_RESET_PASSWORD_REDIRECT must be a valid URL'
+	})
 })
 
 export const validate = (config: Record<string, unknown>) => {

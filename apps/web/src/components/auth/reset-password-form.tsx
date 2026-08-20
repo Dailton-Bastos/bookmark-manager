@@ -1,9 +1,13 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { type LoginFormData, loginSchema } from '@repo/schemas'
+import { type ResetPasswordFormData, resetPasswordSchema } from '@repo/schemas'
+import { useMutation } from '@tanstack/react-query'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { InputPassword } from 'ui/components/input-password'
 import { Button } from 'ui/components/shadcn/ui/button'
 import {
@@ -13,46 +17,77 @@ import {
 	FieldGroup,
 	FieldLabel
 } from 'ui/components/shadcn/ui/field'
-import { Input } from 'ui/components/shadcn/ui/input'
+import { orpcClient } from '@/lib/orpc-client'
+import { DEFAULT_UNAUTHENTICATED_REDIRECT } from '@/routes'
 import { CardWrapper } from './card-wrapper'
 
-interface LoginFormProps {
-	onSubmit: (data: LoginFormData) => Promise<void>
-	isPending: boolean
+type ResetPasswordFormProps = {
+	token: string
 }
 
-export const LoginForm = ({ onSubmit, isPending }: LoginFormProps) => {
-	const form = useForm<LoginFormData>({
-		resolver: zodResolver(loginSchema),
+export const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
+	const form = useForm<ResetPasswordFormData>({
+		resolver: zodResolver(resetPasswordSchema),
 		defaultValues: {
-			email: '',
-			password: ''
+			newPassword: '',
+			confirmNewPassword: '',
+			token
 		}
 	})
 
+	const router = useRouter()
+
+	const { isPending, mutateAsync } = useMutation(
+		orpcClient.user.resetPassword.mutationOptions({
+			onSuccess: () => {
+				form.reset()
+				router.push(DEFAULT_UNAUTHENTICATED_REDIRECT)
+			}
+		})
+	)
+
+	const onSubmit = async (data: ResetPasswordFormData) => {
+		toast.promise(mutateAsync(data), {
+			loading: 'Resetting password...',
+			success: 'Your password has been successfully reset.',
+			error: (err) => {
+				if (err instanceof Error) {
+					if (err.message.includes('Bad Request')) {
+						return 'Invalid link or the password reset request has expired. Please request a new password reset.'
+					}
+				}
+
+				return 'An error occurred while resetting the password.'
+			}
+		})
+	}
+
+	useEffect(() => {
+		form.setValue('token', token)
+	}, [token, form])
+
 	return (
 		<CardWrapper
-			headerTitle="Log in to your account"
-			headerDescription="Welcome back! Please enter your details"
+			headerTitle="Reset your password"
+			headerDescription="Enter your new password below. Make sure it is strong and secure."
 		>
-			<form id="form-login" onSubmit={form.handleSubmit(onSubmit)}>
+			<form id="form-reset-password" onSubmit={form.handleSubmit(onSubmit)}>
 				<FieldGroup className="gap-4">
 					<Controller
 						control={form.control}
-						name="email"
+						name="newPassword"
 						render={({ field, fieldState }) => (
 							<Field className="gap-1.5" data-invalid={fieldState.invalid}>
-								<FieldLabel htmlFor="email" className="text-foreground">
-									Email
+								<FieldLabel htmlFor="newPassword" className="text-foreground">
+									New password*
 								</FieldLabel>
-								<Input
+								<InputPassword
 									{...field}
-									id="email"
-									type="email"
+									id="newPassword"
+									type="password"
 									aria-invalid={fieldState.invalid}
 									autoComplete="off"
 									required
-									className="hover:bg-secondary focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
 								/>
 								{fieldState.invalid && (
 									<FieldError
@@ -66,16 +101,21 @@ export const LoginForm = ({ onSubmit, isPending }: LoginFormProps) => {
 
 					<Controller
 						control={form.control}
-						name="password"
+						name="confirmNewPassword"
 						render={({ field, fieldState }) => (
 							<Field className="gap-1.5" data-invalid={fieldState.invalid}>
-								<FieldLabel htmlFor="password" className="text-foreground">
-									Password
+								<FieldLabel
+									htmlFor="confirmNewPassword"
+									className="text-foreground"
+								>
+									Confirm password*
 								</FieldLabel>
 								<InputPassword
 									{...field}
-									id="password"
+									id="confirmNewPassword"
+									type="password"
 									aria-invalid={fieldState.invalid}
+									autoComplete="off"
 									required
 								/>
 								{fieldState.invalid && (
@@ -94,27 +134,16 @@ export const LoginForm = ({ onSubmit, isPending }: LoginFormProps) => {
 							className="w-full h-11.5 rounded-lg hover:bg-chart-3 cursor-pointer font-semibold"
 							disabled={isPending}
 						>
-							Log in
+							Reset password
 						</Button>
 
 						<div className="flex flex-col gap-3 w-full mt-8">
 							<FieldDescription className="text-center font-medium [&>a]:no-underline">
-								Forgot password?{' '}
 								<Link
-									href="/request-password-reset"
-									className="font-semibold text-sm text-foreground outline-none focus-visible:p-0.5 focus-visible:rounded  focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2"
-								>
-									Reset it
-								</Link>
-							</FieldDescription>
-
-							<FieldDescription className="text-center font-medium [&>a]:no-underline">
-								Don&apos;t have an account?{' '}
-								<Link
-									href="/signup"
+									href="/login"
 									className="font-semibold text-sm text-foreground outline-none focus-visible:p-0.5 focus-visible:rounded focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2"
 								>
-									Sign up
+									Back to login
 								</Link>
 							</FieldDescription>
 						</div>

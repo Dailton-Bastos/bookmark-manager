@@ -1,6 +1,11 @@
 import { describe, expect, it } from '@jest/globals'
 import { ZodError } from 'zod'
-import { loginSchema, signupSchema } from './auth.schema'
+import {
+	loginSchema,
+	requestPasswordResetSchema,
+	resetPasswordSchema,
+	signupSchema
+} from './auth.schema'
 
 describe('AuthSchema', () => {
 	describe('LoginSchema', () => {
@@ -117,6 +122,164 @@ describe('AuthSchema', () => {
 
 				expect(passwordIssue).toBeDefined()
 				expect(passwordIssue?.code).toBe('too_big')
+			}
+		})
+	})
+
+	describe('RequestPasswordResetSchema', () => {
+		it('should validate a valid request password reset object', () => {
+			const validRequest = {
+				email: 'john.doe@example.com'
+			}
+
+			const result = requestPasswordResetSchema.safeParse(validRequest)
+
+			expect(result.success).toBe(true)
+			expect(result.data?.email).toBe('john.doe@example.com')
+		})
+
+		it('should fail validation for an invalid request password reset object', () => {
+			const invalidRequest = {
+				email: 'invalid-email'
+			}
+
+			const result = requestPasswordResetSchema.safeParse(invalidRequest)
+
+			expect(result.success).toBe(false)
+
+			if (!result.success) {
+				expect(result.error).toBeInstanceOf(ZodError)
+				expect(result.error.issues.length).toBe(1)
+
+				const emailIssue = result.error.issues.find(
+					(issue) => issue.path[0] === 'email'
+				)
+
+				expect(emailIssue).toBeDefined()
+				expect(emailIssue?.code).toBe('invalid_format')
+			}
+		})
+	})
+
+	describe('ResetPasswordSchema', () => {
+		it('should validate a valid reset password object', () => {
+			const validReset = {
+				newPassword: 'newpassword123',
+				confirmNewPassword: 'newpassword123',
+				token: 'validtoken'
+			}
+
+			const result = resetPasswordSchema.safeParse(validReset)
+
+			expect(result.success).toBe(true)
+			expect(result.data?.newPassword).toBe('newpassword123')
+			expect(result.data?.confirmNewPassword).toBe('newpassword123')
+			expect(result.data?.token).toBe('validtoken')
+		})
+
+		it('should fail validation for a reset password object with mismatched passwords', () => {
+			const invalidReset = {
+				newPassword: 'newpassword123',
+				confirmNewPassword: 'differentpassword',
+				token: 'validtoken'
+			}
+
+			const result = resetPasswordSchema.safeParse(invalidReset)
+
+			expect(result.success).toBe(false)
+
+			if (!result.success) {
+				expect(result.error).toBeInstanceOf(ZodError)
+				expect(result.error.issues.length).toBe(1)
+
+				const confirmNewPasswordIssue = result.error.issues.find(
+					(issue) => issue.path[0] === 'confirmNewPassword'
+				)
+
+				expect(confirmNewPasswordIssue).toBeDefined()
+				expect(confirmNewPasswordIssue?.message).toBe('Passwords do not match')
+			}
+		})
+
+		it('should fail validation for a reset password object with missing fields', () => {
+			const invalidReset = {
+				newPassword: '',
+				confirmNewPassword: '',
+				token: ''
+			}
+
+			const result = resetPasswordSchema.safeParse(invalidReset)
+
+			expect(result.success).toBe(false)
+
+			if (!result.success) {
+				expect(result.error).toBeInstanceOf(ZodError)
+				expect(result.error.issues.length).toBe(3)
+
+				const newPasswordIssue = result.error.issues.find(
+					(issue) => issue.path[0] === 'newPassword'
+				)
+				const confirmNewPasswordIssue = result.error.issues.find(
+					(issue) => issue.path[0] === 'confirmNewPassword'
+				)
+				const tokenIssue = result.error.issues.find(
+					(issue) => issue.path[0] === 'token'
+				)
+
+				expect(newPasswordIssue).toBeDefined()
+				expect(confirmNewPasswordIssue).toBeDefined()
+				expect(tokenIssue).toBeDefined()
+				expect(newPasswordIssue?.code).toBe('too_small')
+				expect(confirmNewPasswordIssue?.code).toBe('too_small')
+				expect(tokenIssue?.code).toBe('too_small')
+			}
+		})
+
+		it('should fail validation for a reset password object with a new password that is too long', () => {
+			const invalidReset = {
+				newPassword: 'a'.repeat(101),
+				confirmNewPassword: 'a'.repeat(101),
+				token: 'validtoken'
+			}
+
+			const result = resetPasswordSchema.safeParse(invalidReset)
+
+			expect(result.success).toBe(false)
+
+			if (!result.success) {
+				expect(result.error).toBeInstanceOf(ZodError)
+				expect(result.error.issues.length).toBe(1)
+
+				const newPasswordIssue = result.error.issues.find(
+					(issue) => issue.path[0] === 'newPassword'
+				)
+
+				expect(newPasswordIssue).toBeDefined()
+				expect(newPasswordIssue?.code).toBe('too_big')
+			}
+		})
+
+		it('should fail validation for a reset password object with a new password that is too short', () => {
+			const invalidReset = {
+				newPassword: 'short',
+				confirmNewPassword: 'short',
+				token: 'validtoken'
+			}
+
+			const result = resetPasswordSchema.safeParse(invalidReset)
+
+			expect(result.success).toBe(false)
+
+			if (!result.success) {
+				expect(result.error).toBeInstanceOf(ZodError)
+				expect(result.error.issues.length).toBe(1)
+
+				const newPasswordIssue = result.error.issues.find(
+					(issue) => issue.path[0] === 'newPassword'
+				)
+
+				expect(newPasswordIssue).toBeDefined()
+				expect(newPasswordIssue?.code).toBe('too_small')
 			}
 		})
 	})

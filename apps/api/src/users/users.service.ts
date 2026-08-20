@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common'
 import { ORPCError } from '@orpc/nest'
 import type {
+	RequestPasswordResetFormData,
+	ResetPasswordFormData,
 	UpdateUserPasswordInput,
 	UpdateUserProfileInput,
 	UserProfile
@@ -16,7 +18,12 @@ import { eq } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres/driver'
 import { CacheProvider } from '../cache/cache.provider'
 import { schema } from '../database/schemas'
-import { USER_PROFILE_CACHE_KEY } from '../shared/constants/cache'
+import { EnvService } from '../env/env.service'
+import {
+	RESET_PASSWORD_CACHE_KEY,
+	RESET_PASSWORD_TOKEN_CACHE_KEY,
+	USER_PROFILE_CACHE_KEY
+} from '../shared/constants/cache'
 import { DATABASE_CONNECTION } from '../shared/constants/database'
 
 @Injectable()
@@ -25,7 +32,8 @@ export class UsersService {
 		@Inject(DATABASE_CONNECTION)
 		private readonly db: NodePgDatabase<typeof schema>,
 		private readonly cacheProvider: CacheProvider,
-		private readonly authService: AuthService
+		private readonly authService: AuthService,
+		private readonly env: EnvService
 	) {}
 
 	async getProfile(userId: string): Promise<UserProfile | null> {
@@ -136,6 +144,78 @@ export class UsersService {
 
 			throw new ORPCError('INTERNAL_ERROR', {
 				message: 'An error occurred while updating the password'
+			})
+		}
+	}
+
+	async requestPasswordReset({
+		email
+	}: RequestPasswordResetFormData): Promise<void> {
+		const cacheKey = `${RESET_PASSWORD_CACHE_KEY}_${email}`
+		const ttl = 3_600_000 // Cache for 1 hour in milliseconds
+
+		// Check if the password reset request is already cached
+		const cachedRequest = await this.cacheProvider.get<string>(cacheKey)
+
+		if (cachedRequest) {
+			throw new BadRequestException(
+				'Password reset request already sent. Please check your email for the reset link.'
+			)
+		}
+
+		const redirectTo = this.env.get('UI_URL_RESET_PASSWORD_REDIRECT')
+
+		try {
+			await this.authService.api.requestPasswordReset({
+				body: { email, redirectTo }
+			})
+
+			// Cache the email for future requests
+			await this.cacheProvider.set<string>(cacheKey, email, ttl)
+		} catch {
+			throw new ORPCError('INTERNAL_ERROR', {
+				message: 'An error occurred while requesting password reset'
+			})
+		}
+	}
+
+	async resetPassword({
+		token,
+		newPassword,
+		confirmNewPassword
+	}: ResetPasswordFormData): Promise<void> {
+		const cacheKey = `${RESET_PASSWORD_TOKEN_CACHE_KEY}_${token}`
+
+		const ttl = 3_600_000 // Cache for 1 hour in milliseconds
+
+		if (newPassword !== confirmNewPassword) {
+			throw new BadRequestException(
+				'New password and confirm password do not match'
+			)
+		}
+
+		// Check if the password reset token is already cached
+		const cachedRequest = await this.cacheProvider.get<string>(cacheKey)
+
+		if (cachedRequest) return // Token already used, no need to reset again
+
+		try {
+			await this.authService.api.resetPassword({
+				body: { token, newPassword }
+			})
+
+			// Cache the token for future requests
+			await this.cacheProvider.set<string>(cacheKey, token, ttl)
+		} catch (error) {
+			if (error instanceof APIError) {
+				if (error.status === 'BAD_REQUEST') {
+					throw new BadRequestException(
+						error.message || 'Invalid or expired password reset token'
+					)
+				}
+			}
+			throw new ORPCError('INTERNAL_ERROR', {
+				message: 'An error occurred while resetting the password'
 			})
 		}
 	}

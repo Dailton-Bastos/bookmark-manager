@@ -1,10 +1,14 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { type LoginFormData, loginSchema } from '@repo/schemas'
+import {
+	type RequestPasswordResetFormData,
+	requestPasswordResetSchema
+} from '@repo/schemas'
+import { useMutation } from '@tanstack/react-query'
 import Link from 'next/link'
 import { Controller, useForm } from 'react-hook-form'
-import { InputPassword } from 'ui/components/input-password'
+import { toast } from 'sonner'
 import { Button } from 'ui/components/shadcn/ui/button'
 import {
 	Field,
@@ -14,28 +18,50 @@ import {
 	FieldLabel
 } from 'ui/components/shadcn/ui/field'
 import { Input } from 'ui/components/shadcn/ui/input'
+import { orpcClient } from '@/lib/orpc-client'
 import { CardWrapper } from './card-wrapper'
 
-interface LoginFormProps {
-	onSubmit: (data: LoginFormData) => Promise<void>
-	isPending: boolean
-}
-
-export const LoginForm = ({ onSubmit, isPending }: LoginFormProps) => {
-	const form = useForm<LoginFormData>({
-		resolver: zodResolver(loginSchema),
+export const RequestPasswordResetForm = () => {
+	const form = useForm<RequestPasswordResetFormData>({
+		resolver: zodResolver(requestPasswordResetSchema),
 		defaultValues: {
-			email: '',
-			password: ''
+			email: ''
 		}
 	})
 
+	const { isPending, mutateAsync } = useMutation(
+		orpcClient.user.requestPasswordReset.mutationOptions({
+			onSuccess: () => form.reset()
+		})
+	)
+
+	const onSubmit = async (data: RequestPasswordResetFormData) => {
+		toast.promise(mutateAsync(data), {
+			loading: 'Sending password reset link...',
+			success:
+				'If this email exists in our system, check your email for the reset link.',
+			error: (err) => {
+				if (err instanceof Error) {
+					if (err.message.includes('Bad Request')) {
+						return 'Please check your email for the reset link.'
+					}
+				}
+
+				return 'An error occurred while sending the password reset link.'
+			},
+			duration: 5000
+		})
+	}
+
 	return (
 		<CardWrapper
-			headerTitle="Log in to your account"
-			headerDescription="Welcome back! Please enter your details"
+			headerTitle="Forgot your password?"
+			headerDescription="Enter your email address below and we'll send you a link to reset your password."
 		>
-			<form id="form-login" onSubmit={form.handleSubmit(onSubmit)}>
+			<form
+				id="form-request-password-reset"
+				onSubmit={form.handleSubmit(onSubmit)}
+			>
 				<FieldGroup className="gap-4">
 					<Controller
 						control={form.control}
@@ -43,7 +69,7 @@ export const LoginForm = ({ onSubmit, isPending }: LoginFormProps) => {
 						render={({ field, fieldState }) => (
 							<Field className="gap-1.5" data-invalid={fieldState.invalid}>
 								<FieldLabel htmlFor="email" className="text-foreground">
-									Email
+									Email*
 								</FieldLabel>
 								<Input
 									{...field}
@@ -64,57 +90,22 @@ export const LoginForm = ({ onSubmit, isPending }: LoginFormProps) => {
 						)}
 					/>
 
-					<Controller
-						control={form.control}
-						name="password"
-						render={({ field, fieldState }) => (
-							<Field className="gap-1.5" data-invalid={fieldState.invalid}>
-								<FieldLabel htmlFor="password" className="text-foreground">
-									Password
-								</FieldLabel>
-								<InputPassword
-									{...field}
-									id="password"
-									aria-invalid={fieldState.invalid}
-									required
-								/>
-								{fieldState.invalid && (
-									<FieldError
-										errors={[fieldState.error]}
-										className="font-medium"
-									/>
-								)}
-							</Field>
-						)}
-					/>
-
 					<Field>
 						<Button
 							type="submit"
 							className="w-full h-11.5 rounded-lg hover:bg-chart-3 cursor-pointer font-semibold"
 							disabled={isPending}
 						>
-							Log in
+							Send reset link
 						</Button>
 
 						<div className="flex flex-col gap-3 w-full mt-8">
 							<FieldDescription className="text-center font-medium [&>a]:no-underline">
-								Forgot password?{' '}
 								<Link
-									href="/request-password-reset"
-									className="font-semibold text-sm text-foreground outline-none focus-visible:p-0.5 focus-visible:rounded  focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2"
-								>
-									Reset it
-								</Link>
-							</FieldDescription>
-
-							<FieldDescription className="text-center font-medium [&>a]:no-underline">
-								Don&apos;t have an account?{' '}
-								<Link
-									href="/signup"
+									href="/login"
 									className="font-semibold text-sm text-foreground outline-none focus-visible:p-0.5 focus-visible:rounded focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2"
 								>
-									Sign up
+									Back to login
 								</Link>
 							</FieldDescription>
 						</div>

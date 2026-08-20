@@ -29,13 +29,16 @@ jest.mock('@repo/contract', () => ({
 		user: {
 			getProfile: 'user.getProfile',
 			updateProfile: 'user.updateProfile',
-			updatePassword: 'user.updatePassword'
+			updatePassword: 'user.updatePassword',
+			requestPasswordReset: 'user.requestPasswordReset',
+			resetPassword: 'user.resetPassword'
 		}
 	}
 }))
 
 jest.mock('@thallesp/nestjs-better-auth', () => ({
-	Session: () => jest.fn()
+	Session: () => jest.fn(),
+	AllowAnonymous: () => jest.fn()
 }))
 
 describe('UsersController', () => {
@@ -44,6 +47,8 @@ describe('UsersController', () => {
 		getProfile: jest.Mock
 		updateProfile: jest.Mock
 		updatePassword: jest.Mock
+		requestPasswordReset: jest.Mock
+		resetPassword: jest.Mock
 	}
 
 	beforeEach(async () => {
@@ -59,7 +64,9 @@ describe('UsersController', () => {
 					useValue: {
 						getProfile: jest.fn(),
 						updateProfile: jest.fn(),
-						updatePassword: jest.fn()
+						updatePassword: jest.fn(),
+						requestPasswordReset: jest.fn(),
+						resetPassword: jest.fn()
 					}
 				}
 			]
@@ -176,6 +183,46 @@ describe('UsersController', () => {
 			},
 			headersMock
 		)
+		expect(handlerMock).toHaveBeenCalled()
+		expect(result).toBeUndefined()
+	})
+
+	it('should request password reset correctly', async () => {
+		usersServiceMock.requestPasswordReset.mockResolvedValue(true)
+		handlerMock.mockImplementation(async (resolver) => {
+			return resolver({ input: { email: 'john.doe@example.com' } })
+		})
+
+		const result = await controller.requestPasswordReset()
+
+		expect(implement).toHaveBeenCalledWith(contract.user.requestPasswordReset)
+		expect(usersServiceMock.requestPasswordReset).toHaveBeenCalledWith({
+			email: 'john.doe@example.com'
+		})
+		expect(handlerMock).toHaveBeenCalled()
+		expect(result).toBeUndefined()
+	})
+
+	it('should reset password correctly', async () => {
+		usersServiceMock.resetPassword.mockResolvedValue(true)
+		handlerMock.mockImplementation(async (resolver) => {
+			return resolver({
+				input: {
+					token: 'reset-token',
+					newPassword: 'new-password',
+					confirmNewPassword: 'new-password'
+				}
+			})
+		})
+
+		const result = await controller.resetPassword()
+
+		expect(implement).toHaveBeenCalledWith(contract.user.resetPassword)
+		expect(usersServiceMock.resetPassword).toHaveBeenCalledWith({
+			token: 'reset-token',
+			newPassword: 'new-password',
+			confirmNewPassword: 'new-password'
+		})
 		expect(handlerMock).toHaveBeenCalled()
 		expect(result).toBeUndefined()
 	})

@@ -1,7 +1,11 @@
 import { Controller, Headers } from '@nestjs/common'
 import { Implement, implement, ORPCError } from '@orpc/nest'
 import { contract } from '@repo/contract'
-import { Session, type UserSession } from '@thallesp/nestjs-better-auth'
+import {
+	AllowAnonymous,
+	Session,
+	type UserSession
+} from '@thallesp/nestjs-better-auth'
 import { UsersService } from './users.service'
 
 @Controller()
@@ -51,5 +55,23 @@ export class UsersController {
 				await this.usersService.updatePassword(session.user.id, input, headers)
 			}
 		)
+	}
+
+	@Implement(contract.user.requestPasswordReset)
+	@AllowAnonymous()
+	requestPasswordReset() {
+		return implement(contract.user.requestPasswordReset).handler(
+			async ({ input }) => {
+				await this.usersService.requestPasswordReset(input)
+			}
+		)
+	}
+
+	@Implement(contract.user.resetPassword)
+	@AllowAnonymous()
+	resetPassword() {
+		return implement(contract.user.resetPassword).handler(async ({ input }) => {
+			await this.usersService.resetPassword(input)
+		})
 	}
 }
