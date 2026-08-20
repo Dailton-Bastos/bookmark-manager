@@ -3,6 +3,7 @@ import { MailerModule, MailerQueueModule } from '@nestjs-modules/mailer'
 import Redis from 'ioredis'
 import { EnvModule } from '../env/env.module'
 import { EnvService } from '../env/env.service'
+import { RedisModule } from '../redis/redis.module'
 import { REDIS_CLIENT } from '../shared/constants/redis'
 import { MailService } from './mail.service'
 
@@ -28,7 +29,7 @@ import { MailService } from './mail.service'
 			inject: [EnvService]
 		}),
 		MailerQueueModule.registerAsync({
-			imports: [EnvModule],
+			imports: [RedisModule],
 			useFactory: (redisClient: Redis) => ({
 				connection: redisClient,
 				global: true,
