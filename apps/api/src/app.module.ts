@@ -85,9 +85,16 @@ const logger = new Logger('oRPC')
 						onPasswordReset: async ({ user }) => {
 							// TODO: Implement logic to handle password reset confirmation here
 
-							// Invalidate the password reset token cache after a successful password reset
+							// Invalidate the per-email password reset request cache after a successful password reset
 							const cacheKey = `${RESET_PASSWORD_CACHE_KEY}_${user.email}`
-							await cacheProvider.del(cacheKey)
+							try {
+								await cacheProvider.del(cacheKey)
+							} catch {
+								// Log the error but don't throw it, as we don't want to block the password reset flow if cache invalidation fails
+								logger.error(
+									`Failed to invalidate password reset cache for user with email: ${user.email}`
+								)
+							}
 						}
 					},
 					trustedOrigins: [envService.get('UI_URL')]
