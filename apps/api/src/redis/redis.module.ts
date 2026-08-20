@@ -1,10 +1,34 @@
-import { Global, Logger, Module } from '@nestjs/common'
+import {
+	Global,
+	Inject,
+	Injectable,
+	Logger,
+	Module,
+	OnApplicationShutdown
+} from '@nestjs/common'
 import Redis from 'ioredis'
 import { EnvModule } from '../env/env.module'
 import { EnvService } from '../env/env.service'
 import { REDIS_CLIENT } from '../shared/constants/redis'
 
 const logger = new Logger('RedisModule')
+
+@Injectable()
+export class RedisClientCleanupService implements OnApplicationShutdown {
+	private readonly logger = new Logger(RedisClientCleanupService.name)
+
+	constructor(@Inject(REDIS_CLIENT) private readonly redisClient: Redis) {}
+
+	async onApplicationShutdown() {
+		try {
+			await this.redisClient.quit()
+			this.logger.log('Redis client closed')
+		} catch (error) {
+			this.redisClient.disconnect()
+			this.logger.error('Error closing Redis client', error)
+		}
+	}
+}
 
 @Global()
 @Module({
@@ -22,7 +46,8 @@ const logger = new Logger('RedisModule')
 				return redis
 			},
 			inject: [EnvService]
-		}
+		},
+		RedisClientCleanupService
 	],
 	exports: [REDIS_CLIENT]
 })
