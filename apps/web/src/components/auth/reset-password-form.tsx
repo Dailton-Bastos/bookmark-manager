@@ -71,7 +71,7 @@ export const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
 			headerTitle="Reset your password"
 			headerDescription="Enter your new password below. Make sure it is strong and secure."
 		>
-			<form id="form-signup" onSubmit={form.handleSubmit(onSubmit)}>
+			<form id="form-reset-password" onSubmit={form.handleSubmit(onSubmit)}>
 				<FieldGroup className="gap-4">
 					<Controller
 						control={form.control}

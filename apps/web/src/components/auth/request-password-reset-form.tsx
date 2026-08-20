@@ -58,7 +58,10 @@ export const RequestPasswordResetForm = () => {
 			headerTitle="Forgot your password?"
 			headerDescription="Enter your email address below and we'll send you a link to reset your password."
 		>
-			<form id="form-signup" onSubmit={form.handleSubmit(onSubmit)}>
+			<form
+				id="form-request-password-reset"
+				onSubmit={form.handleSubmit(onSubmit)}
+			>
 				<FieldGroup className="gap-4">
 					<Controller
 						control={form.control}
