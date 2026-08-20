@@ -197,11 +197,7 @@ export class UsersService {
 		// Check if the password reset token is already cached
 		const cachedRequest = await this.cacheProvider.get<string>(cacheKey)
 
-		if (cachedRequest) {
-			throw new BadRequestException(
-				'Password reset token has already been used. Please request a new password reset.'
-			)
-		}
+		if (cachedRequest) return // Token already used, no need to reset again
 
 		try {
 			await this.authService.api.resetPassword({

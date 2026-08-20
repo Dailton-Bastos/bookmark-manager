@@ -483,19 +483,6 @@ describe('UsersService', () => {
 			)
 		})
 
-		it('should throw BadRequestException if password reset token is already cached', async () => {
-			jest.spyOn(cacheProvider, 'get').mockResolvedValue(true)
-
-			const promise = service.resetPassword(resetPasswordInputMock)
-
-			await expect(promise).rejects.toThrow(BadRequestException)
-			await expect(promise).rejects.toThrow(
-				'Password reset token has already been used. Please request a new password reset.'
-			)
-
-			expect(authService.api.resetPassword).not.toHaveBeenCalled()
-		})
-
 		it('should throw INTERNAL_ERROR if authService.api.resetPassword fails', async () => {
 			jest.spyOn(cacheProvider, 'get').mockResolvedValue(false)
 			jest
