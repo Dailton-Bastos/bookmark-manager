@@ -9,9 +9,11 @@ import { schema } from '../../database/schemas'
 import { EnvService } from '../../env/env.service'
 import {
 	RESET_PASSWORD_CACHE_KEY,
+	RESET_PASSWORD_TOKEN_CACHE_KEY,
 	USER_PROFILE_CACHE_KEY
 } from '../../shared/constants/cache'
 import { DATABASE_CONNECTION } from '../../shared/constants/database'
+import { resetPasswordInputMock } from '../__mocks__/reset-password.mock'
 import { userMock } from '../__mocks__/user.mock'
 import { UsersService } from '../users.service'
 
@@ -85,7 +87,8 @@ describe('UsersService', () => {
 					useValue: {
 						api: {
 							changePassword: jest.fn(),
-							requestPasswordReset: jest.fn()
+							requestPasswordReset: jest.fn(),
+							resetPassword: jest.fn()
 						}
 					}
 				},
@@ -461,6 +464,101 @@ describe('UsersService', () => {
 			expect(cacheManager.set).toHaveBeenCalledWith(
 				`${RESET_PASSWORD_CACHE_KEY}_${email}`,
 				email,
+				3_600_000
+			)
+		})
+	})
+
+	describe('resetPassword', () => {
+		it('should throw BadRequestException if new password and confirm new password do not match', async () => {
+			const promise = service.resetPassword({
+				newPassword: 'newPassword123',
+				confirmNewPassword: 'differentPassword123',
+				token: 'valid-reset-token'
+			})
+
+			await expect(promise).rejects.toThrow(BadRequestException)
+			await expect(promise).rejects.toThrow(
+				'New password and confirm password do not match'
+			)
+		})
+
+		it('should throw BadRequestException if password reset token is already cached', async () => {
+			jest.spyOn(cacheProvider, 'get').mockResolvedValue(true)
+
+			const promise = service.resetPassword(resetPasswordInputMock)
+
+			await expect(promise).rejects.toThrow(BadRequestException)
+			await expect(promise).rejects.toThrow(
+				'Password reset request already used or expired. Please request a new password reset.'
+			)
+
+			expect(authService.api.resetPassword).not.toHaveBeenCalled()
+		})
+
+		it('should throw INTERNAL_ERROR if authService.api.resetPassword fails', async () => {
+			jest.spyOn(cacheProvider, 'get').mockResolvedValue(false)
+			jest
+				.spyOn(authService.api, 'resetPassword')
+				.mockRejectedValue(new Error('some upstream error'))
+
+			const promise = service.resetPassword(resetPasswordInputMock)
+
+			await expect(promise).rejects.toThrow(
+				'An error occurred while resetting the password'
+			)
+			expect(authService.api.resetPassword).toHaveBeenCalledWith({
+				body: {
+					token: resetPasswordInputMock.token,
+					newPassword: resetPasswordInputMock.newPassword
+				}
+			})
+			expect(cacheManager.set).not.toHaveBeenCalled()
+		})
+
+		it('should throw BAD_REQUEST if authService.api.resetPassword fails with BAD_REQUEST', async () => {
+			jest.spyOn(cacheProvider, 'get').mockResolvedValue(false)
+			jest.spyOn(authService.api, 'resetPassword').mockRejectedValue(
+				new APIError('BAD_REQUEST', {
+					message: 'Invalid or expired password reset token'
+				})
+			)
+
+			const promise = service.resetPassword(resetPasswordInputMock)
+
+			await expect(promise).rejects.toThrow(BadRequestException)
+			await expect(promise).rejects.toThrow(
+				'Invalid or expired password reset token'
+			)
+			expect(authService.api.resetPassword).toHaveBeenCalledWith({
+				body: {
+					token: resetPasswordInputMock.token,
+					newPassword: resetPasswordInputMock.newPassword
+				}
+			})
+			expect(cacheManager.set).not.toHaveBeenCalled()
+		})
+
+		it('should call authService.api.resetPassword with correct parameters and cache the token', async () => {
+			jest.spyOn(cacheProvider, 'get').mockResolvedValue(false)
+
+			// Mock the authService.api.resetPassword to resolve successfully
+			jest.spyOn(authService.api, 'resetPassword').mockResolvedValue({
+				status: true
+			})
+
+			const promise = service.resetPassword(resetPasswordInputMock)
+
+			await expect(promise).resolves.toBeUndefined()
+			expect(authService.api.resetPassword).toHaveBeenCalledWith({
+				body: {
+					token: resetPasswordInputMock.token,
+					newPassword: resetPasswordInputMock.newPassword
+				}
+			})
+			expect(cacheManager.set).toHaveBeenCalledWith(
+				`${RESET_PASSWORD_TOKEN_CACHE_KEY}_${resetPasswordInputMock.token}`,
+				resetPasswordInputMock.token,
 				3_600_000
 			)
 		})
