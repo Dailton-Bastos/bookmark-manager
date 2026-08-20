@@ -490,7 +490,7 @@ describe('UsersService', () => {
 
 			await expect(promise).rejects.toThrow(BadRequestException)
 			await expect(promise).rejects.toThrow(
-				'Password reset request already used or expired. Please request a new password reset.'
+				'Password reset token has already been used. Please request a new password reset.'
 			)
 
 			expect(authService.api.resetPassword).not.toHaveBeenCalled()

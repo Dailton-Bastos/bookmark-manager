@@ -199,7 +199,7 @@ export class UsersService {
 
 		if (cachedRequest) {
 			throw new BadRequestException(
-				'Password reset request already used or expired. Please request a new password reset.'
+				'Password reset token has already been used. Please request a new password reset.'
 			)
 		}
 
