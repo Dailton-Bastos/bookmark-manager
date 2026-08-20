@@ -42,7 +42,7 @@
 **/*.pid.lock
 pgdata/
 pgadmin/
-redis/
+redis/dump.rdb
 redisinsight/
 
 # IDEs and editors

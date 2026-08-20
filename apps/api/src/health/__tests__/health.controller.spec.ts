@@ -5,6 +5,7 @@ import {
 	MemoryHealthIndicator
 } from '@nestjs/terminus'
 import { Test, TestingModule } from '@nestjs/testing'
+import { MailerHealthIndicator } from '@nestjs-modules/mailer'
 import { DatabaseHealthIndicator } from '../../database/database.health'
 import { DATABASE_HEALTH_INDICATOR } from '../../shared/constants/database'
 import { downMock } from '../__mock__/down.mock'
@@ -56,6 +57,14 @@ describe('HealthController', () => {
 							.fn()
 							.mockResolvedValue({} as HealthIndicatorResult<'database'>)
 					} as Pick<DatabaseHealthIndicator, 'isHealthy'>
+				},
+				{
+					provide: MailerHealthIndicator,
+					useValue: {
+						isHealthy: jest
+							.fn()
+							.mockResolvedValue({} as HealthIndicatorResult<'mailer'>)
+					} as Pick<MailerHealthIndicator, 'isHealthy'>
 				}
 			]
 		}).compile()
@@ -70,6 +79,7 @@ describe('HealthController', () => {
 		const result = await healthController.check()
 
 		expect(health.check).toHaveBeenCalledWith([
+			expect.any(Function),
 			expect.any(Function),
 			expect.any(Function),
 			expect.any(Function),

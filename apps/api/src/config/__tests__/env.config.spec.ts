@@ -20,7 +20,12 @@ describe('EnvConfig', () => {
 				REDIS_URL: 'redis://localhost:6379',
 				CACHE_TTL: 60000,
 				BRANDFETCH_API_CLIENT: 'client_id',
-				UI_URL_RESET_PASSWORD_REDIRECT: 'http://localhost:3000/reset-password'
+				UI_URL_RESET_PASSWORD_REDIRECT: 'http://localhost:3000/reset-password',
+				MAIL_HOST: 'smtp.example.com',
+				MAIL_PORT: '587',
+				MAIL_USER: 'user',
+				MAIL_PASSWORD: 'password',
+				MAIL_FROM: 'no-reply@example.com'
 			}
 
 			expect(() => validate(config)).not.toThrow()

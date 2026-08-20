@@ -22,7 +22,9 @@ import { DatabaseModule } from './database/database.module'
 import { EnvModule } from './env/env.module'
 import { EnvService } from './env/env.service'
 import { HealthModule } from './health/health.module'
+import { MailModule } from './mail/mail.module'
 import { PaginationModule } from './pagination/pagination.module'
+import { RedisModule } from './redis/redis.module'
 import { RESET_PASSWORD_CACHE_KEY } from './shared/constants/cache'
 import { DATABASE_CONNECTION } from './shared/constants/database'
 import { requestContextStorage } from './shared/request-context'
@@ -160,7 +162,9 @@ const logger = new Logger('oRPC')
 		TagsModule,
 		PaginationModule,
 		UploadModule,
-		UsersModule
+		UsersModule,
+		RedisModule,
+		MailModule
 	],
 	controllers: [],
 	providers: []

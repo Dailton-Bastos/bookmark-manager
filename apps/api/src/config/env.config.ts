@@ -48,7 +48,12 @@ const envSchema = z.object({
 	UI_URL_RESET_PASSWORD_REDIRECT: z.url({
 		protocol: /^https?$/,
 		message: 'UI_URL_RESET_PASSWORD_REDIRECT must be a valid URL'
-	})
+	}),
+	MAIL_HOST: z.string().nonempty({ message: 'MAIL_HOST is required' }),
+	MAIL_PORT: z.coerce.number().default(587),
+	MAIL_USER: z.string().nonempty({ message: 'MAIL_USER is required' }),
+	MAIL_PASSWORD: z.string().nonempty({ message: 'MAIL_PASSWORD is required' }),
+	MAIL_FROM: z.email({ message: 'MAIL_FROM must be a valid email' })
 })
 
 export const validate = (config: Record<string, unknown>) => {
