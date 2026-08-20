@@ -25,7 +25,10 @@ export class RedisClientCleanupService implements OnApplicationShutdown {
 			this.logger.log('Redis client closed')
 		} catch (error) {
 			this.redisClient.disconnect()
-			this.logger.error('Error closing Redis client', error)
+			this.logger.error(
+				'Error closing Redis client',
+				(error as Error).stack ?? String(error)
+			)
 		}
 	}
 }
@@ -41,7 +44,7 @@ export class RedisClientCleanupService implements OnApplicationShutdown {
 					maxRetriesPerRequest: null // Critical for BullMQ workers
 				})
 
-				redis.on('error', (err) => logger.error('Redis error:', err))
+				redis.on('error', (err) => logger.error(err.message, err.stack))
 
 				return redis
 			},
