@@ -54,7 +54,7 @@ const envSchema = z.object({
 	MAIL_USER: z.string().nonempty({ message: 'MAIL_USER is required' }),
 	MAIL_PASSWORD: z.string().nonempty({ message: 'MAIL_PASSWORD is required' }),
 	MAIL_FROM: z.email({ message: 'MAIL_FROM must be a valid email' }),
-	MAIL_VERIFY_TRANSPORTERS: z.boolean().default(false)
+	MAIL_VERIFY_TRANSPORTERS: z.coerce.boolean().default(false)
 })
 
 export const validate = (config: Record<string, unknown>) => {

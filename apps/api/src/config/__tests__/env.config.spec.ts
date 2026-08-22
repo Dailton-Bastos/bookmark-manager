@@ -25,7 +25,8 @@ describe('EnvConfig', () => {
 				MAIL_PORT: '587',
 				MAIL_USER: 'user',
 				MAIL_PASSWORD: 'password',
-				MAIL_FROM: 'no-reply@example.com'
+				MAIL_FROM: 'no-reply@example.com',
+				MAIL_VERIFY_TRANSPORTERS: 'false'
 			}
 
 			expect(() => validate(config)).not.toThrow()
