@@ -34,7 +34,7 @@ export class MailService {
 				template: 'reset-password',
 				context: {
 					url,
-					name: name ?? email,
+					name,
 					previewText: 'Click the link below to reset your password.',
 					title: 'Reset your password'
 				}
