@@ -83,6 +83,7 @@ const logger = new Logger('oRPC')
 					}),
 					emailAndPassword: {
 						enabled: true,
+						requireEmailVerification: true,
 						sendResetPassword: async ({ user, url }) => {
 							await mailService.sendResetPasswordEmail({ user, url })
 						},
@@ -107,6 +108,11 @@ const logger = new Logger('oRPC')
 									`Failed to invalidate password reset cache for user with email: ${user.email}`
 								)
 							}
+						}
+					},
+					emailVerification: {
+						sendVerificationEmail: async ({ user, url }) => {
+							await mailService.sendVerificationEmail({ user, url })
 						}
 					},
 					trustedOrigins: [envService.get('UI_URL')]
