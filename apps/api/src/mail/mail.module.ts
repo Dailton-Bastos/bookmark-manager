@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs'
-import path from 'node:path'
+import * as path from 'node:path'
 import { Global, Module } from '@nestjs/common'
 import { MailerModule, MailerQueueModule } from '@nestjs-modules/mailer'
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.adapter'
