@@ -44,6 +44,7 @@ pgdata/
 pgadmin/
 redis/dump.rdb
 redisinsight/
+mailpit/
 
 # IDEs and editors
 **/.idea

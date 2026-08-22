@@ -23,6 +23,7 @@ import { EnvModule } from './env/env.module'
 import { EnvService } from './env/env.service'
 import { HealthModule } from './health/health.module'
 import { MailModule } from './mail/mail.module'
+import { MailService } from './mail/mail.service'
 import { PaginationModule } from './pagination/pagination.module'
 import { RedisModule } from './redis/redis.module'
 import { RESET_PASSWORD_CACHE_KEY } from './shared/constants/cache'
@@ -72,7 +73,8 @@ const logger = new Logger('oRPC')
 			useFactory: (
 				database: NodePgDatabase,
 				envService: EnvService,
-				cacheProvider: CacheProvider
+				cacheProvider: CacheProvider,
+				mailService: MailService
 			) => ({
 				auth: betterAuth({
 					database: drizzleAdapter(database, {
@@ -81,8 +83,8 @@ const logger = new Logger('oRPC')
 					}),
 					emailAndPassword: {
 						enabled: true,
-						sendResetPassword: async () => {
-							// TODO: Implement email sending logic here
+						sendResetPassword: async ({ user, url }) => {
+							await mailService.sendResetPasswordEmail({ user, url })
 						},
 						onPasswordReset: async ({ user }) => {
 							// TODO: Implement logic to handle password reset confirmation here
@@ -102,7 +104,7 @@ const logger = new Logger('oRPC')
 					trustedOrigins: [envService.get('UI_URL')]
 				})
 			}),
-			inject: [DATABASE_CONNECTION, EnvService, CacheProvider]
+			inject: [DATABASE_CONNECTION, EnvService, CacheProvider, MailService]
 		}),
 		ORPCModule.forRoot({
 			context: () => ({ request: requestContextStorage.getStore() as Request }), // per-request context via AsyncLocalStorage

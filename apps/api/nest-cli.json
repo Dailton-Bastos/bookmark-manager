@@ -4,6 +4,8 @@
 	"sourceRoot": "src",
 	"compilerOptions": {
 		"deleteOutDir": true,
-		"builder": "webpack"
+		"builder": "webpack",
+		"assets": ["templates/**/*.hbs"],
+		"watchAssets": true
 	}
 }
