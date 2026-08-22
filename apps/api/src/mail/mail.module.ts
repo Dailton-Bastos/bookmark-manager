@@ -4,6 +4,7 @@ import { Global, Module } from '@nestjs/common'
 import { MailerModule, MailerQueueModule } from '@nestjs-modules/mailer'
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.adapter'
 import Redis from 'ioredis'
+import { CacheModule } from '../cache/cache.module'
 import { EnvModule } from '../env/env.module'
 import { EnvService } from '../env/env.service'
 import { helpersHandlebars } from '../helpers/helpers-handlebars'
@@ -75,7 +76,8 @@ const templateDir =
 			}),
 			inject: [REDIS_CLIENT]
 		}),
-		EnvModule
+		EnvModule,
+		CacheModule
 	],
 	providers: [MailService],
 	exports: [MailService]
