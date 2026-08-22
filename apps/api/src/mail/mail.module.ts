@@ -54,7 +54,9 @@ const templateDir =
 				defaults: {
 					from: envService.get('MAIL_FROM')
 				},
-				verifyTransporters: true,
+				verifyTransporters:
+					envService.get('NODE_ENV') === 'development' ||
+					envService.get('MAIL_VERIFY_TRANSPORTERS'),
 				preview: envService.get('NODE_ENV') === 'development'
 			}),
 			inject: [EnvService]
