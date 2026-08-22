@@ -74,9 +74,6 @@ export class MailService {
 
 		if (cachedRequest) return // Email verification request already sent, no need to send again
 
-		// Cache the email for future requests
-		await this.cacheProvider.set<string>(cacheKey, email, ttl)
-
 		// Send the verification email
 		await this.sendMail({
 			to: email,
@@ -90,5 +87,8 @@ export class MailService {
 				title: 'Verify your email address'
 			}
 		})
+
+		// Cache the email for future requests
+		await this.cacheProvider.set<string>(cacheKey, email, ttl)
 	}
 }
