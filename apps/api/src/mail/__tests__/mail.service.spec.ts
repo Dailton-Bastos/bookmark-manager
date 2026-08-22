@@ -77,4 +77,48 @@ describe('MailService', () => {
 			).rejects.toThrow('Send mail failed')
 		})
 	})
+
+	describe('sendOnPasswordResetConfirmationEmail', () => {
+		it('should call sendMail with correct parameters', async () => {
+			const { email, name } = mockUser
+			const requestPasswordResetUrl =
+				'http://example.com/request-password-reset'
+
+			const sendMailSpy = jest.spyOn(service, 'sendMail')
+
+			await service.sendOnPasswordResetConfirmationEmail({
+				user: mockUser,
+				requestPasswordResetUrl
+			})
+
+			expect(sendMailSpy).toHaveBeenCalledWith({
+				to: email,
+				subject: 'Your password has been reset',
+				template: 'password-reset-confirmation',
+				context: {
+					name,
+					previewText:
+						'Your password has been successfully reset. If you did not initiate this change, please contact support immediately.',
+					title: 'Password Reset Confirmation',
+					requestPasswordResetUrl
+				}
+			})
+		})
+
+		it('should propagate errors thrown by sendMail', async () => {
+			const requestPasswordResetUrl =
+				'http://example.com/request-password-reset'
+
+			jest
+				.spyOn(service, 'sendMail')
+				.mockRejectedValue(new Error('Send mail failed'))
+
+			await expect(
+				service.sendOnPasswordResetConfirmationEmail({
+					user: mockUser,
+					requestPasswordResetUrl
+				})
+			).rejects.toThrow('Send mail failed')
+		})
+	})
 })

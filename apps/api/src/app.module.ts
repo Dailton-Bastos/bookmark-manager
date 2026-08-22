@@ -87,7 +87,15 @@ const logger = new Logger('oRPC')
 							await mailService.sendResetPasswordEmail({ user, url })
 						},
 						onPasswordReset: async ({ user }) => {
-							// TODO: Implement logic to handle password reset confirmation here
+							const requestPasswordResetUrl = new URL(
+								'/request-password-reset',
+								envService.get('UI_URL')
+							).toString()
+
+							await mailService.sendOnPasswordResetConfirmationEmail({
+								user,
+								requestPasswordResetUrl
+							})
 
 							// Invalidate the per-email password reset request cache after a successful password reset
 							const cacheKey = `${RESET_PASSWORD_CACHE_KEY}_${user.email}`

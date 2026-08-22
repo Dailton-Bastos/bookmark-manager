@@ -32,4 +32,25 @@ export class MailService {
 			}
 		})
 	}
+
+	async sendOnPasswordResetConfirmationEmail({
+		user: { email, name },
+		requestPasswordResetUrl
+	}: {
+		user: BaseUserSession['user']
+		requestPasswordResetUrl: string
+	}): Promise<void> {
+		await this.sendMail({
+			to: email,
+			subject: 'Your password has been reset',
+			template: 'password-reset-confirmation',
+			context: {
+				name,
+				previewText:
+					'Your password has been successfully reset. If you did not initiate this change, please contact support immediately.',
+				title: 'Password Reset Confirmation',
+				requestPasswordResetUrl
+			}
+		})
+	}
 }
