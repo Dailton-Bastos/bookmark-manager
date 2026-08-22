@@ -84,15 +84,7 @@ const logger = new Logger('oRPC')
 					emailAndPassword: {
 						enabled: true,
 						sendResetPassword: async ({ user, url }) => {
-							try {
-								await mailService.sendResetPasswordEmail({ user, url })
-							} catch (error) {
-								logger.error(
-									`Failed to send reset password email to ${user.email}: ${
-										error instanceof Error ? error.message : String(error)
-									}`
-								)
-							}
+							await mailService.sendResetPasswordEmail({ user, url })
 						},
 						onPasswordReset: async ({ user }) => {
 							// TODO: Implement logic to handle password reset confirmation here
