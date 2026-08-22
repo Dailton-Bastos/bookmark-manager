@@ -39,13 +39,19 @@ export class MailService {
 					title: 'Reset your password'
 				}
 			})
-		} catch {
+		} catch (sendMailError) {
 			// If sending the email fails, we should still invalidate the cache to prevent abuse
 			try {
 				await this.cacheProvider.del(cacheKey)
 			} catch (error) {
 				throw new Error(error instanceof Error ? error.message : String(error))
 			}
+
+			throw new Error(
+				sendMailError instanceof Error
+					? sendMailError.message
+					: String(sendMailError)
+			)
 		}
 	}
 }
