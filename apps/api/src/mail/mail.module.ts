@@ -6,6 +6,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.ad
 import Redis from 'ioredis'
 import { EnvModule } from '../env/env.module'
 import { EnvService } from '../env/env.service'
+import { helpersHandlebars } from '../helpers/helpers-handlebars'
 import { RedisModule } from '../redis/redis.module'
 import { REDIS_CLIENT } from '../shared/constants/redis'
 import { MailService } from './mail.service'
@@ -36,14 +37,14 @@ const templateDir =
 				},
 				template: {
 					dir: templateDir,
-					adapter: new HandlebarsAdapter(),
+					adapter: new HandlebarsAdapter(helpersHandlebars(envService)), // Use the helpersHandlebars function to get the helpers
 					options: {
 						strict: true
 					}
 				},
 				options: {
 					partials: {
-						dir: path.join(templateDir, 'partials'),
+						dir: templateDir,
 						options: {
 							strict: true
 						}
@@ -73,7 +74,8 @@ const templateDir =
 				}
 			}),
 			inject: [REDIS_CLIENT]
-		})
+		}),
+		EnvModule
 	],
 	providers: [MailService],
 	exports: [MailService]
