@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { SignupForm } from '@/components/auth/signup-form'
 import { authClient } from '@/lib/auth-client'
-import { DEFAULT_LOGIN_REDIRECT } from '@/routes'
+import { DEFAULT_UNAUTHENTICATED_REDIRECT } from '@/routes'
 
 export const Signup = () => {
 	const router = useRouter()
@@ -33,7 +33,7 @@ export const Signup = () => {
 				}
 			)
 		},
-		onSuccess: () => router.push(DEFAULT_LOGIN_REDIRECT),
+		onSuccess: () => router.push(DEFAULT_UNAUTHENTICATED_REDIRECT),
 		onSettled: () =>
 			Promise.all([
 				queryClient.invalidateQueries({ queryKey: ['session'] }),

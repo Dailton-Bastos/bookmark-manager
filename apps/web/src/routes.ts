@@ -7,7 +7,9 @@ export const authRoutes: string[] = [
 	'/login',
 	'/signup',
 	'/request-password-reset',
-	'/reset-password'
+	'/reset-password',
+	'/email-verification',
+	'/request-email-verification'
 ]
 
 /**

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { LoginForm } from '@/components/auth/login-form'
 import { authClient } from '@/lib/auth-client'
+import { EMAIL_VERIFICATION_CALLBACK_URL } from '@/utils/auth-constants'
 import { getSafeCallbackUrl } from '@/utils/get-safe-callback-url'
 
 interface LoginProps {
@@ -25,7 +26,17 @@ export const Login = ({ callbackUrl }: LoginProps) => {
 					password: formData.password
 				},
 				{
-					onError: (ctx) => {
+					onError: async (ctx) => {
+						if (ctx.error.status === 403) {
+							await authClient.sendVerificationEmail({
+								email: formData.email,
+								callbackURL: EMAIL_VERIFICATION_CALLBACK_URL
+							})
+							throw new Error(
+								'Your account is not verified. Please check your email for the verification link.'
+							)
+						}
+
 						throw new Error(ctx.error.message)
 					}
 				}

@@ -18,6 +18,10 @@ export const requestPasswordResetSchema = z.object({
 	email: z.email('Please enter a valid email address')
 })
 
+export const requestEmailVerificationSchema = z.object({
+	email: z.email('Please enter a valid email address')
+})
+
 export const resetPasswordSchema = z
 	.object({
 		newPassword: z
@@ -38,3 +42,6 @@ export type RequestPasswordResetFormData = z.infer<
 	typeof requestPasswordResetSchema
 >
 export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>
+export type RequestEmailVerificationFormData = z.infer<
+	typeof requestEmailVerificationSchema
+>
