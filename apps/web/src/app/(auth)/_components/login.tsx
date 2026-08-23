@@ -25,7 +25,20 @@ export const Login = ({ callbackUrl }: LoginProps) => {
 					password: formData.password
 				},
 				{
-					onError: (ctx) => {
+					onError: async (ctx) => {
+						if (ctx.error.status === 403) {
+							await authClient.sendVerificationEmail({
+								email: formData.email,
+								callbackURL: new URL(
+									'/email-verification',
+									window.location.origin
+								).toString()
+							})
+							throw new Error(
+								'Your account is not verified. Please check your email for the verification link.'
+							)
+						}
+
 						throw new Error(ctx.error.message)
 					}
 				}
