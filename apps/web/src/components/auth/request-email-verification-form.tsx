@@ -18,7 +18,7 @@ import {
 } from 'ui/components/shadcn/ui/field'
 import { Input } from 'ui/components/shadcn/ui/input'
 import { authClient } from '@/lib/auth-client'
-import { EMAIL_VERIFICATION_CALLBACK_URL } from '@/utils/constants'
+import { EMAIL_VERIFICATION_CALLBACK_URL } from '@/utils/auth-constants'
 import { CardWrapper } from './card-wrapper'
 
 export const RequestEmailVerificationForm = () => {

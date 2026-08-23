@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { LoginForm } from '@/components/auth/login-form'
 import { authClient } from '@/lib/auth-client'
-import { EMAIL_VERIFICATION_CALLBACK_URL } from '@/utils/constants'
+import { EMAIL_VERIFICATION_CALLBACK_URL } from '@/utils/auth-constants'
 import { getSafeCallbackUrl } from '@/utils/get-safe-callback-url'
 
 interface LoginProps {
