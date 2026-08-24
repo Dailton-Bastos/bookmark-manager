@@ -2,15 +2,17 @@
 import { ImagePlus } from "lucide-react";
 import type * as React from "react";
 import { useRef, useState } from "react";
+import { cn } from "ui/lib/utils";
 import { Input } from "./shadcn/ui/input";
 
 interface FileUploadProps {
 	onFileSelected: (file: File) => void;
+	className?: string;
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-export const FileUpload = ({ onFileSelected }: FileUploadProps) => {
+export const FileUpload = ({ onFileSelected, className }: FileUploadProps) => {
 	const [fileErrorMessage, setFileErrorMessage] = useState<string | null>(null);
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -62,7 +64,10 @@ export const FileUpload = ({ onFileSelected }: FileUploadProps) => {
 	return (
 		<div className="flex flex-col items-center justify-center w-full h-full">
 			<div
-				className="flex flex-col justify-center w-18 h-18 md:w-32 md:h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg text-center cursor-pointer hover:border-muted-foreground/50 transition-colors"
+				className={cn(
+					"flex flex-col justify-center w-18 h-18 md:w-32 md:h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg text-center cursor-pointer hover:border-muted-foreground/50 transition-colors",
+					className,
+				)}
 				onDragOver={handleDragOver}
 				onDrop={handleDrop}
 				onClick={handleClick}

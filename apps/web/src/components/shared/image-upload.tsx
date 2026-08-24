@@ -2,25 +2,34 @@ import Image from 'next/image'
 import { FileUpload } from 'ui/components/file-upload'
 import { X } from 'ui/components/icons'
 import { Button } from 'ui/components/shadcn/ui/button'
+import { cn } from 'ui/lib/utils'
 
 interface ImageUploadProps {
 	onFileSelected: (file: File) => void
 	clearSelection: () => void
 	preview: string | null
 	isPending?: boolean
+	className?: string
 }
 
 export const ImageUpload = ({
 	onFileSelected,
 	clearSelection,
 	preview,
-	isPending
+	isPending,
+	className
 }: ImageUploadProps) => {
-	if (!preview) return <FileUpload onFileSelected={onFileSelected} />
+	if (!preview)
+		return <FileUpload onFileSelected={onFileSelected} className={className} />
 
 	return (
 		<div className="space-y-4">
-			<div className="relative w-18 h-18 md:w-32 md:h-32 rounded-lg text-center">
+			<div
+				className={cn(
+					'relative w-18 h-18 md:w-32 md:h-32 rounded-lg text-center',
+					className
+				)}
+			>
 				<Image
 					src={preview}
 					alt="Preview"
