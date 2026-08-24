@@ -49,7 +49,7 @@ export const InputTag = ({
 			type="text"
 			autoComplete="off"
 			className={cn(
-				"hover:bg-secondary focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60",
+				"h-10 md:h-11 text-sm hover:bg-secondary focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60",
 				className,
 			)}
 		/>

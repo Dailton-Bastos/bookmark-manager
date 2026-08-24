@@ -62,7 +62,7 @@ export const FileUpload = ({ onFileSelected }: FileUploadProps) => {
 	return (
 		<div className="flex flex-col items-center justify-center w-full h-full">
 			<div
-				className="flex flex-col justify-center w-32 h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg text-center cursor-pointer hover:border-muted-foreground/50 transition-colors"
+				className="flex flex-col justify-center w-18 h-18 md:w-32 md:h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg text-center cursor-pointer hover:border-muted-foreground/50 transition-colors"
 				onDragOver={handleDragOver}
 				onDrop={handleDrop}
 				onClick={handleClick}
@@ -77,7 +77,9 @@ export const FileUpload = ({ onFileSelected }: FileUploadProps) => {
 			>
 				<ImagePlus className="size-6 mx-auto text-muted-foreground" />
 
-				<span className="text-xs text-muted-foreground">Add</span>
+				<span className="hidden md:block text-xs text-muted-foreground">
+					Add
+				</span>
 
 				<Input
 					ref={fileInputRef}

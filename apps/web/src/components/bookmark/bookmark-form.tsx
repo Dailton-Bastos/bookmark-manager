@@ -35,12 +35,12 @@ export const BookmarkForm = ({
 
 			<BookmarkFormInputs isFetchingMetadata={isFetchingMetadata} />
 
-			<DialogFooter className="gap-4 mt-8">
+			<DialogFooter className="gap-4 mt-4 md:mt-8 flex-row justify-between lg:justify-end">
 				<DialogClose asChild>
 					<Button
 						variant="ghost"
 						disabled={isPending || isFetchingMetadata}
-						className="h-11.5 min-w-22.5 rounded-lg border cursor-pointer font-semibold text-base text-foreground hover:bg-secondary"
+						className="h-10 md:h-11.5 min-w-auto flex-1 md:flex-none md:min-w-22.5 w-full md:w-fit rounded-lg border cursor-pointer font-semibold text-base text-foreground hover:bg-secondary"
 					>
 						Cancel
 					</Button>
@@ -49,7 +49,7 @@ export const BookmarkForm = ({
 				<SubmitButton
 					type="submit"
 					title={submitButtonTitle}
-					className="w-36.25"
+					className="w-full flex-1 md:flex-none h-10 md:h-11.5 md:w-36.25"
 					disabled={isPending || isFetchingMetadata}
 				/>
 			</DialogFooter>
