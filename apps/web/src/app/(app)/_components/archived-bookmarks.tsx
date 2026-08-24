@@ -61,7 +61,7 @@ export const ArchivedBookmarks = () => {
 		<div className="w-full p-8">
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-2">
-					<h1 className="text-2xl font-bold text-foreground">
+					<h1 className="text-xl md:text-2xl font-bold text-foreground">
 						Archived bookmarks
 					</h1>
 					{isFetching && (
@@ -75,8 +75,8 @@ export const ArchivedBookmarks = () => {
 
 			<div className="flex flex-1 flex-col">
 				<div className="@container/main flex flex-1 flex-col gap-2">
-					<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-						<div className="grid grid-cols-1 gap-6 *:data-[slot=card]:shadow-md @xl/main:grid-cols-2 @5xl/main:grid-cols-3 @8xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
+					<div className="flex flex-col gap-4 py-5 md:gap-6">
+						<div className="grid grid-cols-1 gap-8 lg:gap-6 *:data-[slot=card]:shadow-md @xl/main:grid-cols-2 @5xl/main:grid-cols-3 @8xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
 							{(bookmarks ?? []).map((page) => (
 								<React.Fragment key={page.meta.currentPage}>
 									{page.data.map((bookmark) => (
