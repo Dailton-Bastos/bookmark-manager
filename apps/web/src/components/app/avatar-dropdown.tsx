@@ -57,7 +57,7 @@ export const AvatarDropdown = () => {
 						</Link>
 					</DropdownMenuItem>
 
-					<DropdownMenuSeparator className="bg-input/20" />
+					<DropdownMenuSeparator className="bg-input/20 dark:bg-input" />
 
 					<div className="px-2">
 						<DropdownMenuItem
@@ -97,7 +97,7 @@ export const AvatarDropdown = () => {
 						</DropdownMenuItem>
 					</div>
 
-					<DropdownMenuSeparator className="bg-input/20" />
+					<DropdownMenuSeparator className="bg-input/20 dark:bg-input" />
 
 					<div className="px-2">
 						<DropdownMenuItem

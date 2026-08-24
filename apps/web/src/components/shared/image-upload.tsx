@@ -35,14 +35,14 @@ export const ImageUpload = ({
 					alt="Preview"
 					width={256}
 					height={256}
-					className="rounded-lg object-cover w-full h-full"
+					className="rounded-lg object-cover w-full h-full border"
 				/>
 
 				<Button
 					type="button"
 					aria-label="Remove selected image"
 					variant="secondary"
-					className="w-6 h-6 absolute top-1 right-1 cursor-pointer bg-popover rounded-lg shadow-md hover:bg-gray-100"
+					className="w-6 h-6 absolute top-1 right-1 cursor-pointer bg-popover rounded-lg shadow-md hover:bg-gray-100 dark:hover:bg-accent/50"
 					onClick={clearSelection}
 					disabled={isPending}
 				>

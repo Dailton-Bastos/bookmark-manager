@@ -100,7 +100,7 @@ export const AppSidebar = ({
 						variant="link"
 						onClick={handleResetSelectedTags}
 						disabled={isFetching}
-						className="cursor-pointer underline"
+						className="cursor-pointer underline text-muted-foreground"
 					>
 						Reset
 					</Button>
@@ -118,7 +118,7 @@ export const AppSidebar = ({
 							variant="link"
 							onClick={viewAllTags}
 							disabled={isFetching}
-							className="cursor-pointer"
+							className="cursor-pointer text-muted-foreground"
 						>
 							{isFetching ? 'Loading...' : `View more (${remainingTagsCount})`}
 						</Button>
@@ -131,7 +131,7 @@ export const AppSidebar = ({
 							variant="link"
 							onClick={viewLessTags}
 							disabled={isFetching}
-							className="cursor-pointer"
+							className="cursor-pointer text-muted-foreground"
 						>
 							{isFetching ? 'Loading...' : 'View less'}
 						</Button>

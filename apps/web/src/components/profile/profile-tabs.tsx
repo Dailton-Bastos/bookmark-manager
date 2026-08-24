@@ -11,7 +11,7 @@ import { ProfilePassword } from './profile-password'
 export const ProfileTabs = () => {
 	return (
 		<Tabs defaultValue="profile" className="w-full max-w-2xl mx-auto">
-			<TabsList className="w-full justify-start bg-primary-foreground">
+			<TabsList className="w-full justify-start bg-card">
 				<TabsTrigger
 					value="profile"
 					className="font-semibold text-base text-muted-foreground cursor-pointer"

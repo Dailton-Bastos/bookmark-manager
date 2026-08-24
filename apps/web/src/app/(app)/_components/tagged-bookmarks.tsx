@@ -137,7 +137,7 @@ export const TaggedBookmarks = ({ params }: TaggedBookmarksProps) => {
 						<h1 className="text-lg md:text-2xl font-bold text-foreground">
 							Bookmarks tagged:{' '}
 						</h1>
-						<span className="text-primary text-base font-normal md:font-bold md:text-lg">
+						<span className="text-primary text-base font-normal md:font-bold md:text-lg dark:text-muted-foreground">
 							{selectedTagNames}
 						</span>
 					</div>
