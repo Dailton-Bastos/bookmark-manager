@@ -9,14 +9,14 @@ interface UserAvatarProps {
 
 export const UserAvatar = ({ imageUrl = null, altText }: UserAvatarProps) => {
 	return (
-		<Avatar size="lg">
+		<Avatar className="w-10 h-10 rounded-full border border-input/20 shadow-xs">
 			{imageUrl ? (
 				<Image
 					src={imageUrl || ''}
 					alt={altText || 'User Avatar'}
 					width={256}
 					height={256}
-					className="rounded-lg object-cover w-full h-full"
+					className="rounded-full object-cover w-full h-full"
 				/>
 			) : (
 				<AvatarFallback className="w-10 h-10 bg-secondary text-muted-foreground rounded-full flex items-center justify-center">

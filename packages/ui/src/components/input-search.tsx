@@ -14,7 +14,7 @@ export const InputSearch = ({ ...props }: React.ComponentProps<"input">) => {
 	return (
 		<InputGroup
 			className={cn(
-				"h-11 rounded-lg border-sidebar-border shadow-xs focus-within:ring-offset-2",
+				"h-10 md:h-11 rounded-lg border-sidebar-border shadow-xs focus-within:ring-offset-2",
 				"hover:bg-secondary",
 				"hover:border-input",
 				"has-[[data-slot=input-group-control]:focus-visible]:ring-2",
