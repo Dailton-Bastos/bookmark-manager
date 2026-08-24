@@ -131,22 +131,24 @@ export const TaggedBookmarks = ({ params }: TaggedBookmarksProps) => {
 
 	return (
 		<div className="w-full p-8">
-			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-2">
-					<h1 className="text-xl md:text-2xl font-bold text-foreground">
-						Bookmarks tagged:{' '}
-						<span className="text-primary">{selectedTagNames}</span>
-					</h1>
+			<div className="flex items-start justify-between gap-4">
+				<div className="flex items-start gap-2 md:items-center">
+					<div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
+						<h1 className="text-lg md:text-2xl font-bold text-foreground">
+							Bookmarks tagged:{' '}
+						</h1>
+						<span className="text-primary text-base font-normal md:font-bold md:text-lg">
+							{selectedTagNames}
+						</span>
+					</div>
 				</div>
-				<div className="ml-auto flex items-center gap-4">
-					<SortByDropdown order={order} setOrder={handleSortOrderChange} />
-				</div>
+				<SortByDropdown order={order} setOrder={handleSortOrderChange} />
 			</div>
 
 			<div className="flex flex-1 flex-col">
 				<div className="@container/main flex flex-1 flex-col gap-2">
 					<div className="flex flex-col gap-4 py-5 md:gap-6">
-						<div className="grid grid-cols-1 gap-8 lg:gap-6 *:data-[slot=card]:shadow-md @xl/main:grid-cols-2 @5xl/main:grid-cols-3 @8xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
+						<div className="grid grid-cols-1 gap-4 md:gap-8 lg:gap-6 *:data-[slot=card]:shadow-md @xl/main:grid-cols-2 @5xl/main:grid-cols-3 @8xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
 							{bookmarks.map((bookmark) => (
 								<Bookmark
 									key={bookmark.id}

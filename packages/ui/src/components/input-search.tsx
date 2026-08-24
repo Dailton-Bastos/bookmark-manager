@@ -24,7 +24,7 @@ export const InputSearch = ({ ...props }: React.ComponentProps<"input">) => {
 			<InputGroupInput
 				id="search"
 				placeholder="Search by title..."
-				className="placeholder:text-muted-foreground placeholder:font-medium placeholder:text-sm"
+				className="text-sm md:text-base placeholder:text-muted-foreground placeholder:font-medium placeholder:text-sm"
 				{...props}
 			/>
 			<InputGroupAddon align="inline-start">

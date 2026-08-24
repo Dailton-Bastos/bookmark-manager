@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation'
 import type { LucideIcon } from 'ui/components/icons'
 import {
 	SidebarMenuButton,
-	SidebarMenuItem
+	SidebarMenuItem,
+	useSidebar
 } from 'ui/components/shadcn/ui/sidebar'
 import { cn } from 'ui/lib/utils'
 import {
@@ -35,8 +36,10 @@ export const NavLink = ({
 	const { setSearchTerm, setOrder } = useSearchBookmarksStore()
 
 	const { setTags } = useTagBookmarksStore()
+	const { setOpenMobile } = useSidebar()
 
 	const handleClick = () => {
+		setOpenMobile(false) // Close the sidebar on mobile when a link is clicked
 		setSearchTerm('')
 		setOrder('desc')
 		setTags([]) // Clear selected tags when navigating
