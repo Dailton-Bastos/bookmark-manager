@@ -33,7 +33,7 @@ export const updateUserPasswordSchema = z
 		confirmNewPassword: z
 			.string()
 			.min(1, { message: 'Please confirm your new password' }),
-		revokeOtherSessions: z.boolean().default(true)
+		revokeOtherSessions: z.boolean()
 	})
 	.refine((data) => data.newPassword === data.confirmNewPassword, {
 		message: 'Passwords do not match',
