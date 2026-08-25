@@ -3,12 +3,12 @@
 import type { Bookmark } from '@repo/schemas'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
+import { CustomPinIcon as PinIcon } from 'ui/components/custom-icons/pin'
 import {
 	Archive,
 	Copy,
 	EllipsisVertical,
 	ExternalLink,
-	PinIcon,
 	RotateCcw,
 	SquarePen,
 	Trash2,

@@ -1,7 +1,8 @@
 import type { Bookmark as BookmarkProps } from '@repo/schemas'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { Calendar, Clock, Eye, Pin } from 'ui/components/icons'
+import { CustomPinIcon as PinIcon } from 'ui/components/custom-icons/pin'
+import { Calendar, Clock, Eye } from 'ui/components/icons'
 import { Badge } from 'ui/components/shadcn/ui/badge'
 import {
 	Card,
@@ -138,7 +139,7 @@ export const Bookmark = ({
 
 				<div className="ml-auto flex items-center">
 					{pinned && !isArchived && (
-						<Pin className="size-4 text-muted-foreground" />
+						<PinIcon className="size-4 text-muted-foreground" />
 					)}
 
 					{isArchived && (

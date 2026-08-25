@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import type { LucideIcon } from 'ui/components/icons'
 import {
 	SidebarMenuButton,
 	SidebarMenuItem,
@@ -16,7 +15,7 @@ import {
 
 interface NavLinkProps {
 	href: string
-	icon?: LucideIcon
+	icon?: React.JSXElementConstructor<React.SVGProps<SVGSVGElement>>
 	children: React.ReactNode
 	className?: string
 	exact?: boolean
