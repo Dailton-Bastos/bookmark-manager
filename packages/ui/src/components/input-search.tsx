@@ -14,7 +14,7 @@ export const InputSearch = ({ ...props }: React.ComponentProps<"input">) => {
 	return (
 		<InputGroup
 			className={cn(
-				"h-11 rounded-lg border-sidebar-border shadow-xs focus-within:ring-offset-2",
+				"h-10 md:h-11 rounded-lg border-sidebar-border shadow-xs focus-within:ring-offset-2",
 				"hover:bg-secondary",
 				"hover:border-input",
 				"has-[[data-slot=input-group-control]:focus-visible]:ring-2",
@@ -24,7 +24,7 @@ export const InputSearch = ({ ...props }: React.ComponentProps<"input">) => {
 			<InputGroupInput
 				id="search"
 				placeholder="Search by title..."
-				className="placeholder:text-muted-foreground placeholder:font-medium placeholder:text-sm"
+				className="text-sm md:text-base placeholder:text-muted-foreground placeholder:font-medium placeholder:text-sm"
 				{...props}
 			/>
 			<InputGroupAddon align="inline-start">

@@ -21,7 +21,7 @@ export const InputPassword = ({
 	const [showPassword, setShowPassword] = useState(false);
 
 	return (
-		<InputGroup className="h-11 rounded-lg border-chart-2 shadow-sm hover:bg-secondary focus-within:ring-offset-2 has-[[data-slot=input-group-control]:focus-visible]:ring-2 has-[[data-slot=input-group-control]:focus-visible]:ring-ring/60">
+		<InputGroup className="h-11 rounded-lg border-chart-2 shadow-sm hover:bg-secondary focus-within:ring-offset-2 has-[[data-slot=input-group-control]:focus-visible]:ring-2 has-[[data-slot=input-group-control]:focus-visible]:ring-ring/60 dark:border-border">
 			<InputGroupInput
 				className={className}
 				{...props}

@@ -2,10 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import type { LucideIcon } from 'ui/components/icons'
 import {
 	SidebarMenuButton,
-	SidebarMenuItem
+	SidebarMenuItem,
+	useSidebar
 } from 'ui/components/shadcn/ui/sidebar'
 import { cn } from 'ui/lib/utils'
 import {
@@ -15,7 +15,7 @@ import {
 
 interface NavLinkProps {
 	href: string
-	icon?: LucideIcon
+	icon?: React.JSXElementConstructor<React.SVGProps<SVGSVGElement>>
 	children: React.ReactNode
 	className?: string
 	exact?: boolean
@@ -35,8 +35,10 @@ export const NavLink = ({
 	const { setSearchTerm, setOrder } = useSearchBookmarksStore()
 
 	const { setTags } = useTagBookmarksStore()
+	const { setOpenMobile } = useSidebar()
 
 	const handleClick = () => {
+		setOpenMobile(false) // Close the sidebar on mobile when a link is clicked
 		setSearchTerm('')
 		setOrder('desc')
 		setTags([]) // Clear selected tags when navigating

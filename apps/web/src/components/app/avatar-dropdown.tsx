@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { useTheme } from 'next-themes'
-import { LogOutIcon, MoonIcon, PaletteIcon, SunIcon } from 'ui/components/icons'
+import { CustomDarkThemeIcon as MoonIcon } from 'ui/components/custom-icons/dark-theme'
+import { LogOutIcon, PaletteIcon, SunIcon } from 'ui/components/icons'
 import { Button } from 'ui/components/shadcn/ui/button'
 import {
 	DropdownMenu,
@@ -26,7 +27,7 @@ export const AvatarDropdown = () => {
 				<Button
 					variant="ghost"
 					size="icon"
-					className="rounded-full cursor-pointer border border-input/20 hover:bg-transparent"
+					className="w-11.5 h-11.5 rounded-full cursor-pointer border-0 focus:outline-none focus:ring-0 focus-visible:ring-0 hover:bg-transparent data-[state='open']:p-px data-[state='open']:border-2 data-[state='open']:border-primary"
 				>
 					<UserAvatar imageUrl={user?.image} altText={user?.name || ''} />
 				</Button>
@@ -57,7 +58,7 @@ export const AvatarDropdown = () => {
 						</Link>
 					</DropdownMenuItem>
 
-					<DropdownMenuSeparator className="bg-input/20" />
+					<DropdownMenuSeparator className="bg-input/20 dark:bg-input" />
 
 					<div className="px-2">
 						<DropdownMenuItem
@@ -65,7 +66,7 @@ export const AvatarDropdown = () => {
 							className="py-2 focus:bg-sidebar-accent"
 						>
 							<div className="flex items-center gap-2">
-								<PaletteIcon className="w-4 h-4" />
+								<PaletteIcon className="w-4 h-4 text-foreground" />
 								Theme
 							</div>
 
@@ -79,25 +80,25 @@ export const AvatarDropdown = () => {
 										value="light"
 										aria-label='Theme "light"'
 										title="Light theme"
-										className="text-foreground cursor-pointer data-[state=active]:bg-card"
+										className="cursor-pointer data-[state=active]:bg-card"
 									>
-										<SunIcon className="w-4 h-4" />
+										<SunIcon className="w-4 h-4 text-foreground" />
 									</TabsTrigger>
 
 									<TabsTrigger
 										value="dark"
 										aria-label='Theme "dark"'
 										title="Dark theme"
-										className="text-foreground cursor-pointer data-[state=active]:bg-card"
+										className="cursor-pointer data-[state=active]:bg-card"
 									>
-										<MoonIcon className="w-4 h-4" />
+										<MoonIcon className="w-4 h-4 text-foreground" />
 									</TabsTrigger>
 								</TabsList>
 							</Tabs>
 						</DropdownMenuItem>
 					</div>
 
-					<DropdownMenuSeparator className="bg-input/20" />
+					<DropdownMenuSeparator className="bg-input/20 dark:bg-input" />
 
 					<div className="px-2">
 						<DropdownMenuItem
@@ -105,7 +106,7 @@ export const AvatarDropdown = () => {
 							onSelect={() => signOutAsync()}
 							disabled={isSigningOut}
 						>
-							<LogOutIcon className="w-4 h-4" />
+							<LogOutIcon className="w-4 h-4 text-foreground" />
 							Logout
 						</DropdownMenuItem>
 					</div>

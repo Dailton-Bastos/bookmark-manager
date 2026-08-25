@@ -38,7 +38,9 @@ export const usePinOrUnpinBookmarkMutation = () => {
 			}),
 			{
 				loading: `${pinned ? 'Unpinning' : 'Pinning'} bookmark...`,
-				success: `Bookmark ${pinned ? 'unpinned' : 'pinned'} successfully!`,
+				success: pinned
+					? 'Bookmark unpinned successfully.'
+					: 'Bookmark pinned to top.',
 				error: (err) => {
 					if (err instanceof Error) return err.message
 

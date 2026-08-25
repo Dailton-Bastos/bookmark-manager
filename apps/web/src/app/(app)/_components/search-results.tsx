@@ -97,24 +97,27 @@ export const SearchResults = ({ params }: Props) => {
 
 	return (
 		<div className="w-full p-8">
-			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-2">
-					<h1 className="text-2xl font-bold text-foreground">
-						Results for: <span className="text-primary">"{query}"</span>
-					</h1>
+			<div className="flex items-start justify-between gap-4">
+				<div className="flex items-baseline gap-2 md:items-center">
+					<div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
+						<h1 className="text-lg md:text-2xl font-bold text-foreground">
+							Results for:
+						</h1>
+						<span className="text-primary text-base font-normal md:font-bold md:text-lg dark:text-muted-foreground">
+							{!isFetching && `"${query}"`}
+						</span>
+					</div>
 					{isFetching && (
 						<LoaderCircle className="size-4 text-muted-foreground animate-spin" />
 					)}
 				</div>
-				<div className="ml-auto flex items-center gap-4">
-					<SortByDropdown order={order} setOrder={handleSortOrderChange} />
-				</div>
+				<SortByDropdown order={order} setOrder={handleSortOrderChange} />
 			</div>
 
 			<div className="flex flex-1 flex-col">
 				<div className="@container/main flex flex-1 flex-col gap-2">
-					<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-						<div className="grid grid-cols-1 gap-6 *:data-[slot=card]:shadow-md @xl/main:grid-cols-2 @5xl/main:grid-cols-3 @8xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
+					<div className="flex flex-col gap-4 py-5 md:gap-6">
+						<div className="grid grid-cols-1 gap-4 md:gap-8 lg:gap-6 *:data-[slot=card]:shadow-md @xl/main:grid-cols-2 @5xl/main:grid-cols-3 @8xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
 							{(bookmarks ?? []).map((page) => (
 								<React.Fragment key={page.meta.currentPage}>
 									{page.data.map((bookmark) => (

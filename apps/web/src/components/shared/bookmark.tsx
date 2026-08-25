@@ -1,7 +1,8 @@
 import type { Bookmark as BookmarkProps } from '@repo/schemas'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { Calendar, Clock, Eye, Pin } from 'ui/components/icons'
+import { CustomPinIcon as PinIcon } from 'ui/components/custom-icons/pin'
+import { Calendar, Clock, Eye } from 'ui/components/icons'
 import { Badge } from 'ui/components/shadcn/ui/badge'
 import {
 	Card,
@@ -15,7 +16,6 @@ import {
 import { Separator } from 'ui/components/shadcn/ui/separator'
 import { formatDate } from '@/utils/format-date'
 import { removePrefixesFromUrl } from '@/utils/remove-prefixes-from-url'
-import { truncateString } from '@/utils/truncate-string'
 import { BookmarkDropdown } from '../app/bookmark-dropdown'
 
 interface Props {
@@ -54,8 +54,8 @@ export const Bookmark = ({
 
 	return (
 		<Card className="@container/card p-4 pb-3 gap-3 min-h-68">
-			<CardHeader className="p-0 pb-1 gap-0">
-				<div className="flex items-center gap-3">
+			<CardHeader className="p-0 pb-1 gap-0 relative">
+				<div className="grid grid-cols-[44px_minmax(auto,1fr)_32px] items-center gap-3">
 					<Image
 						src={faviconUrl}
 						alt={`Favicon for ${title}`}
@@ -67,18 +67,18 @@ export const Bookmark = ({
 
 					<div className="w-full min-w-0">
 						<CardTitle
-							className="text-lg font-bold font-sans text-foreground min-w-0 truncate"
+							className="text-sm md:text-lg font-bold font-sans text-foreground min-w-0 truncate"
 							title={title}
 						>
-							{truncateString(title, 30)}
+							{title}
 						</CardTitle>
 						<CardDescription className="text-xs text-muted-foreground font-medium min-w-0 truncate">
-							{truncateString(removePrefixesFromUrl(url), 35)}
+							{removePrefixesFromUrl(url)}
 						</CardDescription>
 					</div>
 				</div>
 
-				<CardAction className="mt-1 ml-3">
+				<CardAction className="mt-1 ml-3 absolute top-0 right-0 z-1">
 					<BookmarkDropdown
 						bookmark={bookmark}
 						handlePinUnpinBookmark={handlePinUnpinBookmark}
@@ -90,7 +90,7 @@ export const Bookmark = ({
 			<Separator />
 
 			<CardContent className="px-0 py-1">
-				<p className="text-muted-foreground font-medium text-sm text-justify line-clamp-4">
+				<p className="text-muted-foreground font-medium text-sm text-justify">
 					{description}
 				</p>
 
@@ -139,7 +139,7 @@ export const Bookmark = ({
 
 				<div className="ml-auto flex items-center">
 					{pinned && !isArchived && (
-						<Pin className="size-4 text-muted-foreground" />
+						<PinIcon className="size-4 text-muted-foreground" />
 					)}
 
 					{isArchived && (

@@ -3,12 +3,12 @@
 import type { Bookmark } from '@repo/schemas'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
+import { CustomPinIcon as PinIcon } from 'ui/components/custom-icons/pin'
 import {
 	Archive,
 	Copy,
 	EllipsisVertical,
 	ExternalLink,
-	PinIcon,
 	RotateCcw,
 	SquarePen,
 	Trash2,
@@ -75,7 +75,7 @@ export const BookmarkDropdown = ({
 				<Button
 					size="icon"
 					aria-label="Bookmark options"
-					className="cursor-pointer rounded-lg bg-popover border border-accent text-foreground font-semibold text-base hover:bg-secondary"
+					className="w-8 h-8 cursor-pointer rounded-lg bg-popover border border-accent text-foreground font-semibold text-base hover:bg-secondary"
 				>
 					<EllipsisVertical className="size-5 text-foreground" />
 				</Button>

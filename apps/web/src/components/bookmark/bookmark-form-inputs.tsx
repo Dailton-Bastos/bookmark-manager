@@ -39,7 +39,7 @@ export const BookmarkFormInputs = ({
 	}, [register])
 
 	return (
-		<FieldGroup className="gap-4">
+		<FieldGroup className="gap-2 md:gap-4">
 			<Field className="gap-1.5" data-invalid={errors.url}>
 				<FieldLabel htmlFor="url" className="text-foreground">
 					Website URL *
@@ -52,7 +52,7 @@ export const BookmarkFormInputs = ({
 					autoComplete="off"
 					required
 					disabled={isFetchingMetadata}
-					className="hover:bg-secondary focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
+					className="h-10 md:h-11 hover:bg-secondary text-sm focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
 				/>
 				{errors.url && (
 					<FieldError errors={[errors.url]} className="font-medium" />
@@ -71,7 +71,7 @@ export const BookmarkFormInputs = ({
 					autoComplete="off"
 					required
 					disabled={isFetchingMetadata}
-					className="hover:bg-secondary focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
+					className="h-10 md:h-11 hover:bg-secondary text-sm focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
 				/>
 				{errors.title && (
 					<FieldError errors={[errors.title]} className="font-medium" />
@@ -90,7 +90,7 @@ export const BookmarkFormInputs = ({
 					rows={4}
 					autoComplete="off"
 					disabled={isFetchingMetadata}
-					className="min-h-22.5 hover:bg-secondary border border-chart-2 focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
+					className="min-h-15 md:min-h-22.5 text-sm hover:bg-secondary border border-chart-2 focus-visible:ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring/60"
 				/>
 				<FieldDescription className="text-right">
 					{description ? `${description.length}/280` : '0/280'}

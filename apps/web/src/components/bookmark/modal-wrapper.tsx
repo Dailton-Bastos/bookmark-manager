@@ -28,9 +28,9 @@ export const ModalWrapper = ({
 		<Dialog open={isOpen} onOpenChange={onClose}>
 			<DialogContent
 				showCloseButton={false}
-				className="bg-card rounded-2xl p-8"
+				className="bg-card rounded-2xl gap-2 p-5 md:p-8 md:gap-4 max-h-166.25 overflow-y-auto md:max-h-max"
 			>
-				<DialogHeader>
+				<DialogHeader className="text-left">
 					<DialogTitle className="font-bold text-2xl text-foreground">
 						{title}
 					</DialogTitle>

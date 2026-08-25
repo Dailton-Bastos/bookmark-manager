@@ -24,9 +24,9 @@ export const DeleteBookmarkModal = () => {
 		<Dialog open={isOpen} onOpenChange={onClose}>
 			<DialogContent
 				showCloseButton={false}
-				className="bg-card rounded-2xl p-6 gap-0 sm:max-w-md"
+				className="bg-card rounded-2xl p-4 lg:p-6 gap-0 max-w-85 md:max-w-112.5 w-full"
 			>
-				<DialogHeader>
+				<DialogHeader className="text-left">
 					<DialogTitle className="font-bold text-2xl text-foreground">
 						Delete bookmark
 					</DialogTitle>
@@ -44,7 +44,7 @@ export const DeleteBookmarkModal = () => {
 					</DialogClose>
 				</DialogHeader>
 
-				<DialogFooter className="gap-4 mt-6">
+				<DialogFooter className="gap-4 mt-6 flex-row justify-end">
 					<DialogClose asChild>
 						<Button
 							variant="ghost"

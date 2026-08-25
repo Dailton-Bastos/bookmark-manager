@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { LoaderCircle } from 'ui/components/icons'
+import { LoaderCircle, X } from 'ui/components/icons'
 import { Button } from 'ui/components/shadcn/ui/button'
 import {
 	Sidebar,
@@ -11,7 +11,8 @@ import {
 	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
-	SidebarMenuItem
+	SidebarMenuItem,
+	useSidebar
 } from 'ui/components/shadcn/ui/sidebar'
 import { useTagBookmarksStore } from '@/hooks/useBookmarks'
 import { useTagsQuery } from '@/hooks/useTags'
@@ -31,6 +32,8 @@ export const AppSidebar = ({
 		remainingTagsCount
 	} = useTagsQuery()
 
+	const { setOpenMobile } = useSidebar()
+
 	const router = useRouter()
 
 	const { tags: selectedTags, setTags } = useTagBookmarksStore()
@@ -47,14 +50,29 @@ export const AppSidebar = ({
 	return (
 		<Sidebar className="border-r-0" {...props}>
 			<SidebarHeader className="px-4 py-3 gap-4">
-				<SidebarMenu>
+				<SidebarMenu className="relative lg:static">
+					<div className="flex items-center justify-end w-full absolute -top-1.5 -right-1.5 z-1 lg:hidden">
+						<Button
+							className="w-8 h-8"
+							variant="ghost"
+							size="icon"
+							aria-label="Close Sidebar"
+							onClick={() => setOpenMobile(false)}
+						>
+							<X className="w-5 h-5" />
+						</Button>
+					</div>
+
 					<SidebarMenuItem>
 						<SidebarMenuButton
 							size="lg"
 							asChild
-							className="hover:bg-transparent cursor-pointer"
+							className="hover:bg-transparent cursor-pointer w-fit"
 						>
-							<Link href="/">
+							<Link
+								href="/"
+								className="pointer-events-none md:pointer-events-auto"
+							>
 								<Logo />
 							</Link>
 						</SidebarMenuButton>
@@ -82,7 +100,7 @@ export const AppSidebar = ({
 						variant="link"
 						onClick={handleResetSelectedTags}
 						disabled={isFetching}
-						className="cursor-pointer underline"
+						className="cursor-pointer underline text-muted-foreground"
 					>
 						Reset
 					</Button>
@@ -100,7 +118,7 @@ export const AppSidebar = ({
 							variant="link"
 							onClick={viewAllTags}
 							disabled={isFetching}
-							className="cursor-pointer"
+							className="cursor-pointer text-muted-foreground"
 						>
 							{isFetching ? 'Loading...' : `View more (${remainingTagsCount})`}
 						</Button>
@@ -113,7 +131,7 @@ export const AppSidebar = ({
 							variant="link"
 							onClick={viewLessTags}
 							disabled={isFetching}
-							className="cursor-pointer"
+							className="cursor-pointer text-muted-foreground"
 						>
 							{isFetching ? 'Loading...' : 'View less'}
 						</Button>

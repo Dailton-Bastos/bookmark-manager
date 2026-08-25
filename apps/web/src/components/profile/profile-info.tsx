@@ -69,8 +69,8 @@ export const ProfileInfo = () => {
 	}, [form, user?.name])
 
 	return (
-		<Card className="w-full px-8 py-10 gap-8 rounded-xl">
-			<CardHeader className="w-full">
+		<Card className="w-full px-6 py-6 md:px-8 md:py-10 gap-4 md:gap-8 rounded-xl">
+			<CardHeader className="w-full px-0 md:px-6">
 				<CardTitle>
 					<h1 className="text-2xl text-left font-bold text-foreground">
 						Profile Information
@@ -81,7 +81,7 @@ export const ProfileInfo = () => {
 				</CardDescription>
 			</CardHeader>
 
-			<CardContent>
+			<CardContent className="w-full px-0 md:px-6">
 				<form id="form-profile" onSubmit={form.handleSubmit(onSubmit)}>
 					<FieldGroup className="gap-4">
 						<span className="text-foreground font-medium text-sm">
@@ -93,6 +93,7 @@ export const ProfileInfo = () => {
 								clearSelection={clearSelection}
 								preview={preview}
 								isPending={isFileUploadPending}
+								className="w-28 h-28"
 							/>
 						</div>
 

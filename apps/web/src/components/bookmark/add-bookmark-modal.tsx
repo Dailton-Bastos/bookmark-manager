@@ -97,7 +97,7 @@ const AddBookmarkModalContent = () => {
 
 		toast.promise(mutateAsync(normalizedData), {
 			loading: 'Saving bookmark...',
-			success: 'Bookmark added successfully!',
+			success: 'Bookmark added successfully.',
 			error: (err) => {
 				if (err instanceof Error) return err.message
 

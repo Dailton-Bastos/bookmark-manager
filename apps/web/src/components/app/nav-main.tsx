@@ -1,6 +1,7 @@
 'use client'
 
-import { Archive, Home } from 'ui/components/icons'
+import { CustomHomeIcon as Home } from 'ui/components/custom-icons/home'
+import { Archive } from 'ui/components/icons'
 import { SidebarMenu } from 'ui/components/shadcn/ui/sidebar'
 import { NavLink } from '../shared/nav-link'
 

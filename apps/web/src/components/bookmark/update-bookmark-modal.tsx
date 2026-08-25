@@ -181,7 +181,7 @@ const UpdateBookmarkModalContent = () => {
 					handleFileSelect={handleFileSelect}
 					clearSelection={clearSelection}
 					preview={preview}
-					submitButtonTitle="Update Bookmark"
+					submitButtonTitle="Save Bookmark"
 				/>
 			</FormProvider>
 		</ModalWrapper>

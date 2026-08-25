@@ -137,6 +137,7 @@ export default function AppLayout({
 							'--sidebar-width': '18.5rem'
 						} as React.CSSProperties
 					}
+					mobileBreakpoint={1024}
 				>
 					<AppSidebar />
 					<SidebarInset>
