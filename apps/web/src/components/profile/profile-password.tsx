@@ -6,7 +6,7 @@ import {
 } from '@repo/schemas'
 import { useMutation } from '@tanstack/react-query'
 import { useEffect } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, type Resolver, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { InputPassword } from 'ui/components/input-password'
 import { Button } from 'ui/components/shadcn/ui/button'
@@ -27,7 +27,9 @@ import { orpcClient } from '@/lib/orpc-client'
 
 export const ProfilePassword = () => {
 	const form = useForm<UpdateUserPasswordInput>({
-		resolver: zodResolver(updateUserPasswordSchema),
+		resolver: zodResolver(
+			updateUserPasswordSchema
+		) as Resolver<UpdateUserPasswordInput>,
 		defaultValues: {
 			currentPassword: '',
 			newPassword: '',
