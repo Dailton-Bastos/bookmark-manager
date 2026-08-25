@@ -82,7 +82,7 @@ export const FileUpload = ({ onFileSelected, className }: FileUploadProps) => {
 			>
 				<ImagePlus className="size-6 mx-auto text-muted-foreground" />
 
-				<span className="hidden md:block text-xs text-muted-foreground">
+				<span className="sr-only md:not-sr-only md:block text-xs text-muted-foreground">
 					Add
 				</span>
 

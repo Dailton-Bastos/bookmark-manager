@@ -38,6 +38,7 @@ export const AppHeader = () => {
 
 					<Button
 						type="button"
+						size="icon"
 						aria-label="Add Bookmark"
 						onClick={onOpen}
 						className="w-10 h-10 md:hidden"

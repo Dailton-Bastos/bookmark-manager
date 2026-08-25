@@ -26,6 +26,7 @@ export const AvatarDropdown = () => {
 			<DropdownMenuTrigger asChild>
 				<Button
 					variant="ghost"
+					size="icon"
 					className="w-11.5 h-11.5 rounded-full cursor-pointer border-0 focus:outline-none focus:ring-0 focus-visible:ring-0 hover:bg-transparent data-[state='open']:p-px data-[state='open']:border-2 data-[state='open']:border-primary"
 				>
 					<UserAvatar imageUrl={user?.image} altText={user?.name || ''} />
