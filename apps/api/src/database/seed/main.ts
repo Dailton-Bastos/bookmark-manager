@@ -56,7 +56,6 @@ export class DatabaseSeed {
 					`Database seed is only allowed in development environment. Current environment: ${env}`
 				)
 				process.exitCode = 1
-				await this.pool.end()
 				return
 			}
 
@@ -70,8 +69,8 @@ export class DatabaseSeed {
 						id: f.uuid(),
 						image: f.default({ defaultValue: null })
 					},
-					count: 1000,
-					with: { accounts: 1, sessions: 3, bookmarks: 100 }
+					count: 10,
+					with: { accounts: 1, sessions: 3, bookmarks: 50 }
 				},
 				accounts: {
 					columns: {
@@ -111,7 +110,7 @@ export class DatabaseSeed {
 							maxDate: new Date(Date.now() + 1000 * 60 * 60)
 						})
 					},
-					count: 100
+					count: 30
 				},
 				bookmarks: {
 					columns: {
@@ -140,12 +139,13 @@ export class DatabaseSeed {
 						})
 					}
 				},
-				tags: { count: 10000 },
-				bookmarkTags: { count: 1000 }
+				tags: { count: 500 },
+				bookmarkTags: { count: 100 }
 			}))
 			this.logger.log('Database seed completed successfully ✅')
 		} catch (error) {
-			this.logger.error('Database seed failed ❌:', error)
+			const err = error instanceof Error ? error : new Error(String(error))
+			this.logger.error('Database seed failed ❌', err.stack)
 			process.exitCode = 1
 			return
 		} finally {
@@ -157,7 +157,12 @@ export class DatabaseSeed {
 
 try {
 	const databaseSeed = new DatabaseSeed()
-	void databaseSeed.main()
+	void databaseSeed.main().catch((error) => {
+		const logger = new Logger(DatabaseSeed.name)
+		const err = error instanceof Error ? error : new Error(String(error))
+		logger.error('Database seed failed ❌', err.stack)
+		process.exitCode = 1
+	})
 } catch (error) {
 	const logger = new Logger(DatabaseSeed.name)
 	logger.error('Database seed initialization failed ❌:', error)
