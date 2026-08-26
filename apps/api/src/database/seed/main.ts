@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { Logger } from '@nestjs/common'
 import { hashPassword } from 'better-auth/crypto'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { NodePgDatabase } from 'drizzle-orm/node-postgres/driver'
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres/driver'
 import { reset, seed } from 'drizzle-seed'
 import { Pool } from 'pg'
 import { schema } from '../schemas'
@@ -11,47 +11,60 @@ import 'dotenv/config'
 export class DatabaseSeed {
 	private readonly logger = new Logger(DatabaseSeed.name)
 	private readonly pool: Pool
-	private readonly db: NodePgDatabase
+	private readonly db: NodePgDatabase<typeof schema>
 
 	constructor() {
+		const host = process.env.DATABASE_HOST
+		const user = process.env.DATABASE_USER
+		const password = process.env.DATABASE_PASSWORD
+		const database = process.env.DATABASE_NAME
+		const rawPort = process.env.DATABASE_PORT
+
+		if (!host || !user || !password || !database) {
+			throw new Error(
+				'Missing required database environment variables. Please ensure DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD and DATABASE_NAME are set.'
+			)
+		}
+
+		const port = Number(rawPort ?? 5432)
+
+		if (Number.isNaN(port)) {
+			throw new Error(
+				`Invalid DATABASE_PORT value: "${rawPort}". Please provide a valid numeric port.`
+			)
+		}
+
 		this.pool = new Pool({
-			host: process.env.DATABASE_HOST,
-			port: Number(process.env.DATABASE_PORT),
-			user: process.env.DATABASE_USER,
-			password: process.env.DATABASE_PASSWORD,
-			database: process.env.DATABASE_NAME
+			host,
+			port,
+			user,
+			password,
+			database
 		})
 
-		this.db = drizzle(this.pool)
+		this.db = drizzle({ client: this.pool, schema })
 	}
 
 	async main() {
 		const env = process.env.NODE_ENV || 'development'
 
-		if (env !== 'development') {
-			this.logger.error(
-				`Database seed is only allowed in development environment. Current environment: ${env}`
-			)
-			process.exit(1)
-		}
-
 		const defaultAccountPassword = await hashPassword('12345678')
 
-		const { users, accounts, sessions, tags, bookmarks, bookmarkTags } = schema
-
 		try {
+			if (env !== 'development') {
+				this.logger.error(
+					`Database seed is only allowed in development environment. Current environment: ${env}`
+				)
+				process.exitCode = 1
+				await this.pool.end()
+				return
+			}
+
 			this.logger.log('Resetting database...')
 			await reset(this.db, schema)
 
 			this.logger.log('Starting database seed 🕐')
-			await seed(this.db, {
-				users,
-				accounts,
-				sessions,
-				tags,
-				bookmarks,
-				bookmarkTags
-			}).refine((f) => ({
+			await seed(this.db, schema).refine((f) => ({
 				users: {
 					columns: {
 						id: f.uuid(),
@@ -90,6 +103,16 @@ export class DatabaseSeed {
 						})
 					}
 				},
+				verifications: {
+					columns: {
+						id: f.uuid(),
+						expiresAt: f.date({
+							minDate: new Date(Date.now() + 1000 * 60 * 60), // 1h from now
+							maxDate: new Date(Date.now() + 1000 * 60 * 60)
+						})
+					},
+					count: 100
+				},
 				bookmarks: {
 					columns: {
 						title: f.valuesFromArray({
@@ -123,14 +146,20 @@ export class DatabaseSeed {
 			this.logger.log('Database seed completed successfully ✅')
 		} catch (error) {
 			this.logger.error('Database seed failed ❌:', error)
-			process.exit(1)
+			process.exitCode = 1
+			return
 		} finally {
-			this.pool.end()
+			await this.pool.end()
 			this.logger.log('Database pool closed 🛑')
 		}
 	}
 }
 
-const databaseSeed = new DatabaseSeed()
-
-databaseSeed.main()
+try {
+	const databaseSeed = new DatabaseSeed()
+	void databaseSeed.main()
+} catch (error) {
+	const logger = new Logger(DatabaseSeed.name)
+	logger.error('Database seed initialization failed ❌:', error)
+	process.exitCode = 1
+}
