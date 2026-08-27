@@ -10,6 +10,7 @@ interface ImageUploadProps {
 	preview: string | null
 	isPending?: boolean
 	className?: string
+	showImageBorder?: boolean
 }
 
 export const ImageUpload = ({
@@ -17,7 +18,8 @@ export const ImageUpload = ({
 	clearSelection,
 	preview,
 	isPending,
-	className
+	className,
+	showImageBorder = true
 }: ImageUploadProps) => {
 	if (!preview)
 		return <FileUpload onFileSelected={onFileSelected} className={className} />
@@ -35,7 +37,10 @@ export const ImageUpload = ({
 					alt="Preview"
 					width={256}
 					height={256}
-					className="rounded-lg object-cover w-full h-full border"
+					className={cn(
+						'rounded-lg object-cover w-full h-full',
+						showImageBorder && 'border'
+					)}
 				/>
 
 				<Button
