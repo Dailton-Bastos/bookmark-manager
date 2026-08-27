@@ -1,0 +1,21 @@
+export const faviconData: string[] = [
+	'/assets/images/favicon-32x32.png',
+	'/assets/images/favicon-caniuse.png',
+	'/assets/images/favicon-claude.png',
+	'/assets/images/favicon-codepen.png',
+	'/assets/images/favicon-css-grid-garden.png',
+	'/assets/images/favicon-css-tricks.png',
+	'/assets/images/favicon-dev.png',
+	'/assets/images/favicon-flexbox-froggy.png',
+	'/assets/images/favicon-flexbox-zombies.png',
+	'/assets/images/favicon-freecodecamp.png',
+	'/assets/images/favicon-frontend-mentor.png',
+	'/assets/images/favicon-github.png',
+	'/assets/images/favicon-javascript-info.png',
+	'/assets/images/favicon-mdn.png',
+	'/assets/images/favicon-react-docs.png',
+	'/assets/images/favicon-smashing-magazine.png',
+	'/assets/images/favicon-stack-overflow.png',
+	'/assets/images/favicon-tailwind.png',
+	'/assets/images/favicon-web-dev.png'
+]
