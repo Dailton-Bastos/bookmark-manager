@@ -93,6 +93,7 @@ export const ProfileInfo = () => {
 								clearSelection={clearSelection}
 								preview={preview}
 								isPending={isFileUploadPending}
+								showImageBorder={false}
 								className="w-28 h-28"
 							/>
 						</div>

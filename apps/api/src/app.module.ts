@@ -63,7 +63,8 @@ const logger = new Logger('oRPC')
 							})
 						}),
 						new KeyvRedis(envService.get('REDIS_URL'))
-					]
+					],
+					ttl: envService.get('CACHE_TTL')
 				}
 			},
 			inject: [EnvService]

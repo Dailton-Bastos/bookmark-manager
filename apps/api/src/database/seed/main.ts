@@ -6,6 +6,7 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres/driver'
 import { reset, seed } from 'drizzle-seed'
 import { Pool } from 'pg'
 import { schema } from '../schemas'
+import { faviconData } from './data'
 import 'dotenv/config'
 
 export class DatabaseSeed {
@@ -120,7 +121,18 @@ export class DatabaseSeed {
 						description: f.valuesFromArray({
 							values: faker.helpers.uniqueArray(faker.lorem.paragraph, 100)
 						}),
-						favicon: f.default({ defaultValue: null }),
+						favicon: f.valuesFromArray({
+							values: [
+								{
+									weight: 0.3,
+									values: [undefined]
+								},
+								{
+									weight: 0.7,
+									values: faviconData
+								}
+							]
+						}),
 						url: f.valuesFromArray({
 							values: faker.helpers.uniqueArray(faker.internet.url, 100)
 						}),
