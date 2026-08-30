@@ -45,7 +45,7 @@ USER node
 
 EXPOSE 3001
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD node -e "const http=require('node:http');const req=http.get('http://127.0.0.1:3001/api/health',(res)=>{process.exit(res.statusCode===200?0:1)});req.on('error',()=>process.exit(1));req.setTimeout(4000,()=>{req.destroy();process.exit(1)});"
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD node -e "const http=require('node:http');const bindHost=process.env.HOST||'0.0.0.0';const host=bindHost==='0.0.0.0'?'127.0.0.1':bindHost==='::'?'::1':bindHost;const port=Number(process.env.PORT||3001);const req=http.get({host,port,path:'/api/health'},(res)=>{process.exit(res.statusCode===200?0:1)});req.on('error',()=>process.exit(1));req.setTimeout(4000,()=>{req.destroy();process.exit(1)});"
 
 CMD ["node", "dist/main"]
 
