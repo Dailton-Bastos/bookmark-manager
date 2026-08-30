@@ -48,7 +48,7 @@ async function bootstrap() {
 	const HOST = configService.get('HOST')
 	const ENV = configService.get('NODE_ENV')
 
-	await app.listen(PORT, () => {
+	await app.listen(PORT, HOST, () => {
 		logger.log(
 			`Application is running on: http://${HOST}:${PORT} in ${ENV} mode`
 		)
