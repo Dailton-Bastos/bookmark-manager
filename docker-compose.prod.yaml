@@ -1,14 +1,36 @@
 services:
-  bookmark-manager-api:
-    container_name: bookmark-manager-api
+  api:
+    container_name: api
     build:
       context: .
       target: prod
       dockerfile: apps/api/Dockerfile
+    environment:
+      - NODE_ENV=production
+      - PORT=${PORT}
+      - HOST=${HOST}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_URL=${DATABASE_URL}
+      - BETTER_AUTH_URL=${BETTER_AUTH_URL}
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+      - UI_URL=${UI_URL}
+      - API_URL=${API_URL}
+      - REDIS_URL=${REDIS_URL}
+      - CACHE_TTL=${CACHE_TTL}
+      - BRANDFETCH_API_CLIENT=${BRANDFETCH_API_CLIENT}
+      - UI_URL_RESET_PASSWORD_REDIRECT=${UI_URL_RESET_PASSWORD_REDIRECT}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USER=${MAIL_USER}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_FROM=${MAIL_FROM}
+      - MAIL_VERIFY_TRANSPORTERS=${MAIL_VERIFY_TRANSPORTERS}
     networks:
       - web
-    ports:
-      - "127.0.0.1:3001:3001"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.bookmark-manager-api.rule=Host(`api.bookmark-manager.local`)"

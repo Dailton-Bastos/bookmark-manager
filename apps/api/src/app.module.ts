@@ -49,7 +49,8 @@ const logger = new Logger('oRPC')
 		ConfigModule.forRoot({
 			isGlobal: true,
 			expandVariables: true,
-			validate
+			validate,
+			ignoreEnvFile: process.env.NODE_ENV === 'production'
 		}),
 		NestCacheModule.registerAsync({
 			isGlobal: true,
