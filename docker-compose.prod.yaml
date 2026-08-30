@@ -1,0 +1,36 @@
+services:
+  bookmark-manager-api:
+    container_name: bookmark-manager-api
+    build:
+      context: .
+      target: prod
+      dockerfile: apps/api/Dockerfile
+    env_file:
+      - ./apps/api/.env
+    networks:
+      - web
+    ports:
+      - "127.0.0.1:3001:3001"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bookmark-manager-api.rule=Host(`api.bookmark-manager.local`)"
+      - "traefik.http.routers.bookmark-manager-api.entrypoints=websecure"
+      - "traefik.http.routers.bookmark-manager-api.tls=true"
+      - "traefik.http.services.bookmark-manager-api.loadbalancer.server.port=3001"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const http=require('node:http');const req=http.get('http://127.0.0.1:3001/api/health',(res)=>{process.exit(res.statusCode===200?0:1)});req.on('error',()=>process.exit(1));req.setTimeout(4000,()=>{req.destroy();process.exit(1)});",
+        ]
+      interval: 20s
+      timeout: 5s
+      retries: 6
+      start_period: 45s
+    restart: unless-stopped
+
+networks:
+  web:
+   external: true
