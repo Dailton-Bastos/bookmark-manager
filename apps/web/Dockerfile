@@ -6,6 +6,10 @@ ARG PNPM_VERSION=10.30.3
 FROM node:${NODE_TAG} AS builder
 ARG PNPM_VERSION
 
+# Accept the build argument
+ARG API_PROTOCOL
+ARG API_HOST
+ARG API_PORT
 # Receive build arguments from Docker Compose
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_UI_URL
@@ -17,6 +21,11 @@ ENV TURBO_TELEMETRY_DISABLED=1
 # Expose arguments as environment variables for Next.js build compilation
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_UI_URL=$NEXT_PUBLIC_UI_URL
+
+# Make it available as an environment variable during the build process
+ENV API_PROTOCOL=$API_PROTOCOL
+ENV API_HOST=$API_HOST
+ENV API_PORT=$API_PORT
 
 WORKDIR /usr/src/app
 
