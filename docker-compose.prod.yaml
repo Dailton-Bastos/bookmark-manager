@@ -6,7 +6,7 @@ services:
       dockerfile: apps/api/Dockerfile
     environment:
       - NODE_ENV=production
-      - PORT=${PORT:-3001}
+      - PORT=${API_PORT:-3001}
       - HOST=${HOST:-0.0.0.0}
       - DATABASE_HOST=${DATABASE_HOST}
       - DATABASE_PORT=${DATABASE_PORT:-5432}
@@ -34,14 +34,49 @@ services:
       - "traefik.http.routers.bookmark-manager-api.rule=Host(`api.bookmark-manager.local`)"
       - "traefik.http.routers.bookmark-manager-api.entrypoints=websecure"
       - "traefik.http.routers.bookmark-manager-api.tls=true"
-      - "traefik.http.services.bookmark-manager-api.loadbalancer.server.port=${PORT:-3001}"
+      - "traefik.http.services.bookmark-manager-api.loadbalancer.server.port=${API_PORT:-3001}"
     healthcheck:
       test:
         [
           "CMD",
           "node",
           "-e",
-          "const http=require('node:http');const req=http.get('http://${HOST:-0.0.0.0}:${PORT:-3001}/api/health',(res)=>{process.exit(res.statusCode===200?0:1)});req.on('error',()=>process.exit(1));req.setTimeout(4000,()=>{req.destroy();process.exit(1)});",
+          "const http=require('node:http');const req=http.get('http://${HOST:-0.0.0.0}:${API_PORT:-3001}/api/health',(res)=>{process.exit(res.statusCode===200?0:1)});req.on('error',()=>process.exit(1));req.setTimeout(4000,()=>{req.destroy();process.exit(1)});",
+        ]
+      interval: 20s
+      timeout: 5s
+      retries: 6
+      start_period: 45s
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      target: prod
+      dockerfile: apps/web/Dockerfile
+    environment:
+      - NODE_ENV=production
+      - PORT=${PORT_WEB:-3000}
+      - API_PROTOCOL=${API_PROTOCOL:-http}
+      - API_HOST=${API_HOST:-api}
+      - API_PORT=${API_PORT:-3001}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://api:3001}
+      - NEXT_PUBLIC_UI_URL=${NEXT_PUBLIC_UI_URL:-http://0.0.0.0:3000}
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bookmark-manager-web.rule=Host(`web.bookmark-manager.local`)"
+      - "traefik.http.routers.bookmark-manager-web.entrypoints=websecure"
+      - "traefik.http.routers.bookmark-manager-web.tls=true"
+      - "traefik.http.services.bookmark-manager-web.loadbalancer.server.port=${PORT_WEB:-3000}"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const http=require('node:http');const req=http.get('http://${HOST:-0.0.0.0}:${PORT_WEB:-3000}/api/health',(res)=>{process.exit(res.statusCode===200?0:1)});req.on('error',()=>process.exit(1));req.setTimeout(4000,()=>{req.destroy();process.exit(1)});",
         ]
       interval: 20s
       timeout: 5s
