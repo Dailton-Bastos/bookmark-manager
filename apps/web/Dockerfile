@@ -6,9 +6,17 @@ ARG PNPM_VERSION=10.30.3
 FROM node:${NODE_TAG} AS builder
 ARG PNPM_VERSION
 
+# Receive build arguments from Docker Compose
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_UI_URL
+
 RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 ENV TURBO_TELEMETRY_DISABLED=1
+
+# Expose arguments as environment variables for Next.js build compilation
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_UI_URL=$NEXT_PUBLIC_UI_URL
 
 WORKDIR /usr/src/app
 
