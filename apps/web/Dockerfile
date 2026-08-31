@@ -46,7 +46,7 @@ COPY --from=builder --chown=node:node /usr/src/app/apps/web/.next/static ./apps/
 
 USER node
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD node -e "const http=require('node:http');const bindHost=process.env.HOST||'0.0.0.0';const host=bindHost==='0.0.0.0'?'127.0.0.1':bindHost==='::'?'::1':bindHost;const port=Number(process.env.PORT||3000);const req=http.get({host,port,path:'/api/health'},(res)=>{process.exit(res.statusCode===200?0:1)});req.on('error',()=>process.exit(1));req.setTimeout(4000,()=>{req.destroy();process.exit(1)});"
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD node -e "const http=require('node:http');const bindHost=process.env.HOSTNAME||process.env.HOST||'0.0.0.0';const host=bindHost==='0.0.0.0'?'127.0.0.1':bindHost==='::'?'::1':bindHost;const port=Number(process.env.PORT||3000);const req=http.get({host,port,path:'/api/health'},(res)=>{process.exit(res.statusCode===200?0:1)});req.on('error',()=>process.exit(1));req.setTimeout(4000,()=>{req.destroy();process.exit(1)});"
 
 # Expose port 3000 to allow HTTP traffic
 EXPOSE 3000
