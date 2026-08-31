@@ -1,16 +1,18 @@
 # syntax=docker/dockerfile:1.18-labs
 ARG NODE_TAG=22-alpine
 ARG PNPM_VERSION=10.30.3
+ARG API_PROTOCOL
+ARG API_HOST
+ARG API_PORT
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_UI_URL
 
 # -------- Production Builder --------
 FROM node:${NODE_TAG} AS builder
 ARG PNPM_VERSION
-
-# Accept the build argument
 ARG API_PROTOCOL
 ARG API_HOST
 ARG API_PORT
-# Receive build arguments from Docker Compose
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_UI_URL
 
@@ -44,16 +46,31 @@ COPY apps/web apps/web
 COPY packages packages
 
 # Build the web (outputs to apps/web/dist)
-RUN pnpm turbo build --filter=web
+RUN export API_PROTOCOL="${API_PROTOCOL}" \
+	API_HOST="${API_HOST}" \
+	API_PORT="${API_PORT}" \
+	NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL}" \
+	NEXT_PUBLIC_UI_URL="${NEXT_PUBLIC_UI_URL}" \
+	&& pnpm turbo build --filter=web
 
 # -------- Production --------
 FROM node:${NODE_TAG} AS prod
+ARG API_PROTOCOL
+ARG API_HOST
+ARG API_PORT
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_UI_URL
 
 WORKDIR /usr/src/app
 
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+ENV API_PROTOCOL=$API_PROTOCOL
+ENV API_HOST=$API_HOST
+ENV API_PORT=$API_PORT
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_UI_URL=$NEXT_PUBLIC_UI_URL
 # Copy production assets
 COPY --from=builder --chown=node:node /usr/src/app/apps/web/public ./apps/web/public
 

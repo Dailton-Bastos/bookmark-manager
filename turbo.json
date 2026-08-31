@@ -1,7 +1,13 @@
 {
 	"$schema": "./node_modules/turbo/schema.json",
 	"ui": "stream",
-	"globalDependencies": ["NEXT_PUBLIC_API_URL", "NEXT_PUBLIC_UI_URL"],
+	"globalEnv": [
+		"API_PROTOCOL",
+		"API_HOST",
+		"API_PORT",
+		"NEXT_PUBLIC_API_URL",
+		"NEXT_PUBLIC_UI_URL"
+	],
 	"tasks": {
 		"build": {
 			"dependsOn": ["^build"],
