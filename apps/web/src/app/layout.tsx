@@ -4,9 +4,13 @@ import './globals.css'
 import { cn } from 'ui/lib/utils'
 import { AppProvider } from '@/providers/app-provider'
 import { ThemeProvider } from '@/providers/theme-provider'
+import { APP_NAME } from '@/utils/constants'
 
 export const metadata: Metadata = {
-	title: 'Bookmark Manager',
+	title: {
+		template: `%s | ${APP_NAME}`,
+		default: APP_NAME
+	},
 	description: 'Add, organize, and manage your bookmarks with ease.'
 }
 

@@ -1,4 +1,5 @@
 import type { ListBookmarksOrder } from '@repo/schemas'
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { PageSkeleton } from '@/components/shared/page-skeleton'
 import { TaggedBookmarks } from '../_components/tagged-bookmarks'
@@ -7,6 +8,10 @@ type SearchParams = Promise<{
 	tags?: string | string[]
 	order?: ListBookmarksOrder
 }>
+
+export const metadata: Metadata = {
+	title: 'Tagged Bookmarks'
+}
 
 export default async function BookmarksTaggedPage({
 	searchParams

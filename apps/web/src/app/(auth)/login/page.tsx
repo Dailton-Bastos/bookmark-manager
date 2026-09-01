@@ -1,6 +1,11 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { FormSkeleton } from '@/components/auth/form-skeleton'
 import { Login } from '../_components/login'
+
+export const metadata: Metadata = {
+	title: 'Login'
+}
 
 export default async function LoginPage({
 	searchParams
