@@ -3,7 +3,7 @@ const { Logger } = require('@nestjs/common')
 const { drizzle } = require('drizzle-orm/node-postgres')
 const { migrate } = require('drizzle-orm/node-postgres/migrator')
 const { Pool } = require('pg')
-require('dotenv/config')
+// Environment variables are expected to be provided by the container runtime in production.
 
 class RunMigrations {
 	constructor() {
