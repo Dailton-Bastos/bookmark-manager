@@ -11,7 +11,11 @@ export const metadata: Metadata = {
 		template: `%s | ${APP_NAME}`,
 		default: APP_NAME
 	},
-	description: 'Add, organize, and manage your bookmarks with ease.'
+	description: 'Add, organize, and manage your bookmarks with ease.',
+	icons: {
+		icon: '/favicon.ico',
+		apple: '/apple-touch-icon.png'
+	}
 }
 
 export default function RootLayout({
