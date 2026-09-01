@@ -1,18 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
 import { ProfileTabs } from '@/components/profile/profile-tabs'
 import { useSession } from '@/providers/session-provider'
-import { APP_NAME } from '@/utils/constants'
 
 export const Profile = () => {
 	const { user } = useSession()
-
-	useEffect(() => {
-		if (!user) return
-
-		document.title = `${user.name}'s Profile | ${APP_NAME}`
-	}, [user])
 
 	if (!user) {
 		return (
