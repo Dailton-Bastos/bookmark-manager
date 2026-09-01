@@ -1,4 +1,18 @@
 services:
+  migrations:
+    build:
+      context: .
+      target: migrate-run
+      dockerfile: apps/api/Dockerfile
+    environment:
+      - NODE_ENV=production
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT:-5432}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
+    networks:
+      - web
   api:
     build:
       context: .
@@ -35,6 +49,9 @@ services:
       - "traefik.http.routers.bookmark-manager-api.entrypoints=websecure"
       - "traefik.http.routers.bookmark-manager-api.tls=true"
       - "traefik.http.services.bookmark-manager-api.loadbalancer.server.port=${API_PORT:-3001}"
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
     healthcheck:
       test:
         [
