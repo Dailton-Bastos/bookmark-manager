@@ -37,6 +37,10 @@ export const Login = ({ callbackUrl }: LoginProps) => {
 							)
 						}
 
+						if (ctx.error.status === 500) {
+							throw new Error('Internal server error. Please try again later.')
+						}
+
 						throw new Error(ctx.error.message)
 					}
 				}

@@ -1,9 +1,14 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { Button } from 'ui/components/shadcn/ui/button'
 import { CardWrapper } from '@/components/auth/card-wrapper'
 import { FormSkeleton } from '@/components/auth/form-skeleton'
 import { ResetPasswordForm } from '@/components/auth/reset-password-form'
+
+export const metadata: Metadata = {
+	title: 'Reset Password'
+}
 
 export default async function ResetPasswordPage({
 	searchParams

@@ -1,9 +1,14 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { Button } from 'ui/components/shadcn/ui/button'
 import { FieldDescription } from 'ui/components/shadcn/ui/field'
 import { CardWrapper } from '@/components/auth/card-wrapper'
 import { FormSkeleton } from '@/components/auth/form-skeleton'
+
+export const metadata: Metadata = {
+	title: 'Email Verification'
+}
 
 export default async function EmailVerificationPage({
 	searchParams

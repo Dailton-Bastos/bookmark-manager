@@ -1,4 +1,9 @@
+import type { Metadata } from 'next'
 import { RequestPasswordResetForm } from '@/components/auth/request-password-reset-form'
+
+export const metadata: Metadata = {
+	title: 'Request Password Reset'
+}
 
 export default function RequestPasswordResetPage() {
 	return (
