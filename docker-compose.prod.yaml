@@ -18,6 +18,7 @@ services:
       context: .
       target: prod
       dockerfile: apps/api/Dockerfile
+    container_name: api
     environment:
       - NODE_ENV=production
       - PORT=${API_PORT:-3001}
@@ -45,7 +46,7 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.bookmark-manager-api.rule=Host(`api.bookmark-manager.local`)"
+      - "traefik.http.routers.bookmark-manager-api.rule=Host(`api.bookmark-manager.local`) && PathPrefix(`/api`)"
       - "traefik.http.routers.bookmark-manager-api.entrypoints=websecure"
       - "traefik.http.routers.bookmark-manager-api.tls=true"
       - "traefik.http.services.bookmark-manager-api.loadbalancer.server.port=${API_PORT:-3001}"
@@ -71,6 +72,7 @@ services:
       context: .
       target: prod
       dockerfile: apps/web/Dockerfile
+      container_name: web
       args:
         - API_PROTOCOL=${API_PROTOCOL:-http}
         - API_HOST=${API_HOST:-api}
